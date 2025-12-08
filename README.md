@@ -68,11 +68,29 @@ Connections (WhatsApp, webhooks, etc.) require OAuth or credentials and must be 
 
 ## Keeping Updated
 
-To get the latest skill and templates:
+Claude can sync skill files and templates directly from WayAI's MCP server:
+
+### Sync Skill
 
 ```
-You: "Update WayAI resources"
-Claude: [MCP: sync_wayai_resources] → Updates skill and wayai-templates/
+You: "Update my WayAI skill"
+Claude: [Reads from wayai://skill/*] → Updates .claude/skills/wayai-settings/
+```
+
+### Sync Templates
+
+```
+You: "Update WayAI templates"
+Claude: [Reads from wayai://template/*] → Updates wayai-templates/
+```
+
+### Use Templates (Always Current)
+
+When creating from a template, Claude reads the latest version directly:
+
+```
+You: "Create a hub using the pizzeria template"
+Claude: [Read wayai://template/pizzeria/*] → Creates hub with latest template
 ```
 
 Your configurations in `organizations/` and `templates/` are never touched.
