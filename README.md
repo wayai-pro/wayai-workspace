@@ -16,8 +16,8 @@ Manage your WayAI hub configurations using VS Code, Claude Code, and version con
 
 ```
 your-repo/
+├── .mcp.json                      # MCP pre-configured for WayAI
 ├── .claude/
-│   ├── settings.json              # MCP pre-configured for WayAI
 │   └── skills/
 │       └── wayai-settings/        # Skill for managing configurations
 ├── wayai-templates/               # Official templates (auto-updated)
