@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "wayai": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote@latest",
+        "https://mcp.wayai.workers.dev/mcp",
+        "--static-oauth-client-info",
+        "{\"client_id\":\"1186e112-878a-46ef-81ef-e4df86af2be6\"}"
+      ]
+    }
+  }
+}
