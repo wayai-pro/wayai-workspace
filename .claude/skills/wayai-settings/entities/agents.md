@@ -63,7 +63,10 @@ get_agent(
 ```
 
 ### create_agent
-Create a new agent in the hub. Requires an LLM connection (Agent type) to be configured.
+Create a new agent in the hub.
+
+**Prerequisite:** The hub must have an **Agent connection** (OpenAI or OpenRouter) configured before creating agents. Add connections via UI: wayai.pro → Hub → Settings → Connections.
+
 ```
 create_agent(
   hub_id,        # Required

@@ -25,13 +25,29 @@ Organization
 | Disable connection | `disable_connection(hub_id, connection_id)` | wayai.pro | Temporarily disable |
 | Sync MCP tools | `sync_mcp_connection(hub_id, connection_id)` | - | Refresh tools from MCP server |
 
-## Connection Types
+## Connection Categories
+
+### Agent Connections (Required for Agents)
+
+**You must add an Agent connection before creating any agents.**
+
+| Type | Description | Setup |
+|------|-------------|-------|
+| OpenAI | GPT models (gpt-4o, gpt-4o-mini, etc.) | API Key |
+| OpenRouter | Access to multiple LLM providers | API Key |
+
+### Channel Connections (For messaging)
 
 | Type | Description | Setup |
 |------|-------------|-------|
 | WhatsApp Business | Send/receive WhatsApp messages | Meta OAuth |
 | Instagram | Instagram DMs | Meta OAuth |
 | Gmail | Send emails | Google OAuth |
+
+### Tool Connections (For native/custom tools)
+
+| Type | Description | Setup |
+|------|-------------|-------|
 | Webhook | Custom REST API integration | Base URL + headers |
 | MCP Server | External MCP tool server | Server URL + auth |
 | Google Calendar | Calendar access | Google OAuth |
@@ -58,26 +74,101 @@ sync_mcp_connection(hub_id, connection_id)
 
 ## Setup Guides (UI)
 
+### OpenAI (Agent Connection)
+
+```
+1. Go to wayai.pro → Your Hub → Settings → Connections
+2. Click "Add Connection" → "OpenAI"
+3. Enter your OpenAI API Key
+4. Click "Save"
+```
+
+**Requirements:**
+- OpenAI account (platform.openai.com)
+- API key with sufficient credits
+
+**Getting an API Key:**
+1. Go to platform.openai.com
+2. Navigate to API Keys section
+3. Click "Create new secret key"
+4. Copy the key (shown only once)
+
+### OpenRouter (Agent Connection)
+
+```
+1. Go to wayai.pro → Your Hub → Settings → Connections
+2. Click "Add Connection" → "OpenRouter"
+3. Enter your OpenRouter API Key
+4. Click "Save"
+```
+
+**Requirements:**
+- OpenRouter account (openrouter.ai)
+- API key with credits
+
+**Getting an API Key:**
+1. Go to openrouter.ai
+2. Sign in and go to Keys section
+3. Create a new API key
+4. Copy the key
+
+**Benefits:**
+- Access to multiple LLM providers (Anthropic, Google, Meta, etc.)
+- Pay-per-use pricing across providers
+
 ### WhatsApp Business
 
 ```
 1. Go to wayai.pro → Your Hub → Settings → Connections
 2. Click "Add Connection" → "WhatsApp Business"
-3. You'll be redirected to Meta Business
-4. Log in with your Meta Business account
-5. Select or create a WhatsApp Business Account
-6. Authorize WayAI to send messages
+3. A Meta popup will open - click "Continue" to start the embedded signup
+4. Select business assets to share with WayAI:
+   - Business portfolio (select or create)
+   - WhatsApp Business account (select existing or create new)
+   - Facebook Page (optional)
+   - Ad account (optional)
+   - Pixel (optional)
+5. Click "Next"
+6. Add your WhatsApp phone number:
+   - "Use a display name only" - no phone number required
+   - "Use a new or existing WhatsApp number" - select/add a phone number
+   - "Add a phone number later" - complete setup without number
+7. Click "Next"
+8. Review permissions and click "Confirm"
+9. Return to WayAI - connection should show as "Active"
+```
+
+**Requirements:**
+- Facebook account with access to Meta Business Suite
+- WhatsApp Business account (can be created during signup)
+- Phone number NOT registered with regular WhatsApp (if adding number)
+
+**Phone Number Options:**
+- **Display name only:** Send messages without a dedicated number
+- **New/existing number:** Use a phone number you own (verification required)
+- **Add later:** Complete setup first, add number in Meta Business Settings
+
+**Troubleshooting:**
+- "Access denied" → Ensure you have admin access to the Meta Business portfolio
+- Phone number issues → Number must not be active on regular WhatsApp app
+- Verification failed → Check SMS/voice call verification code
+
+### Instagram
+
+```
+1. Go to wayai.pro → Your Hub → Settings → Connections
+2. Click "Add Connection" → "Instagram"
+3. You'll be redirected to Meta/Facebook
+4. Log in with your Facebook account linked to Instagram Business
+5. Select the Instagram Business account to connect
+6. Authorize WayAI to access messages
 7. Return to WayAI - connection should show as "Active"
 ```
 
 **Requirements:**
-- Meta Business account (business.facebook.com)
-- WhatsApp Business API access (verified business)
-- Phone number NOT registered with regular WhatsApp
-
-**Troubleshooting:**
-- "Access denied" → Ensure Meta Business account has WhatsApp Business API access
-- Phone number issues → Number must be dedicated to API use
+- Instagram Business or Creator account
+- Facebook Page linked to Instagram account
+- Meta Business account
 
 ### Webhook (Custom API)
 

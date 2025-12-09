@@ -44,11 +44,24 @@ Organization          ← UI only
 └── Project           ← UI only
     └── Hub           ← UI to create, MCP to configure
         ├── Connections   ← UI to create, MCP to manage
-        └── Agents        ← Full MCP control
+        └── Agents        ← Full MCP control (requires Agent connection)
             └── Tools     ← Full MCP control
 ```
 
 Setup order: Organization → Project → Hub → Connections → Agents → Tools
+
+## Connection Requirements
+
+Connections must be added via UI before using related features:
+
+| To use... | You need... | Connection Type |
+|-----------|-------------|-----------------|
+| **Agents** | LLM provider | OpenAI or OpenRouter |
+| **Channels** | Messaging channels | WhatsApp, Instagram, Gmail |
+| **Custom tools** | External APIs | Webhook |
+| **MCP tools** | MCP servers | MCP Server |
+
+**Important:** Add an Agent connection (OpenAI or OpenRouter) before creating agents.
 
 See [workflows/setup-flow.md](workflows/setup-flow.md) for complete guide.
 
