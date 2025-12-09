@@ -3,7 +3,7 @@ name: wayai-settings
 description: Manage WayAI hub configurations via Markdown with YAML frontmatter. Use for creating, updating, and exporting hubs, agents, and tools.
 ---
 
-<!-- v1.1.0 -->
+<!-- v1.2.0 -->
 
 # WayAI Settings Skill
 
@@ -13,62 +13,41 @@ description: Manage WayAI hub configurations via Markdown with YAML frontmatter.
 2. **Convert JSON to Markdown** using the templates below
 3. **Use `include_instructions=true`** only when editing agent instructions
 4. **Guide user through UI** for connections (OAuth, credentials)
-5. **Use MCP Resources** for latest skill/templates (see Syncing section)
-
-## MCP Resources
-
-The WayAI MCP server provides these resources:
-
-| Resource | Description |
-|----------|-------------|
-| `wayai://index` | List all available resources and versions |
-| `wayai://skill/{filename}` | Skill files (SKILL.md, schema-reference.md, connection-guides.md) |
-| `wayai://config/{filename}` | Config files (.mcp.json) |
-| `wayai://template/{name}/{file}` | Official hub templates |
+5. **Sync from upstream** for latest skill/templates (see Syncing section)
 
 ## Syncing Skill & Templates
 
-When user asks to update skill or templates, sync from MCP Resources:
+This repository is forked from `wayai-resources/wayai-settings-template`. Sync updates via Git:
 
-### Update Skill Files
+### First-time Setup (if upstream not configured)
+
+```bash
+git remote add upstream https://github.com/wayai-resources/wayai-settings-template.git
+```
+
+### Update Skill & Templates
 
 ```
-User: "Update my WayAI skill" or "Sync skill"
+User: "Update my WayAI skill" or "Sync with latest"
 
 Claude:
-1. Read wayai://index to check version
-2. Read wayai://skill/SKILL.md
-3. Write to .claude/skills/wayai-settings/SKILL.md
-4. Read wayai://skill/schema-reference.md
-5. Write to .claude/skills/wayai-settings/schema-reference.md
-6. Read wayai://skill/connection-guides.md
-7. Write to .claude/skills/wayai-settings/connection-guides.md
-8. Report: "Updated skill to version X.Y.Z"
+1. git fetch upstream
+2. git merge upstream/main --no-edit
+3. Report: "Synced with latest WayAI skill and templates"
 ```
 
-### Update Templates
-
-```
-User: "Update WayAI templates" or "Sync templates"
-
-Claude:
-1. Read wayai://index to get template list
-2. For each template:
-   - Read wayai://template/{name}/{file}
-   - Write to wayai-templates/{name}/{file}
-3. Report: "Updated X templates"
-```
+If merge conflicts occur, help user resolve them (prefer upstream for skill files, user's version for their hub configs).
 
 ### Using Templates
 
-When creating a hub from a template, always read from MCP Resources (not local files):
+When creating a hub from a template, read from local `wayai-templates/` directory:
 
 ```
 User: "Create a hub using the pizzeria template"
 
 Claude:
-1. Read wayai://template/pizzeria/hub.md
-2. Read wayai://template/pizzeria/agents/*.md
+1. Read wayai-templates/pizzeria/hub.md
+2. Read wayai-templates/pizzeria/agents/*.md
 3. Customize for user's business
 4. Create via MCP tools (create_hub, create_agent, etc.)
 5. Save to organizations/{org}/projects/{proj}/hubs/{hub}/
