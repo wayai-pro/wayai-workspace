@@ -91,18 +91,19 @@ See [workflows/export-import.md](workflows/export-import.md) for file convention
 
 ## Using Templates
 
-When user describes a use case, check `wayai-templates/` for matching templates:
+Templates are in `templates/{lang}/{vertical|horizontal}/{category}/`. When user describes a use case:
 
 ```
-User: "Set up a pizza ordering hub"
+User: "Preciso de um hub para pizzaria"
 
 Claude:
-1. Check wayai-templates/ → found "pizzeria"
-2. Ask: "I found a pizzeria template. Use as starting point?"
-3. If yes: Read template, customize, create via MCP
+1. Detect language → pt
+2. Check templates/pt/vertical/pizzaria/ → found templates
+3. Ask: "Encontrei templates de pizzaria. Qual prefere?"
+4. If yes: Read template, customize, create via MCP
 ```
 
-See [workflows/templates.md](workflows/templates.md) for template usage.
+See [templates/templates.md](templates/templates.md) for available templates.
 
 ## MCP Tools Quick Reference
 
@@ -137,9 +138,12 @@ See [workflows/templates.md](workflows/templates.md) for template usage.
 ## Workflow Guides
 
 - [setup-flow.md](workflows/setup-flow.md) - End-to-end setup order
-- [templates.md](workflows/templates.md) - Using hub templates
 - [export-import.md](workflows/export-import.md) - Markdown export/import
 - [syncing.md](workflows/syncing.md) - Git sync with upstream
+
+## Templates
+
+- [templates/templates.md](templates/templates.md) - Hub templates index and usage
 
 ## Syncing Updates
 
