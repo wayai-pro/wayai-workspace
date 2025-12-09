@@ -1,169 +1,137 @@
 ---
 name: wayai-settings
-description: Manage WayAI hub configurations via Markdown with YAML frontmatter. Use for creating, updating, and exporting hubs, agents, and tools.
+description: Configure WayAI, a SaaS platform for AI-powered omnichannel communication hubs that integrate AI agents with human teams across WhatsApp, Email, Instagram, and native App. Use when setting up hubs, editing agents, managing tools, or exporting to version control. Distinguishes MCP-capable operations from UI-only setup.
 ---
 
-<!-- v1.2.0 -->
+<!-- v2.0.0 -->
 
 # WayAI Settings Skill
 
-## Key Behaviors
+## Quick Decision: MCP or UI?
 
-1. **ALWAYS fetch before edit** - MCP returns JSON, convert to Markdown
-2. **Convert JSON to Markdown** using the templates below
-3. **Use `include_instructions=true`** only when editing agent instructions
-4. **Guide user through UI** for connections (OAuth, credentials)
-5. **Sync from upstream** for latest skill/templates (see Syncing section)
+| Entity | MCP | UI Only |
+|--------|-----|---------|
+| **Organization** | Read (`get_organization`, `get_workspace`) | Create, update, delete, users |
+| **Project** | Read, Create (`get_project`, `create_project`) | Update, delete |
+| **Hub** | Create, Read, Update (`create_hub`, `get_hub`, `update_hub`) | Delete |
+| **Connection** | Enable, disable, sync MCP | Create, delete, OAuth setup |
+| **Agent** | Full CRUD | - |
+| **Tool** | Full CRUD | - |
 
-## Syncing Skill & Templates
+See [entities/](entities/) for detailed operations per entity.
 
-This repository is forked from `wayai-resources/wayai-settings-template`. Sync updates via Git:
-
-### First-time Setup (if upstream not configured)
-
-```bash
-git remote add upstream https://github.com/wayai-resources/wayai-settings-template.git
-```
-
-### Update Skill & Templates
+## Core Workflow
 
 ```
-User: "Update my WayAI skill" or "Sync with latest"
+BEFORE changes:
+1. get_workspace()     → discover hub_id
+2. get_hub(hub_id)     → current state (JSON)
+3. Convert to Markdown → local files
 
-Claude:
-1. git fetch upstream
-2. git merge upstream/main --no-edit
-3. Report: "Synced with latest WayAI skill and templates"
+MAKING changes:
+4. Edit Markdown OR use MCP tools directly
+5. MCP tools return updated JSON
+
+AFTER changes:
+6. Update local Markdown from JSON
+7. Commit to Git
 ```
 
-If merge conflicts occur, help user resolve them (prefer upstream for skill files, user's version for their hub configs).
-
-### Using Templates
-
-When creating a hub from a template, read from local `wayai-templates/` directory:
+## Entity Hierarchy
 
 ```
-User: "Create a hub using the pizzeria template"
-
-Claude:
-1. Read wayai-templates/pizzeria/hub.md
-2. Read wayai-templates/pizzeria/agents/*.md
-3. Customize for user's business
-4. Create via MCP tools (create_hub, create_agent, etc.)
-5. Save to organizations/{org}/projects/{proj}/hubs/{hub}/
+Organization          ← UI only
+└── Project           ← UI only
+    └── Hub           ← UI to create, MCP to configure
+        ├── Connections   ← UI to create, MCP to manage
+        └── Agents        ← Full MCP control
+            └── Tools     ← Full MCP control
 ```
 
-## Markdown Templates
+Setup order: Organization → Project → Hub → Connections → Agents → Tools
 
-Convert MCP JSON responses to Markdown files:
+See [workflows/setup-flow.md](workflows/setup-flow.md) for complete guide.
 
-### Agent Template
-
-```markdown
----
-_wayai_id: {agent_id}
-name: {name}
-role: {role}
-model: {model}
-temperature: {temperature}
-tools:
-  native: {native_tools array}
-  custom: {custom_tools array}
----
-
-{instructions}
-```
-
-### Hub Template
-
-```markdown
----
-_wayai_id: {hub_id}
-name: {name}
-description: {description}
-ai_mode: {ai_mode}
-followup_message: {followup_message}
-inactivity_interval: {inactivity_interval}
----
-
-# {name}
-
-{description}
-```
-
-### Organization Template
-
-```markdown
----
-_wayai_id: {organization_id}
-name: {name}
----
-
-# {name}
-```
-
-### Project Template
-
-```markdown
----
-_wayai_id: {project_id}
-name: {name}
----
-
-# {name}
-```
-
-## File Structure
-
-Write Markdown files to:
+## Repository Structure
 
 ```
 organizations/
-└── {org-name-slugified}/
+└── {org-slug}/
     ├── org.md
     └── projects/
-        └── {project-name-slugified}/
+        └── {project-slug}/
             ├── project.md
             └── hubs/
-                └── {hub-name-slugified}/
+                └── {hub-slug}/
                     ├── hub.md
                     └── agents/
-                        └── {agent-name-slugified}.md
+                        └── {agent-slug}.md
 ```
 
-## System Fields
+**System fields:** `_wayai_*` prefix = system-managed, DO NOT edit.
 
-Fields prefixed with `_wayai_` are system-managed. Users should NOT edit these.
-Claude uses them to match files to database records.
+See [workflows/export-import.md](workflows/export-import.md) for file conventions.
 
-## Connections (UI Only)
+## Using Templates
 
-Connections contain credentials and require OAuth flows. When a tool needs a connection:
-
-```
-Claude: "The send_whatsapp_message tool requires a WhatsApp connection.
-
-        To set this up:
-        1. Go to wayai.pro → Your Hub → Settings → Connections
-        2. Click Add Connection → WhatsApp Business
-        3. Complete the Meta OAuth flow
-        4. Return here when done
-
-        Let me know when you've completed this!"
-```
-
-## Workflow
+When user describes a use case, check `wayai-templates/` for matching templates:
 
 ```
-BEFORE making ANY changes:
-1. Fetch current state: get_hub(hub_id) ← returns JSON
-2. Convert JSON to Markdown files using template
-3. Show diff if changes detected since last export
+User: "Set up a pizza ordering hub"
 
-AFTER making ANY changes:
-4. All write operations return updated JSON
-5. Update local Markdown files from JSON
+Claude:
+1. Check wayai-templates/ → found "pizzeria"
+2. Ask: "I found a pizzeria template. Use as starting point?"
+3. If yes: Read template, customize, create via MCP
 ```
 
-See [schema-reference.md](schema-reference.md) for full schema details.
-See [connection-guides.md](connection-guides.md) for UI workflows.
+See [workflows/templates.md](workflows/templates.md) for template usage.
+
+## MCP Tools Quick Reference
+
+| Operation | Tool |
+|-----------|------|
+| Discover workspace | `get_workspace` |
+| Get organization | `get_organization(organization_id)` |
+| Get project | `get_project(project_id)` |
+| Create project | `create_project(organization_id, project_name)` |
+| Create hub | `create_hub(project_id, hub_name, hub_type, ...)` |
+| Get hub schema | `get_hub(hub_id)` |
+| Update hub | `update_hub(hub_id, ...)` |
+| Get agent | `get_agent(hub_id, agent_id, include_instructions)` |
+| Create agent | `create_agent(hub_id, agent_name, ...)` |
+| Update agent | `update_agent(hub_id, agent_id, ...)` |
+| Delete agent | `delete_agent(hub_id, agent_id, confirm=true)` |
+| Add native tool | `add_native_tool(hub_id, agent_id, tool_native_id)` |
+| Add custom tool | `add_custom_tool(hub_id, agent_id, tool_name, ...)` |
+| Enable/disable tool | `enable_tool` / `disable_tool` |
+| Enable/disable connection | `enable_connection` / `disable_connection` |
+| Sync MCP server | `sync_mcp_connection(hub_id, connection_id)` |
+
+## Entity Documentation
+
+- [organizations.md](entities/organizations.md) - Organization management
+- [projects.md](entities/projects.md) - Project management
+- [hubs.md](entities/hubs.md) - Hub settings and AI modes
+- [connections.md](entities/connections.md) - Channel and API connections
+- [agents.md](entities/agents.md) - Agent configuration
+- [tools.md](entities/tools.md) - Native, MCP, and custom tools
+
+## Workflow Guides
+
+- [setup-flow.md](workflows/setup-flow.md) - End-to-end setup order
+- [templates.md](workflows/templates.md) - Using hub templates
+- [export-import.md](workflows/export-import.md) - Markdown export/import
+- [syncing.md](workflows/syncing.md) - Git sync with upstream
+
+## Syncing Updates
+
+```bash
+# First-time: add upstream
+git remote add upstream https://github.com/wayai-resources/wayai-settings-template.git
+
+# Sync skill & templates
+git fetch upstream && git merge upstream/main --no-edit
+```
+
+See [workflows/syncing.md](workflows/syncing.md) for conflict resolution.
