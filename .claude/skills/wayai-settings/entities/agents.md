@@ -24,16 +24,30 @@ Organization
 
 ## Fields
 
-| Field | Type | Editable | Description |
-|-------|------|----------|-------------|
-| `_wayai_id` | string | NO | System ID - DO NOT EDIT |
-| `name` | string | Yes | Agent display name |
-| `role` | string | Yes | Brief description of agent's function |
-| `model` | string | Yes | LLM model (e.g., gpt-4o, gpt-4o-mini) |
-| `temperature` | number | Yes | Model temperature (0-2) |
-| `tools.native` | array | Yes | Native tool IDs assigned to agent |
-| `tools.custom` | array | Yes | Custom tool definitions |
-| `instructions` | markdown | Yes | System instructions (in body) |
+| Field | Type | Required | Editable | Description |
+|-------|------|----------|----------|-------------|
+| `_wayai_id` | string | - | NO | System ID - DO NOT EDIT |
+| `name` | string | Yes | Yes | Agent display name |
+| `role` | enum | No | Yes | Agent role (see roles below) |
+| `model` | string | No | Yes | LLM model (e.g., gpt-4o, gpt-4o-mini) |
+| `temperature` | number | No | Yes | Model temperature (0-2) |
+| `tools.native` | array | No | Yes | Native tool IDs assigned to agent |
+| `tools.custom` | array | No | Yes | Custom tool definitions |
+| `instructions` | markdown | **Yes** | Yes | System instructions (in body) |
+
+## Agent Roles
+
+| Role | Description |
+|------|-------------|
+| `Pilot` | Main AI agent that handles conversations autonomously |
+| `Copilot` | AI assistant that helps human operators |
+| `Specialist for Pilot` | Expert agent called by Pilot for specific tasks |
+| `Specialist for Copilot` | Expert agent called by Copilot for specific tasks |
+| `Consultant for Pilot` | Advisory agent for Pilot decisions |
+| `Consultant for Copilot` | Advisory agent for Copilot decisions |
+| `Monitor` | Observes conversations without participating |
+| `Evaluator of Conversations` | Evaluates full conversations |
+| `Evaluator of Messages` | Evaluates individual messages |
 
 ## MCP Tools
 
@@ -53,8 +67,8 @@ Create a new agent in the hub.
 create_agent(
   hub_id,        # Required
   agent_name,    # Required
-  agent_role,    # Optional
-  instructions,  # Optional
+  instructions,  # Required: system instructions for the agent
+  agent_role,    # Optional: Pilot, Copilot, Specialist for Pilot, etc.
   model,         # Optional: default varies by plan
   temperature    # Optional: default 0.7
 )
