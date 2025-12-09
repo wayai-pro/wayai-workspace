@@ -77,7 +77,7 @@ sync_mcp_connection(hub_id, connection_id)
 ### OpenAI (Agent Connection)
 
 ```
-1. Go to wayai.pro → Your Hub → Settings → Connections
+1. Go to wayai.pro → Your Hub → Connections
 2. Click "Add Connection" → "OpenAI"
 3. Enter your OpenAI API Key
 4. Click "Save"
@@ -96,7 +96,7 @@ sync_mcp_connection(hub_id, connection_id)
 ### OpenRouter (Agent Connection)
 
 ```
-1. Go to wayai.pro → Your Hub → Settings → Connections
+1. Go to wayai.pro → Your Hub → Connections
 2. Click "Add Connection" → "OpenRouter"
 3. Enter your OpenRouter API Key
 4. Click "Save"
@@ -119,7 +119,7 @@ sync_mcp_connection(hub_id, connection_id)
 ### WhatsApp Business
 
 ```
-1. Go to wayai.pro → Your Hub → Settings → Connections
+1. Go to wayai.pro → Your Hub → Connections
 2. Click "Add Connection" → "WhatsApp Business"
 3. A Meta popup will open - click "Continue" to start the embedded signup
 4. Select business assets to share with WayAI:
@@ -156,7 +156,7 @@ sync_mcp_connection(hub_id, connection_id)
 ### Instagram
 
 ```
-1. Go to wayai.pro → Your Hub → Settings → Connections
+1. Go to wayai.pro → Your Hub → Connections
 2. Click "Add Connection" → "Instagram"
 3. You'll be redirected to Meta/Facebook
 4. Log in with your Facebook account linked to Instagram Business
@@ -173,7 +173,7 @@ sync_mcp_connection(hub_id, connection_id)
 ### Webhook (Custom API)
 
 ```
-1. Go to wayai.pro → Your Hub → Settings → Connections
+1. Go to wayai.pro → Your Hub → Connections
 2. Click "Add Connection" → "Webhook"
 3. Enter a display name (e.g., "POS System")
 4. Enter the base URL (e.g., "https://api.yourpos.com")
@@ -196,7 +196,7 @@ tools:
 ### Google Calendar
 
 ```
-1. Go to wayai.pro → Your Hub → Settings → Connections
+1. Go to wayai.pro → Your Hub → Connections
 2. Click "Add Connection" → "Google Calendar"
 3. Sign in with your Google account
 4. Authorize WayAI to access your calendar
@@ -207,7 +207,7 @@ tools:
 ### Gmail
 
 ```
-1. Go to wayai.pro → Your Hub → Settings → Connections
+1. Go to wayai.pro → Your Hub → Connections
 2. Click "Add Connection" → "Gmail"
 3. Sign in with your Google account
 4. Authorize WayAI to send emails on your behalf
@@ -219,7 +219,7 @@ tools:
 ### MCP Server
 
 ```
-1. Go to wayai.pro → Your Hub → Settings → Connections
+1. Go to wayai.pro → Your Hub → Connections
 2. Click "Add Connection" → "MCP Server"
 3. Enter the MCP server URL
 4. Configure authentication (if required)
@@ -244,7 +244,7 @@ User: "I need to connect WhatsApp"
 
 Claude: "WhatsApp connections require OAuth setup in the UI:
 
-        1. Go to wayai.pro → Your Hub → Settings → Connections
+        1. Go to wayai.pro → Your Hub → Connections
         2. Click 'Add Connection' → 'WhatsApp Business'
         3. Complete the Meta OAuth flow
 

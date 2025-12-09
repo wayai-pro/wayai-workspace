@@ -20,6 +20,10 @@ description: Configure WayAI, a SaaS platform for AI-powered omnichannel communi
 
 See [entities/](entities/) for detailed operations per entity.
 
+## Agent Guideline
+
+Only provide information from this skill, MCP tool descriptions, or MCP resources. Do not invent URLs, paths, or steps.
+
 ## Core Workflow
 
 ```
