@@ -6,7 +6,58 @@ Export WayAI configurations to Markdown for version control. Import from Markdow
 
 **Key principle:** The database is the source of truth. Markdown files are working copies for version control and editing.
 
-## Export Workflow (MCP → Markdown)
+## Quick Export (Recommended)
+
+Use `export_workspace` to generate a zip file with all your configurations:
+
+```
+User: "Export my workspace"
+
+Claude:
+1. export_workspace() → returns download URL
+2. Download and extract zip
+3. Replace local org folders with extracted files
+4. Review changes with git diff
+```
+
+The zip contains:
+- `workspace.md` - Overview of all orgs/projects/hubs
+- `{org}/{project}/{hub}/hub.md` - Hub settings and connections
+- `{org}/{project}/{hub}/{agent}.md` - Agent configurations
+
+### Sync Workflow
+
+```bash
+# 1. Check for local changes first
+git status
+
+# 2. If dirty, commit or stash changes
+git stash
+
+# 3. Download export (URL from export_workspace)
+curl -L "https://..." -o workspace-export.zip
+
+# 4. Extract to temp location
+unzip -o workspace-export.zip -d /tmp/workspace-export
+
+# 5. Remove old org folders (keep .claude/)
+rm -rf */  # Removes org folders only
+
+# 6. Copy new files
+cp -r /tmp/workspace-export/* .
+
+# 7. Review and commit
+git diff
+git add .
+git commit -m "Sync workspace from database"
+
+# 8. Restore any stashed changes if needed
+git stash pop
+```
+
+## Manual Export Workflow (MCP → Markdown)
+
+For granular control or partial exports, use individual MCP tools:
 
 ### Step 1: Fetch Current State
 
@@ -163,20 +214,37 @@ Claude uses `_wayai_id` to match files to database records.
 
 ## Full Export Example
 
+### Using export_workspace (Recommended)
+
 ```
-User: "Export my workspace to Markdown"
+User: "Export my workspace"
 
 Claude:
-1. get_workspace() → discover hierarchy
+1. export_workspace()
 
-Found:
-- Organization: Acme Corp
-  - Project: Customer Support
-    - Hub: Support Hub (MCP enabled)
-    - Hub: Sales Hub (MCP disabled - skipping)
+   Workspace Export Ready!
+   Download URL: https://...signed-url...
+   Expires in: 300 seconds
 
-2. For Support Hub:
-   get_hub(hub_id) → full schema
+2. Check git status for uncommitted changes
+3. Download: curl -L "URL" -o workspace-export.zip
+4. Extract: unzip -o workspace-export.zip -d /tmp/workspace-export
+5. Remove old org folders, copy new files
+6. git diff to review changes
+7. git commit -m "Sync workspace from database"
+
+"Exported 2 organizations, 5 hubs to zip. Download URL expires in 5 minutes."
+```
+
+### Using Manual Export
+
+```
+User: "Export just the Support Hub"
+
+Claude:
+1. get_workspace() → find hub_id
+
+2. get_hub(hub_id) → full schema
    get_agent(hub_id, agent_1, include_instructions=true)
    get_agent(hub_id, agent_2, include_instructions=true)
 
@@ -186,7 +254,7 @@ Found:
    acme-corp/customer-support/support-hub/support-agent.md
    acme-corp/customer-support/support-hub/escalation-agent.md
 
-"Exported 1 organization, 1 project, 1 hub, 2 agents to Markdown."
+"Exported Support Hub with 2 agents to Markdown."
 ```
 
 ## Full Import Example
