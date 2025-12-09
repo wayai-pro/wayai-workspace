@@ -65,7 +65,7 @@ get_agent(
 ### create_agent
 Create a new agent in the hub.
 
-**Prerequisite:** The hub must have an **Agent connection** (OpenAI or OpenRouter) configured before creating agents. Add connections via UI: wayai.pro → Hub → Settings → Connections.
+**Prerequisite:** The hub must have an **Agent connection** (OpenAI or OpenRouter) configured before creating agents. Add connections via UI: wayai.pro → Hub → Connections.
 
 ```
 create_agent(

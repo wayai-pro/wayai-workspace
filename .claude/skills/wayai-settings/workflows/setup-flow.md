@@ -75,7 +75,7 @@ Hub deletion is destructive and must be done via UI at wayai.pro → Hub → Set
 
 **Create in UI:**
 ```
-1. Go to wayai.pro → Hub → Settings → Connections
+1. Go to wayai.pro → Hub → Connections
 2. Click "Add Connection"
 3. Select type (WhatsApp, Webhook, etc.)
 4. Complete OAuth or enter credentials
@@ -132,7 +132,7 @@ Claude:
 
 "**Step 3: Add WhatsApp Connection (UI)**
 You'll need WhatsApp to receive orders:
-1. Go to Hub → Settings → Connections
+1. Go to Hub → Connections
 2. Add WhatsApp Business
 3. Complete Meta OAuth
 
