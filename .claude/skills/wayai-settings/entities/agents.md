@@ -27,13 +27,14 @@ Organization
 | Field | Type | Required | Editable | Description |
 |-------|------|----------|----------|-------------|
 | `_wayai_id` | string | - | NO | System ID - DO NOT EDIT |
-| `name` | string | Yes | Yes | Agent display name |
-| `role` | enum | No | Yes | Agent role (see roles below) |
+| `name` | string | **Yes** | Yes | Agent display name |
+| `role` | enum | **Yes** | Yes | Agent role (see roles below) |
+| `connection_id` | string | **Yes** | No | LLM connection ID (auto-selected if not provided) |
+| `instructions` | markdown | **Yes** | Yes | System instructions (in body) |
 | `model` | string | No | Yes | LLM model (e.g., gpt-4o, gpt-4o-mini) |
 | `temperature` | number | No | Yes | Model temperature (0-2) |
 | `tools.native` | array | No | Yes | Native tool IDs assigned to agent |
 | `tools.custom` | array | No | Yes | Custom tool definitions |
-| `instructions` | markdown | **Yes** | Yes | System instructions (in body) |
 
 ## Agent Roles
 
@@ -62,13 +63,14 @@ get_agent(
 ```
 
 ### create_agent
-Create a new agent in the hub.
+Create a new agent in the hub. Requires an LLM connection (Agent type) to be configured.
 ```
 create_agent(
   hub_id,        # Required
   agent_name,    # Required
+  agent_role,    # Required: Pilot, Copilot, Specialist for Pilot, etc.
   instructions,  # Required: system instructions for the agent
-  agent_role,    # Optional: Pilot, Copilot, Specialist for Pilot, etc.
+  connection_id, # Optional: LLM connection ID (auto-selects if not provided)
   model,         # Optional: default varies by plan
   temperature    # Optional: default 0.7
 )
