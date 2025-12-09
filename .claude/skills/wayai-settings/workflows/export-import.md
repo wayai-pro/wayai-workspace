@@ -20,12 +20,13 @@ get_agent(hub_id, agent_id, include_instructions=true) → full agent details
 
 Use templates from [entities/](../entities/) to convert JSON to Markdown:
 
-**Hub → hub.md**
+**Hub → hub.md** (includes connections table)
 ```markdown
 ---
 _wayai_id: abc-123
 name: Support Hub
 description: Customer support automation
+hub_type: user
 ai_mode: Pilot+Copilot
 followup_message: Need anything else?
 inactivity_interval: 10
@@ -34,14 +35,28 @@ inactivity_interval: 10
 # Support Hub
 
 Customer support automation
+
+## Connections
+
+| Name | Type | Status |
+|------|------|--------|
+| WhatsApp Business | whatsapp | enabled |
+| OpenAI | agent | enabled |
+
+## Agents
+
+| Agent | Role | File |
+|-------|------|------|
+| Support Agent | Pilot | `support-agent.md` |
+| Escalation Agent | Specialist for Pilot | `escalation-agent.md` |
 ```
 
-**Agent → agents/{name}.md**
+**Agent → {agent-slug}.md**
 ```markdown
 ---
 _wayai_id: def-456
 name: Support Agent
-role: Handles customer inquiries
+role: Pilot
 model: gpt-4o
 temperature: 0.7
 tools:
@@ -61,17 +76,13 @@ You are a helpful support agent...
 ### Step 3: Save to Repository
 
 ```
-organizations/
-└── acme-corp/
-    ├── org.md
-    └── projects/
-        └── customer-support/
-            ├── project.md
-            └── hubs/
-                └── support-hub/
-                    ├── hub.md
-                    └── agents/
-                        └── support-agent.md
+workspace.md                        # Updated with workspace overview
+acme-corp/                          # Organization folder
+└── customer-support/               # Project folder
+    └── support-hub/                # Hub folder
+        ├── hub.md                  # Hub settings + connections
+        ├── support-agent.md        # Agent file
+        └── escalation-agent.md     # Agent file
 ```
 
 ## Import Workflow (Markdown → MCP)
@@ -80,7 +91,7 @@ organizations/
 
 ```
 Read hub.md → parse YAML frontmatter + body
-Read agents/*.md → parse each agent
+Read *.md (excluding hub.md) → parse each agent
 ```
 
 ### Step 2: Compare with Current State
@@ -114,17 +125,12 @@ add_custom_tool(hub_id, agent_id, tool_name="...", ...)
 ### Directory Layout
 
 ```
-organizations/
-└── {org-slug}/
-    ├── org.md
-    └── projects/
-        └── {project-slug}/
-            ├── project.md
-            └── hubs/
-                └── {hub-slug}/
-                    ├── hub.md
-                    └── agents/
-                        └── {agent-slug}.md
+workspace.md                        # Workspace overview (orgs/projects/hubs)
+{org-slug}/                         # Organization folder
+└── {project-slug}/                 # Project folder
+    └── {hub-slug}/                 # Hub folder
+        ├── hub.md                  # Hub settings + connections table
+        └── {agent-slug}.md         # Agent files (one per agent)
 ```
 
 ### Slugification Rules
@@ -175,11 +181,10 @@ Found:
    get_agent(hub_id, agent_2, include_instructions=true)
 
 3. Convert and save:
-   organizations/acme-corp/org.md
-   organizations/acme-corp/projects/customer-support/project.md
-   organizations/acme-corp/projects/customer-support/hubs/support-hub/hub.md
-   organizations/acme-corp/projects/customer-support/hubs/support-hub/agents/support-agent.md
-   organizations/acme-corp/projects/customer-support/hubs/support-hub/agents/escalation-agent.md
+   workspace.md (update with current state)
+   acme-corp/customer-support/support-hub/hub.md
+   acme-corp/customer-support/support-hub/support-agent.md
+   acme-corp/customer-support/support-hub/escalation-agent.md
 
 "Exported 1 organization, 1 project, 1 hub, 2 agents to Markdown."
 ```
@@ -190,7 +195,7 @@ Found:
 User: "I updated the support agent instructions, sync to platform"
 
 Claude:
-1. Read agents/support-agent.md → parse changes
+1. Read support-agent.md → parse changes
 2. get_agent(hub_id, agent_id) → current state
 3. Compare → instructions changed
 

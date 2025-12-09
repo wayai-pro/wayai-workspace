@@ -128,16 +128,17 @@ tools:
 
 ## File Location
 
+Agent files live directly in the hub folder:
+
 ```
-organizations/
-└── {org-name-slugified}/
-    └── projects/
-        └── {project-name-slugified}/
-            └── hubs/
-                └── {hub-name-slugified}/
-                    └── agents/
-                        └── {agent-name-slugified}.md
+{org-slug}/
+└── {project-slug}/
+    └── {hub-slug}/
+        ├── hub.md                  # Hub settings + connections + agents index
+        └── {agent-slug}.md         # Agent file
 ```
+
+The `hub.md` file contains an agents index table linking to each agent file.
 
 ## Examples
 
@@ -159,12 +160,13 @@ Claude:
 1. create_agent(
      hub_id,
      agent_name="Refund Support",
-     agent_role="Handles customer refund requests",
+     agent_role="Specialist for Pilot",
      instructions="You are a helpful support agent...",
      model="gpt-4o",
      temperature=0.7
    )
-2. Save to agents/refund-support.md
+2. Save to {org}/{project}/{hub}/refund-support.md
+3. Update hub.md agents table with new entry
 ```
 
 **Updating agent instructions:**
@@ -185,7 +187,8 @@ User: "Delete the old Test Agent"
 Claude:
 1. Confirm with user: "Are you sure you want to delete Test Agent?"
 2. If yes: delete_agent(hub_id, agent_id, confirm=true)
-3. Remove local Markdown file
+3. Remove agent file from {org}/{project}/{hub}/
+4. Update hub.md agents table to remove entry
 ```
 
 **Adding tools to an agent:**

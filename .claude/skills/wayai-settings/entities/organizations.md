@@ -30,24 +30,19 @@ Organization (you are here)
 | `_wayai_id` | string | NO | System ID - DO NOT EDIT |
 | `name` | string | UI only | Organization display name |
 
-## Markdown Template
+## Folder Structure
 
-```markdown
----
-_wayai_id: {organization_id}
-name: {name}
----
-
-# {name}
-```
-
-## File Location
+Organizations are represented as **root-level folders** in the repository:
 
 ```
-organizations/
-└── {org-name-slugified}/
-    └── org.md
+{org-slug}/                         # Organization folder
+└── {project-slug}/                 # Project folders inside
+    └── {hub-slug}/
+        ├── hub.md
+        └── {agent}.md
 ```
+
+Organization metadata (ID, name) is stored in `workspace.md` at the repository root.
 
 ## Examples
 
@@ -58,6 +53,7 @@ User: "What organizations do I have access to?"
 Claude:
 1. get_workspace() → returns workspace with organizations
 2. List organizations with their projects and hubs
+3. Update workspace.md with current state
 ```
 
 **Creating a new organization:**

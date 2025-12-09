@@ -275,3 +275,30 @@ Claude:
 2. sync_mcp_connection(hub_id, connection_id)
 3. Report newly discovered tools
 ```
+
+## File Location
+
+Connections are stored as a **table in hub.md**, not as separate files:
+
+```
+{org-slug}/
+└── {project-slug}/
+    └── {hub-slug}/
+        └── hub.md                  # Contains connections table
+```
+
+### Connections Table Format
+
+In `hub.md`:
+
+```markdown
+## Connections
+
+| Name | Type | Status |
+|------|------|--------|
+| WhatsApp Business | whatsapp | enabled |
+| OpenAI | agent | enabled |
+| Order System | webhook | disabled |
+```
+
+**Note:** Credentials are never stored in files. The table only shows connection name, type, and status for reference.

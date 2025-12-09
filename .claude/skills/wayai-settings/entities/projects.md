@@ -29,26 +29,19 @@ Organization
 | `_wayai_id` | string | NO | System ID - DO NOT EDIT |
 | `name` | string | UI only | Project display name |
 
-## Markdown Template
+## Folder Structure
 
-```markdown
----
-_wayai_id: {project_id}
-name: {name}
----
-
-# {name}
-```
-
-## File Location
+Projects are represented as **folders inside organization folders**:
 
 ```
-organizations/
-└── {org-name-slugified}/
-    └── projects/
-        └── {project-name-slugified}/
-            └── project.md
+{org-slug}/                         # Organization folder
+└── {project-slug}/                 # Project folder
+    └── {hub-slug}/                 # Hub folders inside
+        ├── hub.md
+        └── {agent}.md
 ```
+
+Project metadata (ID, name) is stored in `workspace.md` at the repository root.
 
 ## MCP Tools
 
@@ -76,6 +69,7 @@ User: "What projects do I have?"
 Claude:
 1. get_workspace() → returns workspace hierarchy
 2. List projects grouped by organization
+3. Update workspace.md with current state
 ```
 
 **Creating a new project:**
@@ -85,7 +79,8 @@ User: "I need a new project for customer support"
 Claude:
 1. get_workspace() → find organization_id
 2. create_project(organization_id, "Customer Support")
-3. Save to organizations/{org}/projects/customer-support/project.md
+3. Create folder: {org-slug}/customer-support/
+4. Update workspace.md with new project
 
 "Project 'Customer Support' created! Would you like me to create a hub inside it?"
 ```

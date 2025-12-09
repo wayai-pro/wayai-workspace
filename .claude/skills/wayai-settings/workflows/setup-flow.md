@@ -163,7 +163,11 @@ Claude:
 
 Claude:
 1. get_hub(hub_id) → full schema
-2. Save to organizations/{org}/projects/{proj}/hubs/pizza-orders/
+2. Save to {org}/{project}/pizza-orders/
+   - hub.md (hub settings + connections table)
+   - order-taker.md (agent)
+   - support-agent.md (agent)
+3. Update workspace.md with new hub
 ```
 
 ## Quick Reference: What Goes Where

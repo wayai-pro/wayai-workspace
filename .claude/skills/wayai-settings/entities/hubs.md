@@ -105,6 +105,18 @@ update_hub(
 )
 ```
 
+## Folder Structure
+
+Hubs are represented as **folders inside project folders**:
+
+```
+{org-slug}/
+└── {project-slug}/
+    └── {hub-slug}/                 # Hub folder
+        ├── hub.md                  # Hub settings + connections table
+        └── {agent-slug}.md         # Agent files (one per agent)
+```
+
 ## Markdown Template
 
 ```markdown
@@ -121,19 +133,21 @@ inactivity_interval: {inactivity_interval}
 # {name}
 
 {description}
-```
 
-## File Location
+## Connections
 
-```
-organizations/
-└── {org-name-slugified}/
-    └── projects/
-        └── {project-name-slugified}/
-            └── hubs/
-                └── {hub-name-slugified}/
-                    ├── hub.md
-                    └── agents/
+| Name | Type | Status |
+|------|------|--------|
+| WhatsApp Business | whatsapp | enabled |
+| OpenAI | agent | enabled |
+| Order System | webhook | disabled |
+
+## Agents
+
+| Agent | Role | File |
+|-------|------|------|
+| Atendente | Pilot | `atendente.md` |
+| Supervisor | Copilot | `supervisor.md` |
 ```
 
 ## Examples
@@ -145,7 +159,8 @@ User: "Show me the Support Hub configuration"
 Claude:
 1. get_workspace() → find hub_id for "Support Hub"
 2. get_hub(hub_id) → get full schema
-3. Convert to Markdown and display
+3. Convert to Markdown and save to {org}/{project}/{hub}/hub.md
+4. Display hub settings and connections
 ```
 
 **Updating hub settings:**
@@ -169,7 +184,8 @@ Claude:
      hub_name="Pizza Orders",
      hub_type="user"  # Required for WhatsApp
    )
-3. Save to organizations/{org}/projects/{proj}/hubs/pizza-orders/hub.md
+3. Create folder: {org}/{project}/pizza-orders/
+4. Save hub.md with hub settings and empty connections table
 
 "Hub 'Pizza Orders' created! Since you need WhatsApp, I used 'user' type.
 

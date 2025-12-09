@@ -72,17 +72,12 @@ See [workflows/setup-flow.md](workflows/setup-flow.md) for complete guide.
 ## Repository Structure
 
 ```
-organizations/
-└── {org-slug}/
-    ├── org.md
-    └── projects/
-        └── {project-slug}/
-            ├── project.md
-            └── hubs/
-                └── {hub-slug}/
-                    ├── hub.md
-                    └── agents/
-                        └── {agent-slug}.md
+workspace.md                        # Workspace overview (orgs/projects/hubs index)
+{org-slug}/                         # Organization folder
+└── {project-slug}/                 # Project folder
+    └── {hub-slug}/                 # Hub folder
+        ├── hub.md                  # Hub settings + connections table
+        └── {agent-slug}.md         # Agent files (one per agent)
 ```
 
 **System fields:** `_wayai_*` prefix = system-managed, DO NOT edit.
