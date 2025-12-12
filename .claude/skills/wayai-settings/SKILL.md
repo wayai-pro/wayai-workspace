@@ -3,7 +3,7 @@ name: wayai-settings
 description: Configure WayAI, a SaaS platform for AI-powered omnichannel communication hubs that integrate AI agents with human teams across WhatsApp, Email, Instagram, and native App. Use when setting up hubs, editing agents, managing tools, or exporting to version control. Distinguishes MCP-capable operations from UI-only setup.
 ---
 
-<!-- v2.0.0 -->
+<!-- v2.1.0 -->
 
 # WayAI Settings Skill
 
@@ -40,6 +40,20 @@ AFTER changes:
 6. Update local Markdown from JSON
 7. Commit to Git
 ```
+
+## Visual Feedback (Optional)
+
+Use **Playwright MCP** to show users results after MCP operations:
+
+```
+1. MCP operation     → create_agent(hub_id, ...)  [fast: ~200ms]
+2. Playwright nav    → Navigate to Agents tab     [visual confirmation]
+3. User sees result  → New agent visible on screen
+```
+
+**Setup:** `claude mcp add playwright npx @playwright/mcp@latest`
+
+See [workflows/visual-feedback.md](workflows/visual-feedback.md) for patterns and examples.
 
 ## Entity Hierarchy
 
@@ -135,6 +149,7 @@ See [templates/templates.md](templates/templates.md) for available templates.
 - [setup-flow.md](workflows/setup-flow.md) - End-to-end setup order
 - [export-import.md](workflows/export-import.md) - Markdown export/import
 - [syncing.md](workflows/syncing.md) - Git sync with upstream
+- [visual-feedback.md](workflows/visual-feedback.md) - Playwright for visual confirmation
 
 ## Templates
 
