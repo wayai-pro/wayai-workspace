@@ -8,7 +8,7 @@ This repository is forked from `wayai-resources/wayai-settings-template`. Sync t
 
 | Directory | Source | Description |
 |-----------|--------|-------------|
-| `.claude/skills/wayai-settings/` | upstream | Skill documentation |
+| `.claude/skills/wayai/` | upstream | Skill documentation |
 | `wayai-templates/` | upstream | Official hub templates |
 
 ## What Stays Local
@@ -66,7 +66,7 @@ git push origin main
 
 ### Skill Files Conflict
 
-If conflicts occur in `.claude/skills/wayai-settings/`:
+If conflicts occur in `.claude/skills/wayai/`:
 
 ```
 <<<<<<< HEAD
@@ -80,8 +80,8 @@ Upstream changes
 
 ```bash
 # Accept upstream version
-git checkout --theirs .claude/skills/wayai-settings/
-git add .claude/skills/wayai-settings/
+git checkout --theirs .claude/skills/wayai/
+git add .claude/skills/wayai/
 git commit -m "Sync skill from upstream"
 ```
 

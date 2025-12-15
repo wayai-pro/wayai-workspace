@@ -1,5 +1,5 @@
 ---
-name: wayai-settings
+name: wayai
 description: |
   Configure WayAI hubs, agents, and tools via MCP. WayAI is a SaaS platform for
   AI-powered omnichannel communication hubs that integrate AI agents with human
@@ -16,7 +16,7 @@ description: |
 
 <!-- v3.2.0 -->
 
-# WayAI Settings Skill
+# WayAI Skill
 
 ## Agent Guidelines
 
