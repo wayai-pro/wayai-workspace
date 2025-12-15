@@ -79,7 +79,11 @@ AFTER changes:
 | Resource | Description |
 |----------|-------------|
 | `templates://index` | List all available hub templates |
-| `templates://{lang}/{type}/{category}/{variant}/{file}` | Read specific template file |
+
+**Template Tool:**
+| Tool | Description |
+|------|-------------|
+| `get_template(path)` | Fetch a specific template file content |
 
 See [references/mcp-operations.md](references/mcp-operations.md) for detailed usage.
 
@@ -100,10 +104,8 @@ See [workflows/visual-feedback.md](workflows/visual-feedback.md) for patterns.
 
 ## Using Templates
 
-Templates are available via MCP resources:
-
 1. **List templates:** Read `templates://index` resource
-2. **Get template:** Read `templates://{lang}/{type}/{category}/{variant}/{file}`
+2. **Get template:** Use `get_template(path)` tool
 
 ```
 User: "Preciso de um hub para pizzaria"
@@ -111,16 +113,15 @@ User: "Preciso de um hub para pizzaria"
 Claude:
 1. Read resource: templates://index → list available templates
 2. Find matching template (pt/vertical/pizzaria/pedidos)
-3. Read resource: templates://pt/vertical/pizzaria/pedidos/hub.md
-4. Read resource: templates://pt/vertical/pizzaria/pedidos/atendente.md
+3. get_template("pt/vertical/pizzaria/pedidos/hub.md")
+4. get_template("pt/vertical/pizzaria/pedidos/atendente.md")
 5. Customize placeholders ({NOME_EMPRESA}, etc.)
 6. Create hub and agent via MCP tools
 ```
 
-**Example URIs:**
-- `templates://index` - Template catalog
-- `templates://pt/horizontal/sdr/simples/hub.md` - SDR hub config
-- `templates://pt/vertical/odonto/agendamento/recepcionista.md` - Dental receptionist agent
+**Example paths for get_template:**
+- `pt/horizontal/sdr/simples/hub.md` - SDR hub config
+- `pt/vertical/odonto/agendamento/recepcionista.md` - Dental receptionist agent
 
 ## Reference Documentation
 

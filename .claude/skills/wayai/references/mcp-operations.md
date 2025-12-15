@@ -25,6 +25,16 @@ export_skill()
 ```
 Returns: download URL for skill files
 
+### get_template
+Fetch a specific template file content. First read `templates://index` resource to see available templates.
+```
+get_template(path)
+```
+Parameters:
+- `path` (required): Template file path, e.g., "pt/vertical/pizzaria/pedidos/hub.md"
+
+Returns: Template file content (Markdown)
+
 ---
 
 ## Organization Operations
