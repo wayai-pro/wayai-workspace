@@ -18,12 +18,6 @@ description: |
 
 1. **WayAI MCP Server** - Use for ALL settings operations (CRUD on hubs, agents, tools, connections)
 2. **UI (platform.wayai.pro)** - Use when MCP doesn't support the operation (OAuth, delete hub, user management)
-3. **Playwright MCP** - Use ONLY for:
-   - Visual feedback after MCP operations (OPTIONAL - ask user first)
-   - Guiding users through UI-only operations
-
-**Important:** Always ask the user before using Playwright for visual feedback:
-> "Would you like me to show you the result in the browser?"
 
 ## Quick Decision: MCP or UI?
 
@@ -87,21 +81,6 @@ AFTER changes:
 
 See [references/mcp-operations.md](references/mcp-operations.md) for detailed usage.
 
-## Visual Feedback (Optional)
-
-After completing MCP operations, **ask the user** if they want visual confirmation:
-
-> "The agent was created successfully. Would you like me to show you the result in the browser?"
-
-If user says yes:
-1. Use Playwright to navigate to platform.wayai.pro
-2. Navigate to the relevant section
-3. Show the result on screen
-
-**Setup:** `claude mcp add playwright npx @playwright/mcp@latest`
-
-See [workflows/visual-feedback.md](workflows/visual-feedback.md) for patterns.
-
 ## Using Templates
 
 1. **List templates:** Read `templates://index` resource
@@ -128,7 +107,6 @@ Claude:
 | Reference | When to Read |
 |-----------|--------------|
 | [platform-overview.md](references/platform-overview.md) | Understanding WayAI concepts, entity types, AI modes |
-| [ui-navigation.md](references/ui-navigation.md) | Navigating the app with Playwright, app structure |
 | [mcp-operations.md](references/mcp-operations.md) | MCP tool details, parameters, examples |
 | [markdown-format.md](references/markdown-format.md) | File format conventions, export/import workflows |
 
@@ -136,7 +114,6 @@ Claude:
 
 | Workflow | When to Use |
 |----------|-------------|
-| [visual-feedback.md](workflows/visual-feedback.md) | Showing users results after MCP operations |
 | [syncing.md](workflows/syncing.md) | Git sync with upstream template repository |
 
 ## Syncing Updates
