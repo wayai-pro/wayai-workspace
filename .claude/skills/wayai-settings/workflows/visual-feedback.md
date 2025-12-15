@@ -5,7 +5,33 @@
 Use **Playwright MCP** to provide visual confirmation after MCP operations. This hybrid approach combines:
 
 - **WayAI MCP** → Fast, reliable CRUD operations (~200ms)
-- **Playwright MCP** → Navigate to show users the result
+- **Playwright MCP** → Navigate to show users the result (OPTIONAL)
+
+**Important:** Visual feedback is optional. Always ask the user first before using Playwright.
+
+## Ask Before Visual Feedback
+
+Visual feedback is optional. Always ask the user first:
+
+### Pattern: Ask After Operation
+
+```
+User: "Create a support agent"
+
+Claude:
+1. create_agent(hub_id, ...) via WayAI MCP
+2. "Done! Support Agent created successfully.
+   Would you like me to show you the result in the browser?"
+
+If user says yes → proceed with visual feedback
+If user says no → done, no Playwright needed
+```
+
+### When to Skip Asking
+
+- User already said "and show me the result"
+- User explicitly requested visual confirmation
+- Bulk operations (10+ items) - default to no visual feedback
 
 ## Setup Requirement
 
@@ -17,7 +43,19 @@ claude mcp add playwright npx @playwright/mcp@latest
 
 No API keys required. Runs locally on user's machine.
 
-## When to Use Visual Feedback
+## When Visual Feedback Makes Sense
+
+Only offer visual feedback when it adds value:
+
+| Scenario | Offer Visual Feedback? |
+|----------|------------------------|
+| Single operation (create agent) | Yes, ask user |
+| Multiple operations (3+ agents) | Usually no, too slow |
+| User explicitly requested | Yes, no need to ask |
+| CI/CD or automation | No |
+| User said "don't show me" | No |
+
+### Navigation Targets by Operation
 
 | After this MCP operation... | Navigate to show... |
 |-----------------------------|---------------------|
@@ -40,7 +78,7 @@ create_agent(hub_id, "Support Agent", agent_role="Pilot", ...)
 ### Step 2: Navigate for Visual Confirmation
 
 ```
-browser_navigate("https://wayai.pro")
+browser_navigate("https://platform.wayai.pro")
 browser_snapshot()
 → Find and click through: Organization → Project → Hub → Tab
 → User sees the result on screen
@@ -90,7 +128,7 @@ Claude:
 
 3. "Let me show you the new agent in the platform..."
 
-4. browser_navigate("https://wayai.pro")
+4. browser_navigate("https://platform.wayai.pro")
 5. browser_snapshot()
 6. browser_click(settings_icon_ref)
 7. browser_snapshot()
@@ -116,7 +154,7 @@ Claude:
 
 2. "I'll show you the tool in the agent's configuration..."
 
-3. browser_navigate("https://wayai.pro")
+3. browser_navigate("https://platform.wayai.pro")
 4. [navigate to hub → Agents tab → click agent]
 5. browser_snapshot()
    → User sees "web_search" in agent's tools list
@@ -133,7 +171,7 @@ Claude:
 
 2. "Let me show you the updated settings..."
 
-3. browser_navigate("https://wayai.pro")
+3. browser_navigate("https://platform.wayai.pro")
 4. [navigate to hub → Overview tab]
 5. browser_snapshot()
    → User sees AI Mode: "Pilot" in Overview
@@ -190,7 +228,7 @@ browser_snapshot() → now shows authenticated view
 
 ### Session Already Active
 
-If user is already logged into wayai.pro in their browser, Playwright will use that session.
+If user is already logged into platform.wayai.pro in their browser, Playwright will use that session.
 
 ## Best Practices
 
@@ -237,6 +275,6 @@ browser_click(new_ref)
 If browser ends up on wrong page:
 
 ```
-browser_navigate("https://wayai.pro")
+browser_navigate("https://platform.wayai.pro")
 → Start navigation from beginning
 ```
