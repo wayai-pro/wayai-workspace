@@ -1,17 +1,8 @@
 ---
 name: wayai
 description: |
-  Configure WayAI hubs, agents, and tools via MCP. WayAI is a SaaS platform for
-  AI-powered omnichannel communication hubs that integrate AI agents with human
-  teams across WhatsApp, Email, Instagram, and native App channels.
-
-  Use this skill when:
-  - Learning about WayAI platform concepts (hubs, agents, tools, connections)
-  - Managing hub configurations via MCP tools (create, update, delete agents/tools)
-  - Navigating the WayAI web app (platform.wayai.pro) structure
-  - Using Playwright MCP to provide visual feedback after operations
-  - Syncing local markdown files with the WayAI database
-  - Using templates to create pre-configured hubs for common use cases
+  Configure WayAI hubs (AI omnichannel workspaces), agents, and tools via MCP.
+  Build AI assistants and chatbots for customer support across WhatsApp, Instagram, and App.
 ---
 
 <!-- v3.2.0 -->
