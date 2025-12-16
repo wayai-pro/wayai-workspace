@@ -1,8 +1,7 @@
 ---
 name: wayai
 description: |
-  Configure WayAI hubs (AI omnichannel workspaces), agents, and tools via MCP.
-  Build AI assistants and chatbots for customer support across WhatsApp, Instagram, and App.
+  Configure WayAI hubs (Conversations Central for AI-human collaboration across WhatsApp, Instagram, WayAI App, and more), agents, and tools via MCP.
 ---
 
 <!-- v3.2.0 -->
