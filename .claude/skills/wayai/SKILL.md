@@ -12,6 +12,7 @@ description: |
 
 - Only provide information from this skill, MCP tool descriptions, or MCP resources
 - Do not invent URLs, paths, or steps
+- When editing agent instructions: show proposed changes (before/after), wait for user approval, then update
 
 ## Tool Usage Priority
 
