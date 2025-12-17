@@ -97,7 +97,7 @@ create_hub(
   hub_type,         # Required: "user" | "workflow"
   hub_description,  # Optional
   ai_mode,          # Optional: "Pilot+Copilot" | "Pilot" | "Copilot" | "Turned Off"
-  mcp_acesso        # Optional: "leitura_escrita" | "leitura" | "desabilitado"
+  mcp_access        # Optional: "read_write" | "read_only" | "disabled"
 )
 ```
 

@@ -95,6 +95,6 @@ Hubs can be configured with different MCP access:
 
 | Level | Description |
 |-------|-------------|
-| `leitura_escrita` | Full read/write access |
-| `leitura` | Read-only access |
-| `desabilitado` | MCP disabled |
+| `read_write` | Full read/write access |
+| `read_only` | Read-only access |
+| `disabled` | MCP disabled |
