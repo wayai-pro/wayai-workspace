@@ -29,11 +29,16 @@ export_workspace()
 Returns: download URL (expires in 5 minutes)
 
 ### export_skill
-Export Claude Code skill files from official template.
+Export/update Claude Code skill files. Use this to install or update the WayAI skill.
 ```
 export_skill()
 ```
-Returns: download URL for skill files
+Returns: download URL for skill zip (expires in 5 minutes)
+
+**To install/update:**
+1. Call `export_skill()` to get download URL
+2. Download and extract: `curl -L "<url>" -o skill.zip && unzip -o skill.zip -d ~/.claude/skills/`
+3. Start a new conversation to load the updated skill
 
 ### get_template
 Fetch a specific template file content. First read `templates://index` resource to see available templates.

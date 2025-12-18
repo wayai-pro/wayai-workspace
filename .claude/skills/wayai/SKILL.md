@@ -125,4 +125,3 @@ Claude:
 | [user-tools.md](references/user-tools.md) | Creating custom API tools with placeholders |
 | [templates.md](references/templates.md) | Template format, placeholders, available templates |
 | [markdown-format.md](references/markdown-format.md) | File format conventions, export/import workflows |
-| [syncing.md](references/syncing.md) | Git sync with upstream template repository |
