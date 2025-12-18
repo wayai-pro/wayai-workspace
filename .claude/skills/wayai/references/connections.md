@@ -43,8 +43,8 @@ LLM providers for AI functionality. **At least one Agent connection required bef
 **Prerequisites:** OpenAI API key from [platform.openai.com](https://platform.openai.com)
 
 **Setup:**
-1. Settings → Organizations → Project → Hub → Connections → Add
-2. Select **OpenAI**
+1. Settings → Organizations → Project → Hub → Connections
+2. In the **Agent** group, click the **OpenAI** card
 3. Fill the form:
    - **Connection Name** (required): A name to identify this connection
    - **API Key** (required): Your OpenAI API key
@@ -55,8 +55,8 @@ LLM providers for AI functionality. **At least one Agent connection required bef
 **Prerequisites:** OpenRouter API key from [openrouter.ai](https://openrouter.ai)
 
 **Setup:**
-1. Settings → Organizations → Project → Hub → Connections → Add
-2. Select **OpenRouter**
+1. Settings → Organizations → Project → Hub → Connections
+2. In the **Agent** group, click the **OpenRouter** card
 3. Fill the form:
    - **Connection Name** (required): A name to identify this connection
    - **API Key** (required): Your OpenRouter API key
@@ -83,8 +83,8 @@ Messaging channels for customer communication.
 - WhatsApp Business phone number
 
 **Setup:**
-1. Settings → Organizations → Project → Hub → Connections → Add
-2. Select **WhatsApp**
+1. Settings → Organizations → Project → Hub → Connections
+2. In the **Channel** group, click the **WhatsApp** card
 3. Click "Connect with Meta"
 4. Complete Meta embedded signup flow:
    - Log in to your Meta Business account
@@ -102,8 +102,8 @@ Messaging channels for customer communication.
 - Meta Business account
 
 **Setup:**
-1. Settings → Organizations → Project → Hub → Connections → Add
-2. Select **Instagram**
+1. Settings → Organizations → Project → Hub → Connections
+2. In the **Channel** group, click the **Instagram** card
 3. Click "Connect with Meta"
 4. Authorize Instagram messaging permissions
 5. Select Instagram account
@@ -136,8 +136,8 @@ See [native-tools.md](native-tools.md) for available tools and their parameters.
 **Prerequisites:** Google account with Calendar access
 
 **Setup:**
-1. Settings → Organizations → Project → Hub → Connections → Add
-2. Select **Google Calendar**
+1. Settings → Organizations → Project → Hub → Connections
+2. In the **Tool - Native** group, click the **Google Calendar** card
 3. Click "Connect with Google"
 4. Authorize calendar access
 5. Connection created automatically
@@ -149,8 +149,8 @@ See [native-tools.md](native-tools.md) for available tools and their parameters.
 **Prerequisites:** Google account with Drive access
 
 **Setup:**
-1. Settings → Organizations → Project → Hub → Connections → Add
-2. Select **Google Drive**
+1. Settings → Organizations → Project → Hub → Connections
+2. In the **Tool - Native** group, click the **Google Drive** card
 3. Click "Connect with Google"
 4. Authorize Drive access
 5. Connection created automatically
@@ -162,8 +162,8 @@ See [native-tools.md](native-tools.md) for available tools and their parameters.
 **Prerequisites:** Google account with YouTube access
 
 **Setup:**
-1. Settings → Organizations → Project → Hub → Connections → Add
-2. Select **YouTube**
+1. Settings → Organizations → Project → Hub → Connections
+2. In the **Tool - Native** group, click the **YouTube** card
 3. Click "Connect with Google"
 4. Authorize YouTube access
 5. Connection created automatically
@@ -191,8 +191,8 @@ Internal knowledge base tools. **Auto-enabled for all hubs.**
 Connect to external storage services.
 
 **Setup:**
-1. Settings → Organizations → Project → Hub → Connections → Add
-2. Select **Wayai External Storage**
+1. Settings → Organizations → Project → Hub → Connections
+2. In the **Tool - Native** group, click the **Wayai External Storage** card
 3. Fill the form:
    - **Connection Name** (required): A name to identify this connection
    - **Storage API URL** (required): External storage service API endpoint (e.g., `https://storage.example.com/api`)
@@ -221,8 +221,8 @@ See [user-tools.md](user-tools.md) for how to create custom tools.
 Connect to any REST API using API key authentication.
 
 **Setup:**
-1. Settings → Organizations → Project → Hub → Connections → Add
-2. Select **User Tool - API Key**
+1. Settings → Organizations → Project → Hub → Connections
+2. In the **Tool - User** group, click the **User Tool - API Key** card
 3. Fill the form:
    - **Connection Name** (required): A name to identify this connection
    - **Base URL** (optional): Base URL for the API (e.g., `https://api.example.com`)
@@ -238,8 +238,8 @@ Connect to any REST API using API key authentication.
 Connect to APIs using Basic Authentication.
 
 **Setup:**
-1. Settings → Organizations → Project → Hub → Connections → Add
-2. Select **User Tool - Basic**
+1. Settings → Organizations → Project → Hub → Connections
+2. In the **Tool - User** group, click the **User Tool - Basic** card
 3. Fill the form:
    - **Connection Name** (required): A name to identify this connection
    - **Base URL** (optional): Base URL for the API
@@ -268,8 +268,8 @@ Connect to MCP servers using bearer token or no authentication.
 **Prerequisites:** MCP server URL (Streamable HTTP endpoint)
 
 **Setup:**
-1. Settings → Organizations → Project → Hub → Connections → Add
-2. Select **MCP Server - Token**
+1. Settings → Organizations → Project → Hub → Connections
+2. In the **MCP - External** group, click the **MCP Server - Token** card
 3. Fill the form:
    - **Connection Name** (required): A friendly name for this MCP connection
    - **MCP Server URL** (required): The Streamable HTTP endpoint (e.g., `https://mcp.example.com/mcp`)
@@ -286,8 +286,8 @@ Connect to MCP servers with OAuth 2.0 support (RFC 9728).
 **Prerequisites:** MCP server with OAuth 2.0 Protected Resource Metadata
 
 **Setup:**
-1. Settings → Organizations → Project → Hub → Connections → Add
-2. Select **MCP Server - OAuth**
+1. Settings → Organizations → Project → Hub → Connections
+2. In the **MCP - External** group, click the **MCP Server - OAuth** card
 3. Fill the form:
    - **Connection Name** (required): A friendly name for this MCP connection
    - **MCP Server URL** (required): Base URL of the MCP server
@@ -317,8 +317,8 @@ Speech-to-text and text-to-speech services for voice message processing.
 **Prerequisites:** Groq API key from [console.groq.com](https://console.groq.com)
 
 **Setup:**
-1. Settings → Organizations → Project → Hub → Connections → Add
-2. Select **Groq STT**
+1. Settings → Organizations → Project → Hub → Connections
+2. In the **STT & TTS** group, click the **Groq STT** card
 3. Fill the form:
    - **Connection Name** (required): A name to identify this connection
    - **API Key** (required): Your Groq API key
@@ -331,8 +331,8 @@ Speech-to-text and text-to-speech services for voice message processing.
 **Prerequisites:** OpenAI API key
 
 **Setup:**
-1. Settings → Organizations → Project → Hub → Connections → Add
-2. Select **OpenAI STT**
+1. Settings → Organizations → Project → Hub → Connections
+2. In the **STT & TTS** group, click the **OpenAI STT** card
 3. Fill the form:
    - **Connection Name** (required): A name to identify this connection
    - **API Key** (required): Your OpenAI API key
@@ -345,8 +345,8 @@ Speech-to-text and text-to-speech services for voice message processing.
 **Prerequisites:** OpenAI API key
 
 **Setup:**
-1. Settings → Organizations → Project → Hub → Connections → Add
-2. Select **OpenAI TTS**
+1. Settings → Organizations → Project → Hub → Connections
+2. In the **STT & TTS** group, click the **OpenAI TTS** card
 3. Fill the form:
    - **Connection Name** (required): A name to identify this connection
    - **API Key** (required): Your OpenAI API key
@@ -359,8 +359,8 @@ Speech-to-text and text-to-speech services for voice message processing.
 **Prerequisites:** ElevenLabs API key from [elevenlabs.io](https://elevenlabs.io)
 
 **Setup:**
-1. Settings → Organizations → Project → Hub → Connections → Add
-2. Select **ElevenLabs TTS**
+1. Settings → Organizations → Project → Hub → Connections
+2. In the **STT & TTS** group, click the **ElevenLabs TTS** card
 3. Fill the form:
    - **Connection Name** (required): A name to identify this connection
    - **API Key** (required): Your ElevenLabs API key
