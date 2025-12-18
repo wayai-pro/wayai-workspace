@@ -1,5 +1,15 @@
 # Syncing
 
+## Table of Contents
+- [What Syncs From Upstream](#what-syncs-from-upstream)
+- [What Stays Local](#what-stays-local)
+- [First-Time Setup](#first-time-setup)
+- [Syncing Updates](#syncing-updates)
+- [Handling Conflicts](#handling-conflicts)
+- [Sync Schedule](#sync-schedule)
+- [Checking for Updates](#checking-for-updates)
+- [Version Tracking](#version-tracking)
+
 ## Overview
 
 This repository is forked from `wayai-resources/wayai-settings-template`. Sync to get the latest skill updates and official templates.

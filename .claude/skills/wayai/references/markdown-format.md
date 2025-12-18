@@ -2,6 +2,16 @@
 
 Conventions for exporting WayAI configurations to Markdown files.
 
+## Table of Contents
+- [Directory Structure](#directory-structure)
+- [Slugification Rules](#slugification-rules)
+- [System Fields](#system-fields)
+- [Hub File Template](#hub-file-template-hubmd)
+- [Agent File Template](#agent-file-template-agent-slugmd)
+- [Custom Tool Definition](#custom-tool-definition)
+- [Export Workflow](#export-workflow)
+- [Import Workflow](#import-workflow)
+
 ## Directory Structure
 
 ```

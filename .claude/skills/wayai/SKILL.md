@@ -1,12 +1,24 @@
 ---
 name: wayai
 description: |
-  Configure WayAI hubs (Conversations Central for AI-human collaboration across WhatsApp, Instagram, WayAI App, and more), agents, and tools via MCP.
+  Configure WayAI hubs, agents, and tools via MCP. Use when: (1) Creating or configuring WayAI hubs,
+  (2) Managing AI agents and their tools, (3) Working with MCP operations for WayAI platform,
+  (4) Syncing workspace settings with Git, (5) Using hub templates for new deployments.
 ---
 
 <!-- v3.2.0 -->
 
 # WayAI Skill
+
+## Table of Contents
+- [Agent Guidelines](#agent-guidelines)
+- [Tool Usage Priority](#tool-usage-priority)
+- [Quick Decision: MCP or UI?](#quick-decision-mcp-or-ui)
+- [Entity Hierarchy](#entity-hierarchy)
+- [Core Workflow](#core-workflow)
+- [MCP Tools Quick Reference](#mcp-tools-quick-reference)
+- [Using Templates](#using-templates)
+- [Reference Documentation](#reference-documentation)
 
 ## Agent Guidelines
 
@@ -108,22 +120,9 @@ Claude:
 |-----------|--------------|
 | [platform-overview.md](references/platform-overview.md) | Understanding WayAI concepts, entity types, AI modes |
 | [mcp-operations.md](references/mcp-operations.md) | MCP tool details, parameters, examples |
+| [connections.md](references/connections.md) | Setting up hub connections (OAuth, API keys, channels) |
+| [native-tools.md](references/native-tools.md) | Native tool parameters and usage by connector |
+| [user-tools.md](references/user-tools.md) | Creating custom API tools with placeholders |
+| [templates.md](references/templates.md) | Template format, placeholders, available templates |
 | [markdown-format.md](references/markdown-format.md) | File format conventions, export/import workflows |
-
-## Workflow Guides
-
-| Workflow | When to Use |
-|----------|-------------|
-| [syncing.md](workflows/syncing.md) | Git sync with upstream template repository |
-
-## Syncing Updates
-
-```bash
-# First-time: add upstream
-git remote add upstream https://github.com/wayai-resources/wayai-settings-template.git
-
-# Sync skill & templates
-git fetch upstream && git merge upstream/main --no-edit
-```
-
-See [workflows/syncing.md](workflows/syncing.md) for conflict resolution.
+| [syncing.md](references/syncing.md) | Git sync with upstream template repository |

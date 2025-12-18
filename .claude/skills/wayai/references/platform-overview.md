@@ -1,19 +1,17 @@
 # WayAI Platform Overview
 
+## Table of Contents
+- [What is WayAI](#what-is-wayai)
+- [Hub Types](#hub-types)
+- [AI Modes](#ai-modes)
+- [Agent Roles](#agent-roles)
+- [Connection Types](#connection-types)
+- [Tool Types](#tool-types)
+- [MCP Access Levels](#mcp-access-levels)
+
 ## What is WayAI
 
 WayAI is a SaaS platform for AI-powered omnichannel communication hubs. It integrates AI agents with human teams to handle customer interactions across WhatsApp, Email, Instagram, and native App channels.
-
-## Entity Hierarchy
-
-```
-Organization          # Company/team container (billing, users)
-└── Project           # Logical grouping of hubs
-    └── Hub           # Omnichannel conversation space
-        ├── Connections   # Channels and API integrations
-        └── Agents        # AI personalities
-            └── Tools     # Agent capabilities
-```
 
 ## Hub Types
 
@@ -51,25 +49,16 @@ Organization          # Company/team container (billing, users)
 
 ## Connection Types
 
-### Agent Connections (Required for AI)
-| Type | Description |
-|------|-------------|
-| OpenAI | GPT models (gpt-4o, gpt-4o-mini) |
-| OpenRouter | Multi-provider access (Anthropic, Google, Meta) |
+Connections enable hub functionality. Created via UI (platform.wayai.pro → Hub → Settings → Connections).
 
-### Channel Connections (For messaging)
-| Type | Description |
-|------|-------------|
-| WhatsApp Business | Send/receive WhatsApp messages |
-| Instagram | Instagram DMs |
-| Gmail | Send emails |
+| Category | Examples |
+|----------|----------|
+| **Agent** | OpenAI, OpenRouter (required for AI) |
+| **Channel** | WhatsApp, Instagram, Gmail |
+| **Tool** | Webhook, Google Calendar, MCP Server |
+| **Speech** | Groq STT, OpenAI TTS, ElevenLabs |
 
-### Tool Connections (For integrations)
-| Type | Description |
-|------|-------------|
-| Webhook | Custom REST API integration |
-| MCP Server | External MCP tool server |
-| Google Calendar | Calendar access |
+See [connections.md](connections.md) for setup instructions.
 
 ## Tool Types
 

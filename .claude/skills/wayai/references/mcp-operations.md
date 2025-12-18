@@ -2,6 +2,16 @@
 
 Complete reference for WayAI MCP tools organized by entity type.
 
+## Table of Contents
+- [Workspace Operations](#workspace-operations)
+- [Organization Operations](#organization-operations)
+- [Project Operations](#project-operations)
+- [Hub Operations](#hub-operations)
+- [Agent Operations](#agent-operations)
+- [Tool Operations](#tool-operations)
+- [Connection Operations](#connection-operations)
+- [Quick Reference Table](#quick-reference-table)
+
 ## Workspace Operations
 
 ### get_workspace
