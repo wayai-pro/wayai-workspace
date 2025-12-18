@@ -78,19 +78,56 @@ Messaging channels for customer communication.
 ### WhatsApp
 
 **Prerequisites:**
-- Meta Business account
-- Verified business
-- WhatsApp Business phone number
+- Meta Business account (or create one during signup)
+- Phone number for WhatsApp Business (can be new or existing)
 
 **Setup:**
 1. Settings → Organizations → Project → Hub → Connections
 2. In the **Channel** group, click the **WhatsApp** card
-3. Click "Connect with Meta"
-4. Complete Meta embedded signup flow:
-   - Log in to your Meta Business account
-   - Select or create a WhatsApp Business account
-   - Select phone number and permissions
-5. Connection created automatically
+3. Click "Connect with Meta" → Meta embedded signup opens
+
+**Step 1 - Welcome Screen:**
+- Review the connection benefits (Cloud API for messaging at scale)
+- Click **Continue**
+
+**Step 2 - Select Business Portfolio:**
+- Choose an existing Business portfolio from the dropdown, or
+- Click **Create a Business portfolio** if you don't have one
+- Click **Next**
+
+**Step 3 - Select WhatsApp Business Account:**
+- Choose an existing WhatsApp Business account, or
+- Click **Create a WhatsApp Business account** to create new, or
+- Click **Connect a WhatsApp Business App** to migrate existing app
+- Click **Next**
+
+**Step 4 - Select Facebook Page:**
+- Choose an existing Facebook Page from your portfolio, or
+- Click **Create a Facebook Page** to create new
+- Click **Next**
+
+**Step 5 - Select Pixel (optional):**
+- Choose an existing Meta Pixel or create new
+- Select an Ad Account for conversion tracking
+- Click **Next**
+
+**Step 6 - Add WhatsApp Phone Number:**
+- **Use a display name only**: Send messages showing only your business name
+- **Use a new or existing WhatsApp number**: Register a phone number (verification required)
+- **Add a phone number later**: Skip and configure in Meta Business Settings
+- If adding a number: enter phone number and choose verification method (Text message or Phone call)
+- Click **Next**
+
+**Step 7 - Review Permissions:**
+- Review what WayAI will access (WhatsApp Business account, Ad account, Facebook page, Dataset)
+- Click **Confirm**
+
+**Step 8 - Complete:**
+- "Your account is connected to Wayai" confirmation appears
+- Optionally click **Add payment method** for WhatsApp conversations billing
+- Click **Finish**
+
+**After Setup:** Connection created automatically in WayAI. WhatsApp compliance review may take up to 24 hours.
 
 **Features:** Automatic token refresh (7 days), CTWA + Conversions API.
 
