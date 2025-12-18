@@ -127,7 +127,7 @@ Messaging channels for customer communication.
 - Optionally click **Add payment method** for WhatsApp conversations billing
 - Click **Finish**
 
-**After Setup:** Connection created automatically in WayAI. WhatsApp compliance review may take up to 24 hours.
+**After Setup:** Connection created automatically in WayAI.
 
 **Features:** Automatic token refresh (7 days), CTWA + Conversions API.
 
