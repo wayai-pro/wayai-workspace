@@ -1,6 +1,6 @@
 # Connections
 
-Setup guide for WayAI hub connections. Created via **UI** at platform.wayai.pro → Hub → Settings → Connections.
+Setup guide for WayAI hub connections. Created via **UI** at platform.wayai.pro → Settings → Organizations → Project → Hub → Connections.
 
 ## Table of Contents
 - [Connector Types](#connector-types)
@@ -43,27 +43,24 @@ LLM providers for AI functionality. **At least one Agent connection required bef
 **Prerequisites:** OpenAI API key from [platform.openai.com](https://platform.openai.com)
 
 **Setup:**
-1. Hub → Settings → Connections → Add Connection
+1. Settings → Organizations → Project → Hub → Connections → Add
 2. Select **OpenAI**
-3. Enter connection name and API key
-4. Configure default model
-
-**Settings:**
-- `model` - gpt-4o, gpt-4o-mini, o1, o1-mini, etc.
-- `temperature` - Creativity (0-2, default 0.7)
-- `max_tokens` - Response limit (default 4096)
+3. Fill the form:
+   - **Connection Name** (required): A name to identify this connection
+   - **API Key** (required): Your OpenAI API key
+4. Click Save
 
 ### OpenRouter
 
 **Prerequisites:** OpenRouter API key from [openrouter.ai](https://openrouter.ai)
 
 **Setup:**
-1. Hub → Settings → Connections → Add Connection
+1. Settings → Organizations → Project → Hub → Connections → Add
 2. Select **OpenRouter**
-3. Enter connection name and API key
-4. Select default model
-
-**Available models:** GPT, Claude, Gemini, Grok, Llama via single API.
+3. Fill the form:
+   - **Connection Name** (required): A name to identify this connection
+   - **API Key** (required): Your OpenRouter API key
+4. Click Save
 
 ---
 
@@ -75,11 +72,10 @@ Messaging channels for customer communication.
 
 | Connector | Auth | Status |
 |-----------|------|--------|
-| WhatsApp (OAuth) | OAuth | ✅ Available |
-| WhatsApp (Token) | API Key | ⚠️ Disabled |
+| WhatsApp | OAuth | ✅ Available |
 | Instagram | OAuth | ✅ Available |
 
-### WhatsApp (OAuth) ✅
+### WhatsApp
 
 **Prerequisites:**
 - Meta Business account
@@ -87,17 +83,16 @@ Messaging channels for customer communication.
 - WhatsApp Business phone number
 
 **Setup:**
-1. Hub → Settings → Connections → Add Connection
+1. Settings → Organizations → Project → Hub → Connections → Add
 2. Select **WhatsApp**
 3. Click "Connect with Meta"
-4. Complete Meta embedded signup flow
-5. Select phone number and permissions
+4. Complete Meta embedded signup flow:
+   - Log in to your Meta Business account
+   - Select or create a WhatsApp Business account
+   - Select phone number and permissions
+5. Connection created automatically
 
 **Features:** Automatic token refresh (7 days), CTWA + Conversions API.
-
-### WhatsApp (Token) ⚠️ Disabled
-
-> This connector is currently disabled. Use OAuth method instead.
 
 ### Instagram
 
@@ -107,11 +102,12 @@ Messaging channels for customer communication.
 - Meta Business account
 
 **Setup:**
-1. Hub → Settings → Connections → Add Connection
+1. Settings → Organizations → Project → Hub → Connections → Add
 2. Select **Instagram**
 3. Click "Connect with Meta"
 4. Authorize Instagram messaging permissions
 5. Select Instagram account
+6. Connection created automatically
 
 **Features:** Instagram DMs, auto-refresh (7 days).
 
@@ -128,6 +124,8 @@ See [native-tools.md](native-tools.md) for available tools and their parameters.
 | Connector | Auth | Status |
 |-----------|------|--------|
 | Google Calendar | OAuth | ✅ Available |
+| Google Drive | OAuth | ✅ Available |
+| YouTube | OAuth | ✅ Available |
 | Wayai Conversation | None | ✅ Auto-enabled |
 | Wayai Meta Tools | None | ✅ Auto-enabled |
 | Wayai Knowledge | None | ✅ Auto-enabled |
@@ -138,12 +136,37 @@ See [native-tools.md](native-tools.md) for available tools and their parameters.
 **Prerequisites:** Google account with Calendar access
 
 **Setup:**
-1. Hub → Settings → Connections → Add Connection
+1. Settings → Organizations → Project → Hub → Connections → Add
 2. Select **Google Calendar**
 3. Click "Connect with Google"
 4. Authorize calendar access
+5. Connection created automatically
 
 **Agent tools:** List events, create events, check availability.
+
+### Google Drive
+
+**Prerequisites:** Google account with Drive access
+
+**Setup:**
+1. Settings → Organizations → Project → Hub → Connections → Add
+2. Select **Google Drive**
+3. Click "Connect with Google"
+4. Authorize Drive access
+5. Connection created automatically
+
+**Agent tools:** List files, read files, search files.
+
+### YouTube
+
+**Prerequisites:** Google account with YouTube access
+
+**Setup:**
+1. Settings → Organizations → Project → Hub → Connections → Add
+2. Select **YouTube**
+3. Click "Connect with Google"
+4. Authorize YouTube access
+5. Connection created automatically
 
 ### Wayai Conversation
 
@@ -168,12 +191,13 @@ Internal knowledge base tools. **Auto-enabled for all hubs.**
 Connect to external storage services.
 
 **Setup:**
-1. Hub → Settings → Connections → Add Connection
+1. Settings → Organizations → Project → Hub → Connections → Add
 2. Select **Wayai External Storage**
-3. Enter:
-   - Connection name
-   - Storage API URL
-   - API key
+3. Fill the form:
+   - **Connection Name** (required): A name to identify this connection
+   - **Storage API URL** (required): External storage service API endpoint (e.g., `https://storage.example.com/api`)
+   - **API Key** (required): Your storage service API key
+4. Click Save
 
 **Agent tools:** Store and retrieve files from external storage.
 
@@ -197,14 +221,15 @@ See [user-tools.md](user-tools.md) for how to create custom tools.
 Connect to any REST API using API key authentication.
 
 **Setup:**
-1. Hub → Settings → Connections → Add Connection
+1. Settings → Organizations → Project → Hub → Connections → Add
 2. Select **User Tool - API Key**
-3. Enter:
-   - Connection name
-   - Base URL (e.g., `https://api.example.com`)
-   - API key
-   - Access token (optional, for APIs requiring two credentials)
-   - Custom headers (optional)
+3. Fill the form:
+   - **Connection Name** (required): A name to identify this connection
+   - **Base URL** (optional): Base URL for the API (e.g., `https://api.example.com`)
+   - **API Key** (required): Your API key
+   - **Access Token** (optional): Secondary credential if your API requires two
+   - **Custom Headers** (optional): Additional headers to include in all requests
+4. Click Save
 
 **Usage:** After creating the connection, add custom tools to agents that call your API endpoints.
 
@@ -213,14 +238,15 @@ Connect to any REST API using API key authentication.
 Connect to APIs using Basic Authentication.
 
 **Setup:**
-1. Hub → Settings → Connections → Add Connection
+1. Settings → Organizations → Project → Hub → Connections → Add
 2. Select **User Tool - Basic**
-3. Enter:
-   - Connection name
-   - Base URL
-   - Username
-   - Password
-   - Custom headers (optional)
+3. Fill the form:
+   - **Connection Name** (required): A name to identify this connection
+   - **Base URL** (optional): Base URL for the API
+   - **Username** (required): Your username
+   - **Password** (required): Your password
+   - **Custom Headers** (optional): Additional headers to include in all requests
+4. Click Save
 
 ---
 
@@ -237,33 +263,37 @@ Connect external MCP (Model Context Protocol) servers to extend agent capabiliti
 
 ### MCP Server - Token
 
+Connect to MCP servers using bearer token or no authentication.
+
 **Prerequisites:** MCP server URL (Streamable HTTP endpoint)
 
 **Setup:**
-1. Hub → Settings → Connections → Add Connection
+1. Settings → Organizations → Project → Hub → Connections → Add
 2. Select **MCP Server - Token**
-3. Enter:
-   - Connection name
-   - Base URL (MCP server endpoint)
-   - Bearer token (optional, leave empty for no auth)
-   - Custom headers (optional)
-4. Save → Tools auto-discovered
+3. Fill the form:
+   - **Connection Name** (required): A friendly name for this MCP connection
+   - **MCP Server URL** (required): The Streamable HTTP endpoint (e.g., `https://mcp.example.com/mcp`)
+   - **Bearer Token** (optional): Leave empty if the server doesn't require auth
+   - **Custom Headers** (optional): Additional headers for MCP requests
+4. Click Save → Tools auto-discovered
 
 **After setup:** Use `sync_mcp_connection()` to refresh available tools.
 
 ### MCP Server - OAuth
 
-**Prerequisites:** MCP server with OAuth 2.0 support (RFC 9728)
+Connect to MCP servers with OAuth 2.0 support (RFC 9728).
+
+**Prerequisites:** MCP server with OAuth 2.0 Protected Resource Metadata
 
 **Setup:**
-1. Hub → Settings → Connections → Add Connection
+1. Settings → Organizations → Project → Hub → Connections → Add
 2. Select **MCP Server - OAuth**
-3. Enter:
-   - Connection name
-   - Base URL
-   - Client ID (optional, for pre-registered clients)
-   - Client Secret (optional)
-4. Complete OAuth authorization flow
+3. Fill the form:
+   - **Connection Name** (required): A friendly name for this MCP connection
+   - **MCP Server URL** (required): Base URL of the MCP server
+   - **OAuth Client ID** (optional): Only if the server has pre-registered clients
+   - **OAuth Client Secret** (optional): Only if required by the server
+4. Click Save → Complete OAuth authorization flow
 
 **Features:** Automatic token refresh (1 hour).
 
@@ -287,22 +317,26 @@ Speech-to-text and text-to-speech services for voice message processing.
 **Prerequisites:** Groq API key from [console.groq.com](https://console.groq.com)
 
 **Setup:**
-1. Hub → Settings → Connections → Add Connection
+1. Settings → Organizations → Project → Hub → Connections → Add
 2. Select **Groq STT**
-3. Enter connection name and API key
-4. Select model (whisper-large-v3 or whisper-large-v3-turbo)
+3. Fill the form:
+   - **Connection Name** (required): A name to identify this connection
+   - **API Key** (required): Your Groq API key
+4. Click Save
 
-**Usage:** Transcribes voice messages to text.
+**Usage:** Transcribes voice messages to text using Whisper models.
 
 ### OpenAI STT
 
 **Prerequisites:** OpenAI API key
 
 **Setup:**
-1. Hub → Settings → Connections → Add Connection
+1. Settings → Organizations → Project → Hub → Connections → Add
 2. Select **OpenAI STT**
-3. Enter connection name and API key
-4. Select model (gpt-4o-transcribe, whisper-1)
+3. Fill the form:
+   - **Connection Name** (required): A name to identify this connection
+   - **API Key** (required): Your OpenAI API key
+4. Click Save
 
 **Usage:** Transcribes voice messages to text.
 
@@ -311,22 +345,26 @@ Speech-to-text and text-to-speech services for voice message processing.
 **Prerequisites:** OpenAI API key
 
 **Setup:**
-1. Hub → Settings → Connections → Add Connection
+1. Settings → Organizations → Project → Hub → Connections → Add
 2. Select **OpenAI TTS**
-3. Enter connection name and API key
-4. Configure voice, model, speed
+3. Fill the form:
+   - **Connection Name** (required): A name to identify this connection
+   - **API Key** (required): Your OpenAI API key
+4. Click Save
 
-**Voices:** alloy, echo, fable, onyx, nova, shimmer
+**Voices available:** alloy, echo, fable, onyx, nova, shimmer
 
 ### ElevenLabs TTS
 
 **Prerequisites:** ElevenLabs API key from [elevenlabs.io](https://elevenlabs.io)
 
 **Setup:**
-1. Hub → Settings → Connections → Add Connection
+1. Settings → Organizations → Project → Hub → Connections → Add
 2. Select **ElevenLabs TTS**
-3. Enter connection name and API key
-4. Configure voice ID, model, stability
+3. Fill the form:
+   - **Connection Name** (required): A name to identify this connection
+   - **API Key** (required): Your ElevenLabs API key
+4. Click Save
 
 **Usage:** High-quality voice synthesis with custom voices.
 
@@ -338,9 +376,11 @@ Speech-to-text and text-to-speech services for voice message processing.
 |-----------|------|------|--------------|
 | OpenAI | Agent | API Key | - |
 | OpenRouter | Agent | API Key | - |
-| WhatsApp OAuth | Channel | OAuth | 7 days |
+| WhatsApp | Channel | OAuth | 7 days |
 | Instagram | Channel | OAuth | 7 days |
 | Google Calendar | Tool - Native | OAuth | 1 hour |
+| Google Drive | Tool - Native | OAuth | 1 hour |
+| YouTube | Tool - Native | OAuth | 1 hour |
 | Wayai Conversation | Tool - Native | None | - |
 | Wayai Meta Tools | Tool - Native | None | - |
 | Wayai Knowledge | Tool - Native | None | - |
