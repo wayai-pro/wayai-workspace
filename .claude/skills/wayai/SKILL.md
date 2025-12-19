@@ -15,6 +15,7 @@ description: |
 - [Tool Usage Priority](#tool-usage-priority)
 - [Quick Decision: MCP or UI?](#quick-decision-mcp-or-ui)
 - [Entity Hierarchy](#entity-hierarchy)
+- [Connection Prerequisites](#️-connection-prerequisites)
 - [Core Workflow](#core-workflow)
 - [MCP Tools Quick Reference](#mcp-tools-quick-reference)
 - [Using Templates](#using-templates)
@@ -54,6 +55,18 @@ Organization          ← UI only
 ```
 
 Setup order: Organization (signup) → Project → Hub → Connections (UI) → Agents → Tools
+
+### ⚠️ Connection Prerequisites
+
+**For creating agents → Agent connection required:**
+- OpenAI or OpenRouter → UI: Settings → Hub → Connections → Agent group
+
+**For enabling/creating tools → Tool connection required:**
+- **Auto-enabled (no connection):** Wayai Conversation, Wayai Meta Tools, Wayai Knowledge
+- **Tool - Native (OAuth):** Google Calendar, Drive, YouTube
+- **Tool - Native (API Key):** Wayai External Storage
+- **Tool - User:** Custom API tools (API Key or Basic Auth)
+- **MCP - External:** MCP Server tools (Token or OAuth)
 
 ## Core Workflow
 
@@ -107,7 +120,10 @@ Claude:
 3. get_template("pt/vertical/pizzaria/pedidos/hub.md")
 4. get_template("pt/vertical/pizzaria/pedidos/atendente.md")
 5. Customize placeholders ({NOME_EMPRESA}, etc.)
-6. Create hub and agent via MCP tools
+6. Create hub via MCP: create_hub(...)
+7. ⚠️ STOP: Direct user to UI to create Agent connection (OpenAI/OpenRouter)
+8. After connection confirmed, create agent via MCP: create_agent(...)
+9. Add tools to agent as needed
 ```
 
 **Example paths for get_template:**

@@ -145,7 +145,14 @@ update_hub(
 
 **MCP capabilities:** Full CRUD
 
-**Prerequisite:** Hub must have an Agent connection (OpenAI or OpenRouter) before creating agents.
+### ⚠️ Prerequisite: Agent Connection Required
+
+Creating agents requires an **Agent connection** (LLM provider):
+- **OpenAI** or **OpenRouter**
+- Created via UI: Settings → Hub → Connections → **Agent** group
+- If missing, `create_agent` will fail
+
+Direct user to create Agent connection first, then proceed with agent creation.
 
 | Operation | MCP |
 |-----------|-----|
@@ -208,6 +215,23 @@ delete_agent(
 ## Tool Operations
 
 **MCP capabilities:** Full CRUD
+
+### ⚠️ Prerequisite: Tool Connections Required
+
+Enabling or creating tools requires a **Tool connection** for the tool's connector:
+
+**Auto-enabled (no connection needed):**
+- Wayai Conversation, Wayai Meta Tools, Wayai Knowledge
+
+**Tool - Native group (via UI):**
+- **Google Calendar, Drive, YouTube** → OAuth
+- **Wayai External Storage** → API Key
+
+**Tool - User group (via UI):**
+- **Custom API tools** → API Key or Basic Auth
+
+**MCP - External group (via UI):**
+- **MCP Server tools** → Token or OAuth
 
 | Operation | MCP |
 |-----------|-----|
