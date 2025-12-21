@@ -110,6 +110,7 @@ Agent instructions in a separate file for easier editing. The agent configuratio
 ```markdown
 ---
 agent_id: {agent_id}
+agent_name: "Support Agent"
 ---
 
 You are a helpful support agent...
