@@ -18,6 +18,7 @@ description: |
 - [Connection Prerequisites](#️-connection-prerequisites)
 - [Core Workflow](#core-workflow)
 - [MCP Tools Quick Reference](#mcp-tools-quick-reference)
+- [Editing Agent Instructions](#editing-agent-instructions)
 - [Using Templates](#using-templates)
 - [Reference Documentation](#reference-documentation)
 
@@ -25,7 +26,7 @@ description: |
 
 - Only provide information from this skill, MCP tool descriptions, or MCP resources
 - Do not invent URLs, paths, or steps
-- When editing agent instructions: show proposed changes (before/after), wait for user approval, then update
+- When editing agent instructions, follow the [Editing Agent Instructions](#editing-agent-instructions) workflow
 
 ## Tool Usage Priority
 
@@ -90,7 +91,7 @@ AFTER changes:
 |----------|-------|
 | **Workspace** | `get_workspace`, `export_workspace`, `export_skill` |
 | **Hub** | `get_hub`, `create_hub`, `update_hub` |
-| **Agent** | `get_agent`, `create_agent`, `update_agent`, `delete_agent` |
+| **Agent** | `get_agent`, `get_agent_instructions`, `create_agent`, `update_agent`, `update_agent_instructions`, `delete_agent` |
 | **Tool** | `get_tool`, `add_native_tool`, `add_mcp_tool`, `add_custom_tool`, `update_custom_tool`, `enable_tool`, `disable_tool`, `remove_tool`, `remove_custom_tool` |
 | **Connection** | `enable_connection`, `disable_connection`, `sync_mcp_connection` |
 
@@ -105,6 +106,46 @@ AFTER changes:
 | `get_template(path)` | Fetch a specific template file content |
 
 See [references/mcp-operations.md](references/mcp-operations.md) for detailed usage.
+
+## Editing Agent Instructions
+
+When working with agent instructions, always follow this workflow to keep files in sync:
+
+```
+1. GET: get_agent_instructions(hub_id, agent_id)
+   → Returns signed URL (valid 1 hour)
+
+2. FETCH: WebFetch the signed URL
+   → Downloads current instructions as markdown
+
+3. EDIT: Write to local file in IDE (e.g., instructions.md)
+   → User reviews and edits in their editor
+
+4. REVIEW: Show proposed changes (before/after)
+   → Wait for user approval before updating
+
+5. UPDATE: update_agent_instructions(hub_id, agent_id, instructions)
+   → Uploads new instructions, syncs to database
+```
+
+**Important:**
+- `get_agent` excludes instructions (use `get_agent_instructions` instead)
+- `update_agent` cannot modify instructions (use `update_agent_instructions` instead)
+- Always fetch current instructions before editing to avoid overwriting changes
+
+**Example:**
+```
+User: "Update the Pilot agent instructions to be more friendly"
+
+Claude:
+1. get_agent_instructions(hub_id, agent_id) → signed_url
+2. WebFetch(signed_url) → current instructions content
+3. Write to local file: /tmp/instructions.md
+4. Show user: "Here are the current instructions. I'll make them more friendly..."
+5. Edit the file with proposed changes
+6. Show diff to user, wait for approval
+7. update_agent_instructions(hub_id, agent_id, new_instructions)
+```
 
 ## Using Templates
 

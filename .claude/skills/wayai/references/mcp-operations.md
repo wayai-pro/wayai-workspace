@@ -158,19 +158,29 @@ Direct user to create Agent connection first, then proceed with agent creation.
 |-----------|-----|
 | List | `get_hub(hub_id)` |
 | View | `get_agent(hub_id, agent_id)` |
+| Get instructions | `get_agent_instructions(hub_id, agent_id)` |
 | Create | `create_agent(...)` |
-| Update | `update_agent(...)` |
+| Update settings | `update_agent(...)` |
+| Update instructions | `update_agent_instructions(...)` |
 | Delete | `delete_agent(...)` |
 
 ### get_agent
-Get agent details including tools.
+Get agent details including tools. Instructions are excluded to save context.
 ```
-get_agent(
-  hub_id,                      # Required
-  agent_id,                    # Required
-  include_instructions=false   # Optional: include full instructions
-)
+get_agent(hub_id, agent_id)
 ```
+Use `get_agent_instructions` to retrieve the agent's instructions.
+
+### get_agent_instructions
+Get agent instructions as a downloadable file URL.
+```
+get_agent_instructions(hub_id, agent_id)
+```
+Returns:
+- `signed_url`: URL valid for 1 hour - use WebFetch to retrieve content
+- `file_id`, `file_path`, `expires_in`: File metadata
+
+Note: The file is recreated from `agent.instructions` on each call to ensure sync with the database.
 
 ### create_agent
 Create a new agent.
@@ -187,18 +197,29 @@ create_agent(
 ```
 
 ### update_agent
-Update an existing agent.
+Update an existing agent. To update instructions, use `update_agent_instructions` instead.
 ```
 update_agent(
   hub_id,        # Required
   agent_id,      # Required
   agent_name,    # Optional
   agent_role,    # Optional
-  instructions,  # Optional
   model,         # Optional
   temperature    # Optional
 )
 ```
+
+### update_agent_instructions
+Update agent instructions by uploading them as a file. Preferred method for instruction changes.
+```
+update_agent_instructions(
+  hub_id,        # Required
+  agent_id,      # Required
+  instructions,  # Required: full instructions content (markdown)
+  file_name      # Optional: defaults to instructions.md
+)
+```
+Returns: `file_id`, `file_path`, `instructions_updated`
 
 ### delete_agent
 Remove an agent from the hub.
