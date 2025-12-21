@@ -124,8 +124,8 @@ When working with agent instructions, always follow this workflow to keep files 
    → User reviews and edits in their editor
 ```
 
-### Upload Workflow (Token-Efficient)
-For large instructions (>10KB), use the presigned URL upload:
+### Upload Workflow (Recommended)
+Always prefer the presigned URL upload - it's token-efficient and works with local files:
 ```
 1. GET URL: get_agent_instructions_upload_url(hub_id, agent_id)
    → Returns upload_url and auth_token (valid 5 minutes)
@@ -137,14 +137,14 @@ For large instructions (>10KB), use the presigned URL upload:
    → Uploads and syncs to database in one step
 ```
 
-### Direct Update Workflow (Small Instructions)
-For small instructions (<10KB), use direct text update:
+### Direct Update Workflow (Fallback)
+Only use when file operations aren't available (e.g., no Bash tool access):
 ```
 1. REVIEW: Show proposed changes (before/after)
    → Wait for user approval before updating
 
 2. UPDATE: update_agent_instructions(hub_id, agent_id, instructions)
-   → Uploads new instructions, syncs to database
+   → Sends text directly (consumes tokens for large instructions)
 ```
 
 **File Naming Convention:**
@@ -157,9 +157,9 @@ For small instructions (<10KB), use direct text update:
 
 **Important:**
 - `get_agent` excludes instructions (use `export_agent_instructions` instead)
-- `update_agent` cannot modify instructions (use upload workflow or `update_agent_instructions`)
+- `update_agent` cannot modify instructions (use upload workflow)
 - Always fetch current instructions before editing to avoid overwriting changes
-- Use `get_agent_instructions_upload_url` for large instructions to save tokens
+- Always prefer upload workflow over direct update (token-efficient, works with files)
 
 **Example:**
 ```

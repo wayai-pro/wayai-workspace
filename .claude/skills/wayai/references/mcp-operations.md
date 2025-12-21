@@ -162,7 +162,7 @@ Direct user to create Agent connection first, then proceed with agent creation.
 | Get upload URL | `get_agent_instructions_upload_url(hub_id, agent_id)` |
 | Create | `create_agent(...)` |
 | Update settings | `update_agent(...)` |
-| Update instructions | `update_agent_instructions(...)` or upload via URL |
+| Update instructions | Upload via URL (preferred) or `update_agent_instructions(...)` (fallback) |
 | Delete | `delete_agent(...)` |
 
 ### get_agent
@@ -215,7 +215,7 @@ create_agent(
 ```
 
 ### update_agent
-Update an existing agent. To update instructions, use `get_agent_instructions_upload_url` for large content or `update_agent_instructions` for small content.
+Update an existing agent. To update instructions, use `get_agent_instructions_upload_url` (recommended) or `update_agent_instructions` (fallback when file operations unavailable).
 ```
 update_agent(
   hub_id,        # Required
@@ -228,7 +228,7 @@ update_agent(
 ```
 
 ### update_agent_instructions
-Update agent instructions by sending text content directly. For large instructions (>10KB), prefer `get_agent_instructions_upload_url` for token-efficient upload.
+**Fallback method** - only use when file operations aren't available (e.g., no Bash tool). Prefer `get_agent_instructions_upload_url` for token-efficient upload.
 ```
 update_agent_instructions(
   hub_id,        # Required
