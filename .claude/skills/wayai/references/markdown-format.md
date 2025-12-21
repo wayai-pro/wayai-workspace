@@ -7,7 +7,8 @@ Conventions for exporting WayAI configurations to Markdown files.
 - [Slugification Rules](#slugification-rules)
 - [System Fields](#system-fields)
 - [Hub File Template](#hub-file-template-hubmd)
-- [Agent File Template](#agent-file-template-agent-slugmd)
+- [Agent Config File](#agent-config-file-agent-slugmd)
+- [Agent Instructions File](#agent-instructions-file-agent-slug-instructionsmd)
 - [Custom Tool Definition](#custom-tool-definition)
 - [Export Workflow](#export-workflow)
 - [Import Workflow](#import-workflow)
@@ -15,12 +16,13 @@ Conventions for exporting WayAI configurations to Markdown files.
 ## Directory Structure
 
 ```
-workspace.md                        # Workspace overview (orgs/projects/hubs index)
-{org-slug}/                         # Organization folder
-└── {project-slug}/                 # Project folder
-    └── {hub-slug}/                 # Hub folder
-        ├── hub.md                  # Hub settings + connections table
-        └── {agent-slug}.md         # Agent files (one per agent)
+workspace.md                              # Workspace overview (orgs/projects/hubs index)
+{org-slug}/                               # Organization folder
+└── {project-slug}/                       # Project folder
+    └── {hub-slug}/                       # Hub folder
+        ├── hub.md                        # Hub settings + connections table
+        ├── {agent-slug}.md               # Agent config (metadata + tools)
+        └── {agent-slug}-instructions.md  # Agent instructions
 ```
 
 ## Slugification Rules
@@ -31,13 +33,15 @@ Convert names to URL-safe slugs:
 |----------|------|
 | `Mario's Pizza` | `marios-pizza` |
 | `Order Taker Agent` | `order-taker-agent` |
+| `Suporte Nível 2` | `suporte-nivel-2` |
 | `Support Hub 2.0` | `support-hub-20` |
 
 Rules:
 1. Lowercase
-2. Replace spaces with hyphens
-3. Remove special characters (except hyphens)
-4. Remove consecutive hyphens
+2. Normalize accents (NFD + strip diacritics)
+3. Replace non-alphanumeric with hyphens
+4. Remove leading/trailing hyphens
+5. Limit to 50 characters
 
 ## System Fields
 
@@ -78,35 +82,47 @@ inactivity_interval: {minutes}
 
 ## Agents
 
-| Agent | Role | File |
-|-------|------|------|
-| Support Agent | Pilot | `support-agent.md` |
-| Escalation Agent | Specialist for Pilot | `escalation-agent.md` |
+| Agent | Role | Config | Instructions |
+|-------|------|--------|--------------|
+| Support Agent | Pilot | `support-agent.md` | `support-agent-instructions.md` |
+| Escalation Agent | Specialist for Pilot | `escalation-agent.md` | `escalation-agent-instructions.md` |
 ```
 
-## Agent File Template ({agent-slug}.md)
+## Agent Config File ({agent-slug}.md)
+
+Agent configuration with metadata and tools (no instructions body).
 
 ```markdown
 ---
-_wayai_id: {agent_id}
+agent_id: {agent_id}
 name: {name}
 role: Pilot
 model: gpt-4o
 temperature: 0.7
 tools:
   native:
-    - web_search
-    - send_email
+    - tool_id: {tool_id}
+      tool_name: web_search
   custom:
-    - name: check_order
-      description: Check order status
-      method: GET
-      endpoint: /orders/{id}
+    - tool_id: {tool_id}
+      tool_name: check_order
+      tool_description_ai: "Check order status"
+      tool_method: GET
+---
+```
+
+## Agent Instructions File ({agent-slug}-instructions.md)
+
+Agent instructions in a separate file for easier editing.
+
+```markdown
+---
+agent_id: {agent_id}
 ---
 
-{instructions go here as the body}
-
 You are a helpful support agent...
+
+{full instructions here}
 ```
 
 ## Custom Tool Definition
