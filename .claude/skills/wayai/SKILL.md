@@ -118,7 +118,8 @@ When working with agent instructions, always follow this workflow to keep files 
 2. FETCH: WebFetch the signed URL
    → Downloads current instructions as markdown
 
-3. EDIT: Write to local file in IDE (e.g., instructions.md)
+3. EDIT: Write to local file using naming convention:
+   → {agentname}-instructions.md (e.g., atendente-instructions.md)
    → User reviews and edits in their editor
 
 4. REVIEW: Show proposed changes (before/after)
@@ -127,6 +128,14 @@ When working with agent instructions, always follow this workflow to keep files 
 5. UPDATE: update_agent_instructions(hub_id, agent_id, instructions)
    → Uploads new instructions, syncs to database
 ```
+
+**File Naming Convention:**
+- Pattern: `{agentname}-instructions.md`
+- Slugify agent name: lowercase, spaces→hyphens, remove special chars
+- Examples:
+  - Agent "Atendente" → `atendente-instructions.md`
+  - Agent "Order Taker" → `order-taker-instructions.md`
+  - Agent "Suporte Nível 2" → `suporte-nvel-2-instructions.md`
 
 **Important:**
 - `get_agent` excludes instructions (use `get_agent_instructions` instead)
@@ -140,7 +149,7 @@ User: "Update the Pilot agent instructions to be more friendly"
 Claude:
 1. get_agent_instructions(hub_id, agent_id) → signed_url
 2. WebFetch(signed_url) → current instructions content
-3. Write to local file: /tmp/instructions.md
+3. Write to local file: atendente-instructions.md
 4. Show user: "Here are the current instructions. I'll make them more friendly..."
 5. Edit the file with proposed changes
 6. Show diff to user, wait for approval

@@ -216,7 +216,7 @@ update_agent_instructions(
   hub_id,        # Required
   agent_id,      # Required
   instructions,  # Required: full instructions content (markdown)
-  file_name      # Optional: defaults to instructions.md
+  file_name      # Optional: defaults to {agentname}-instructions.md
 )
 ```
 Returns: `file_id`, `file_path`, `instructions_updated`
