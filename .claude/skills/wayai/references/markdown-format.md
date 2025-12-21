@@ -7,8 +7,7 @@ Conventions for exporting WayAI configurations to Markdown files.
 - [Slugification Rules](#slugification-rules)
 - [System Fields](#system-fields)
 - [Hub File Template](#hub-file-template-hubmd)
-- [Agent Config File](#agent-config-file-agent-slugmd)
-- [Agent Instructions File](#agent-instructions-file-agent-slug-instructionsmd)
+- [Agent Instructions File](#agent-instructions-file-agent-slugmd)
 - [Custom Tool Definition](#custom-tool-definition)
 - [Export Workflow](#export-workflow)
 - [Import Workflow](#import-workflow)
@@ -20,9 +19,8 @@ workspace.md                              # Workspace overview (orgs/projects/hu
 {org-slug}/                               # Organization folder
 └── {project-slug}/                       # Project folder
     └── {hub-slug}/                       # Hub folder
-        ├── hub.md                        # Hub settings + connections table
-        ├── {agent-slug}.md               # Agent config (metadata + tools)
-        └── {agent-slug}-instructions.md  # Agent instructions
+        ├── hub.md                        # Hub settings + agents config + connections table
+        └── {agent-slug}.md               # Agent instructions only
 ```
 
 ## Slugification Rules
@@ -57,15 +55,39 @@ Claude uses `_wayai_id` to match files to database records.
 
 ## Hub File Template (hub.md)
 
+Hub file contains all settings in YAML frontmatter, including full agents configuration with tools.
+
 ```markdown
 ---
-_wayai_id: {hub_id}
+hub_id: {hub_id}
 name: {name}
 description: {description}
 hub_type: user
 ai_mode: Pilot+Copilot
 followup_message: {followup_message}
 inactivity_interval: {minutes}
+agents:
+  - agent_id: {agent_id}
+    name: "Support Agent"
+    role: Pilot
+    model: gpt-4o
+    temperature: 0.7
+    instructions_file: support-agent.md
+    tools:
+      native:
+        - tool_id: {tool_id}
+          tool_name: web_search
+      custom:
+        - tool_id: {tool_id}
+          tool_name: check_order
+          tool_description_ai: "Check order status"
+          tool_method: GET
+  - agent_id: {agent_id}
+    name: "Escalation Agent"
+    role: Specialist for Pilot
+    model: gpt-4o
+    temperature: 0.5
+    instructions_file: escalation-agent.md
 ---
 
 # {name}
@@ -79,41 +101,11 @@ inactivity_interval: {minutes}
 | WhatsApp Business | whatsapp | enabled |
 | OpenAI | agent | enabled |
 | Order System | webhook | disabled |
-
-## Agents
-
-| Agent | Role | Config | Instructions |
-|-------|------|--------|--------------|
-| Support Agent | Pilot | `support-agent.md` | `support-agent-instructions.md` |
-| Escalation Agent | Specialist for Pilot | `escalation-agent.md` | `escalation-agent-instructions.md` |
 ```
 
-## Agent Config File ({agent-slug}.md)
+## Agent Instructions File ({agent-slug}.md)
 
-Agent configuration with metadata and tools (no instructions body).
-
-```markdown
----
-agent_id: {agent_id}
-name: {name}
-role: Pilot
-model: gpt-4o
-temperature: 0.7
-tools:
-  native:
-    - tool_id: {tool_id}
-      tool_name: web_search
-  custom:
-    - tool_id: {tool_id}
-      tool_name: check_order
-      tool_description_ai: "Check order status"
-      tool_method: GET
----
-```
-
-## Agent Instructions File ({agent-slug}-instructions.md)
-
-Agent instructions in a separate file for easier editing.
+Agent instructions in a separate file for easier editing. The agent configuration (model, temperature, tools) is in hub.md.
 
 ```markdown
 ---
@@ -127,30 +119,31 @@ You are a helpful support agent...
 
 ## Custom Tool Definition
 
-In agent frontmatter under `tools.custom`:
+In hub.md under agent's `tools.custom`:
 
 ```yaml
-tools:
-  custom:
-    - name: "create_order"
-      description: "Creates a new order"
-      method: POST
-      connection_type: webhook
-      endpoint_path: "/orders"
-    - name: "get_menu"
-      description: "Retrieves menu items"
-      method: GET
-      connection_type: webhook
-      endpoint_path: "/menu"
+agents:
+  - agent_id: {agent_id}
+    name: "Order Agent"
+    tools:
+      custom:
+        - tool_id: {tool_id}
+          tool_name: create_order
+          tool_description_ai: "Creates a new order"
+          tool_method: POST
+        - tool_id: {tool_id}
+          tool_name: get_menu
+          tool_description_ai: "Retrieves menu items"
+          tool_method: GET
 ```
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `name` | string | Tool name (snake_case recommended) |
-| `description` | string | What the tool does (for AI) |
-| `method` | enum | HTTP method: GET, POST, PUT, DELETE, PATCH |
-| `connection_type` | string | Connection to use (e.g., "webhook") |
-| `endpoint_path` | string | API path appended to connection base URL |
+| `tool_name` | string | Tool name (snake_case recommended) |
+| `tool_description_ai` | string | What the tool does (for AI) |
+| `tool_method` | enum | HTTP method: GET, POST, PUT, DELETE, PATCH |
+| `tool_url` | string | Full endpoint URL template |
+| `tool_instructions` | string | Usage instructions for the AI |
 
 ## Export Workflow
 
@@ -164,14 +157,12 @@ tools:
 5. git commit
 ```
 
-### Manual Export
+### Exporting Agent Instructions
 
 ```
-1. get_workspace() → discover hubs
-2. get_hub(hub_id) → full schema
-3. get_agent(hub_id, agent_id, include_instructions=true) → each agent
-4. Convert to Markdown using templates above
-5. Save to appropriate folder structure
+1. export_agent_instructions(hub_id, agent_id) → download URL
+2. WebFetch download URL → instructions content
+3. Write to local file: {agent-slug}.md
 ```
 
 ## Import Workflow
@@ -182,7 +173,8 @@ tools:
 3. Compare fields → identify changes
 4. Apply via MCP:
    - update_hub() for hub changes
-   - update_agent() for agent changes
+   - update_agent() for agent settings changes
+   - get_agent_instructions_upload_url() + curl for instruction changes
    - add_native_tool() / remove_tool() for tool changes
 ```
 

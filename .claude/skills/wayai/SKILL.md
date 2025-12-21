@@ -91,7 +91,7 @@ AFTER changes:
 |----------|-------|
 | **Workspace** | `get_workspace`, `export_workspace`, `export_skill` |
 | **Hub** | `get_hub`, `create_hub`, `update_hub` |
-| **Agent** | `get_agent`, `get_agent_instructions`, `create_agent`, `update_agent`, `update_agent_instructions`, `delete_agent` |
+| **Agent** | `get_agent`, `export_agent_instructions`, `get_agent_instructions_upload_url`, `create_agent`, `update_agent`, `update_agent_instructions`, `delete_agent` |
 | **Tool** | `get_tool`, `add_native_tool`, `add_mcp_tool`, `add_custom_tool`, `update_custom_tool`, `enable_tool`, `disable_tool`, `remove_tool`, `remove_custom_tool` |
 | **Connection** | `enable_connection`, `disable_connection`, `sync_mcp_connection` |
 
@@ -111,49 +111,69 @@ See [references/mcp-operations.md](references/mcp-operations.md) for detailed us
 
 When working with agent instructions, always follow this workflow to keep files in sync:
 
+### Download (Export) Workflow
 ```
-1. GET: get_agent_instructions(hub_id, agent_id)
+1. EXPORT: export_agent_instructions(hub_id, agent_id)
    → Returns signed URL (valid 1 hour)
 
 2. FETCH: WebFetch the signed URL
    → Downloads current instructions as markdown
 
 3. EDIT: Write to local file using naming convention:
-   → {agentname}-instructions.md (e.g., atendente-instructions.md)
+   → {agentname}.md (e.g., atendente.md)
    → User reviews and edits in their editor
+```
 
-4. REVIEW: Show proposed changes (before/after)
+### Upload Workflow (Token-Efficient)
+For large instructions (>10KB), use the presigned URL upload:
+```
+1. GET URL: get_agent_instructions_upload_url(hub_id, agent_id)
+   → Returns upload_url and auth_token (valid 5 minutes)
+
+2. UPLOAD: Use curl to upload the file directly
+   curl -X POST --data-binary @{file}.md "{upload_url}" \
+     -H "Authorization: {auth_token}" \
+     -H "Content-Type: text/markdown"
+   → Uploads and syncs to database in one step
+```
+
+### Direct Update Workflow (Small Instructions)
+For small instructions (<10KB), use direct text update:
+```
+1. REVIEW: Show proposed changes (before/after)
    → Wait for user approval before updating
 
-5. UPDATE: update_agent_instructions(hub_id, agent_id, instructions)
+2. UPDATE: update_agent_instructions(hub_id, agent_id, instructions)
    → Uploads new instructions, syncs to database
 ```
 
 **File Naming Convention:**
-- Pattern: `{agentname}-instructions.md`
+- Pattern: `{agentname}.md`
 - Slugify agent name: lowercase, spaces→hyphens, remove special chars
 - Examples:
-  - Agent "Atendente" → `atendente-instructions.md`
-  - Agent "Order Taker" → `order-taker-instructions.md`
-  - Agent "Suporte Nível 2" → `suporte-nvel-2-instructions.md`
+  - Agent "Atendente" → `atendente.md`
+  - Agent "Order Taker" → `order-taker.md`
+  - Agent "Suporte Nível 2" → `suporte-nvel-2.md`
 
 **Important:**
-- `get_agent` excludes instructions (use `get_agent_instructions` instead)
-- `update_agent` cannot modify instructions (use `update_agent_instructions` instead)
+- `get_agent` excludes instructions (use `export_agent_instructions` instead)
+- `update_agent` cannot modify instructions (use upload workflow or `update_agent_instructions`)
 - Always fetch current instructions before editing to avoid overwriting changes
+- Use `get_agent_instructions_upload_url` for large instructions to save tokens
 
 **Example:**
 ```
 User: "Update the Pilot agent instructions to be more friendly"
 
 Claude:
-1. get_agent_instructions(hub_id, agent_id) → signed_url
+1. export_agent_instructions(hub_id, agent_id) → signed_url
 2. WebFetch(signed_url) → current instructions content
-3. Write to local file: atendente-instructions.md
+3. Write to local file: atendente.md
 4. Show user: "Here are the current instructions. I'll make them more friendly..."
 5. Edit the file with proposed changes
 6. Show diff to user, wait for approval
-7. update_agent_instructions(hub_id, agent_id, new_instructions)
+7. get_agent_instructions_upload_url(hub_id, agent_id) → upload_url, auth_token
+8. Upload using curl: curl -X POST --data-binary @atendente.md "{upload_url}" -H "Authorization: {auth_token}" -H "Content-Type: text/markdown"
 ```
 
 ## Using Templates

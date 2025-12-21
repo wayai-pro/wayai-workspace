@@ -158,10 +158,11 @@ Direct user to create Agent connection first, then proceed with agent creation.
 |-----------|-----|
 | List | `get_hub(hub_id)` |
 | View | `get_agent(hub_id, agent_id)` |
-| Get instructions | `get_agent_instructions(hub_id, agent_id)` |
+| Export instructions | `export_agent_instructions(hub_id, agent_id)` |
+| Get upload URL | `get_agent_instructions_upload_url(hub_id, agent_id)` |
 | Create | `create_agent(...)` |
 | Update settings | `update_agent(...)` |
-| Update instructions | `update_agent_instructions(...)` |
+| Update instructions | `update_agent_instructions(...)` or upload via URL |
 | Delete | `delete_agent(...)` |
 
 ### get_agent
@@ -169,18 +170,35 @@ Get agent details including tools. Instructions are excluded to save context.
 ```
 get_agent(hub_id, agent_id)
 ```
-Use `get_agent_instructions` to retrieve the agent's instructions.
+Use `export_agent_instructions` to retrieve the agent's instructions.
 
-### get_agent_instructions
-Get agent instructions as a downloadable file URL.
+### export_agent_instructions
+Export agent instructions as a downloadable file URL.
 ```
-get_agent_instructions(hub_id, agent_id)
+export_agent_instructions(hub_id, agent_id)
 ```
 Returns:
-- `signed_url`: URL valid for 1 hour - use WebFetch to retrieve content
-- `file_id`, `file_path`, `expires_in`: File metadata
+- `download_url`: URL valid for 1 hour - use WebFetch to retrieve content
+- `expires_in`: Time until URL expires
 
 Note: The file is recreated from `agent.instructions` on each call to ensure sync with the database.
+
+### get_agent_instructions_upload_url
+Get a presigned URL for uploading agent instructions. Use this for large instructions (>10KB) to save tokens.
+```
+get_agent_instructions_upload_url(hub_id, agent_id)
+```
+Returns:
+- `upload_url`: URL for uploading (valid 5 minutes)
+- `auth_token`: Authorization header value
+- `expires_in`: Time until URL expires
+
+**Upload using curl:**
+```bash
+curl -X POST --data-binary @{file}.md "{upload_url}" \
+  -H "Authorization: {auth_token}" \
+  -H "Content-Type: text/markdown"
+```
 
 ### create_agent
 Create a new agent.
@@ -197,7 +215,7 @@ create_agent(
 ```
 
 ### update_agent
-Update an existing agent. To update instructions, use `update_agent_instructions` instead.
+Update an existing agent. To update instructions, use `get_agent_instructions_upload_url` for large content or `update_agent_instructions` for small content.
 ```
 update_agent(
   hub_id,        # Required
@@ -210,13 +228,13 @@ update_agent(
 ```
 
 ### update_agent_instructions
-Update agent instructions by uploading them as a file. Preferred method for instruction changes.
+Update agent instructions by sending text content directly. For large instructions (>10KB), prefer `get_agent_instructions_upload_url` for token-efficient upload.
 ```
 update_agent_instructions(
   hub_id,        # Required
   agent_id,      # Required
   instructions,  # Required: full instructions content (markdown)
-  file_name      # Optional: defaults to {agentname}-instructions.md
+  file_name      # Optional: defaults to {agentname}.md
 )
 ```
 Returns: `file_id`, `file_path`, `instructions_updated`
