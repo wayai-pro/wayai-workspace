@@ -25,17 +25,39 @@ Ask Claude to help manage your WayAI configuration:
 "Add web_search tool to the agent"
 ```
 
-## Updating the Skill
+## Downloads
 
-Get the latest skill files via MCP:
+All downloads return a URL. Use `curl` to save to disk, then extract or read as needed.
+
+### Workspace
+
+Export your hub configurations as Markdown files:
 
 ```bash
-# In Claude Code, run:
-download_skill()
+download_workspace()  # Returns URL
+curl -L "<url>" -o workspace.zip && unzip -o workspace.zip -d ./
+```
 
-# Then download and extract:
-curl -L "<url>" -o skill.zip
-unzip -o skill.zip -d ./
+Creates `./workspace/` with your org/project/hub structure.
+
+### Templates
+
+Download hub templates for quick setup:
+
+```bash
+download_templates()  # Returns URL
+curl -L "<url>" -o templates.zip && unzip -o templates.zip -d ./
+```
+
+Creates `./templates/` with ready-to-use hub configurations.
+
+### Skill Updates
+
+Get the latest skill files:
+
+```bash
+download_skill()  # Returns URL
+curl -L "<url>" -o skill.zip && unzip -o skill.zip -d ./
 ```
 
 ## Documentation
