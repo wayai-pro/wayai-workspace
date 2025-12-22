@@ -21,34 +21,57 @@ get_workspace()
 ```
 Returns: workspace hierarchy with org/project/hub IDs and names
 
-### export_workspace
-Export entire workspace as downloadable zip with Markdown files.
+### download_workspace
+Download entire workspace as downloadable zip with Markdown files.
 ```
-export_workspace()
+download_workspace()
 ```
 Returns: download URL (expires in 5 minutes)
 
-### export_skill
-Export/update Claude Code skill files. Use this to install or update the WayAI skill.
+### download_skill
+Download Claude Code skill files. Use this to install or update the WayAI skill.
 ```
-export_skill()
+download_skill()
 ```
 Returns: download URL for skill zip (expires in 5 minutes)
 
 **To install/update:**
-1. Call `export_skill()` to get download URL
+1. Call `download_skill()` to get download URL
 2. Download and extract: `curl -L "<url>" -o skill.zip && unzip -o skill.zip -d ~/.claude/skills/`
 3. Start a new conversation to load the updated skill
 
-### get_template
-Fetch a specific template file content. First read `templates://index` resource to see available templates.
+### download_templates
+Download all templates as a zip file. Extract to ./templates/ folder for local access.
 ```
-get_template(path)
+download_templates()
 ```
-Parameters:
-- `path` (required): Template file path, e.g., "pt/vertical/pizzaria/pedidos/hub.md"
+Returns: download URL (expires in 5 minutes)
 
-Returns: Template file content (Markdown)
+**To download and extract:**
+```bash
+curl -L "<url>" -o templates.zip
+unzip -o templates.zip -d ./
+```
+
+Creates a `./templates/` folder with structure:
+```
+templates/
+├── index.json
+└── pt/
+    └── vertical/
+        └── pizzaria/
+            └── pedidos/
+                ├── hub.md
+                └── agents/
+                    └── atendente/
+                        ├── config.md
+                        └── instructions.md
+```
+
+**After download, read templates locally:**
+```
+Read("./templates/pt/vertical/pizzaria/pedidos/hub.md")
+```
 
 ---
 
@@ -158,7 +181,7 @@ Direct user to create Agent connection first, then proceed with agent creation.
 |-----------|-----|
 | List | `get_hub(hub_id)` |
 | View | `get_agent(hub_id, agent_id)` |
-| Export instructions | `export_agent_instructions(hub_id, agent_id)` |
+| Download instructions | `download_agent_instructions(hub_id, agent_id)` |
 | Get upload URL | `get_agent_instructions_upload_url(hub_id, agent_id)` |
 | Create | `create_agent(...)` |
 | Update settings | `update_agent(...)` |
@@ -170,18 +193,23 @@ Get agent details including tools. Instructions are excluded to save context.
 ```
 get_agent(hub_id, agent_id)
 ```
-Use `export_agent_instructions` to retrieve the agent's instructions.
+Use `download_agent_instructions` to retrieve the agent's instructions.
 
-### export_agent_instructions
-Export agent instructions as a downloadable file URL.
+### download_agent_instructions
+Download agent instructions as a downloadable file URL.
 ```
-export_agent_instructions(hub_id, agent_id)
+download_agent_instructions(hub_id, agent_id)
 ```
 Returns:
-- `download_url`: URL valid for 1 hour - use WebFetch to retrieve content
+- `download_url`: Signed URL valid for 1 hour
 - `expires_in`: Time until URL expires
 
-Note: The file is recreated from `agent.instructions` on each call to ensure sync with the database.
+**Download using curl:**
+```bash
+curl -L "{download_url}" -o {agentname}.md
+```
+
+Note: The file is recreated from `agent.instructions` on each call to ensure sync with the database. Save to disk first, then Read when needed (avoids context bloat).
 
 ### get_agent_instructions_upload_url
 Get a presigned URL for uploading agent instructions. Use this for large instructions (>10KB) to save tokens.

@@ -219,25 +219,33 @@ get_templates()
 
 Returns JSON with all available templates (v2.0 format).
 
-### Get Template Files
+### Download All Templates
 
 **Tool:**
 ```
-get_template(path)
+download_templates()
 ```
 
-**Path format:** `{lang}/{type}/{category}/{variant}/{file}`
+Returns a signed URL (valid for 5 minutes) to download all templates as a zip file.
+
+**Download and extract:**
+```bash
+curl -L "<url>" -o templates.zip
+unzip -o templates.zip -d ./
+```
+
+Creates a `./templates/` folder. Then read files locally:
 
 **Examples:**
 ```
 # Hub config
-get_template("pt/vertical/pizzaria/pedidos/hub.md")
+Read("./templates/pt/vertical/pizzaria/pedidos/hub.md")
 
 # Agent config
-get_template("pt/vertical/pizzaria/pedidos/agents/atendente/config.md")
+Read("./templates/pt/vertical/pizzaria/pedidos/agents/atendente/config.md")
 
 # Agent instructions
-get_template("pt/vertical/pizzaria/pedidos/agents/atendente/instructions.md")
+Read("./templates/pt/vertical/pizzaria/pedidos/agents/atendente/instructions.md")
 ```
 
 ### MCP Prompts
@@ -255,10 +263,13 @@ Multi-language guided workflows:
 ## Quick Reference
 
 **Workflow:**
-1. List templates: `templates://index`
-2. Get hub file: `get_template("pt/.../hub.md")`
-3. Get agent config: `get_template("pt/.../agents/{name}/config.md")`
-4. Get agent instructions: `get_template("pt/.../agents/{name}/instructions.md")`
+1. Check if `./templates/` folder exists
+2. If not: `download_templates()` → curl → unzip
+3. List templates: `templates://index` or `get_templates()`
+4. Read local files:
+   - `Read("./templates/pt/.../hub.md")`
+   - `Read("./templates/pt/.../agents/{name}/config.md")`
+   - `Read("./templates/pt/.../agents/{name}/instructions.md")`
 5. Replace placeholders (`{NOME_EMPRESA}`, etc.)
 6. Customize `{CUSTOMIZE: ...}` sections in instructions
 7. Create hub and agent via MCP tools

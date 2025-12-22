@@ -146,24 +146,24 @@ agents:
 | `tool_url` | string | Full endpoint URL template |
 | `tool_instructions` | string | Usage instructions for the AI |
 
-## Export Workflow
+## Download Workflow
 
-### Using export_workspace (Recommended)
+### Using download_workspace (Recommended)
 
 ```
-1. export_workspace() → download URL
+1. download_workspace() → download URL
 2. Download and extract zip
 3. Replace local org folders
 4. git diff to review
 5. git commit
 ```
 
-### Exporting Agent Instructions
+### Downloading Agent Instructions
 
 ```
-1. export_agent_instructions(hub_id, agent_id) → download URL
-2. WebFetch download URL → instructions content
-3. Write to local file: {agent-slug}.md
+1. download_agent_instructions(hub_id, agent_id) → download URL
+2. curl -L "{url}" -o {agentname}.md  # Save to disk (avoids context bloat)
+3. Read("{agentname}.md") when needed
 ```
 
 ## Import Workflow

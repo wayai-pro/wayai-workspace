@@ -89,9 +89,9 @@ AFTER changes:
 
 | Category | Tools |
 |----------|-------|
-| **Workspace** | `get_workspace`, `export_workspace`, `export_skill` |
+| **Workspace** | `get_workspace`, `download_workspace`, `download_skill` |
 | **Hub** | `get_hub`, `create_hub`, `update_hub` |
-| **Agent** | `get_agent`, `export_agent_instructions`, `get_agent_instructions_upload_url`, `create_agent`, `update_agent`, `update_agent_instructions`, `delete_agent` |
+| **Agent** | `get_agent`, `download_agent_instructions`, `get_agent_instructions_upload_url`, `create_agent`, `update_agent`, `update_agent_instructions`, `delete_agent` |
 | **Tool** | `get_tool`, `add_native_tool`, `add_mcp_tool`, `add_custom_tool`, `update_custom_tool`, `enable_tool`, `disable_tool`, `remove_tool`, `remove_custom_tool` |
 | **Connection** | `enable_connection`, `disable_connection`, `sync_mcp_connection` |
 
@@ -100,10 +100,11 @@ AFTER changes:
 |----------|-------------|
 | `templates://index` | List all available hub templates |
 
-**Template Tool:**
+**Template Tools:**
 | Tool | Description |
 |------|-------------|
-| `get_template(path)` | Fetch a specific template file content |
+| `get_templates` | List all available templates (returns JSON index) |
+| `download_templates` | Download all templates as zip (extract to ./templates/) |
 
 See [references/mcp-operations.md](references/mcp-operations.md) for detailed usage.
 
@@ -111,16 +112,17 @@ See [references/mcp-operations.md](references/mcp-operations.md) for detailed us
 
 When working with agent instructions, always follow this workflow to keep files in sync:
 
-### Download (Export) Workflow
+### Download Workflow
 ```
-1. EXPORT: export_agent_instructions(hub_id, agent_id)
+1. DOWNLOAD: download_agent_instructions(hub_id, agent_id)
    → Returns signed URL (valid 1 hour)
 
-2. FETCH: WebFetch the signed URL
-   → Downloads current instructions as markdown
+2. SAVE: curl to local file
+   curl -L "{url}" -o {agentname}.md
+   → Saves instructions to disk (doesn't bloat context)
 
-3. EDIT: Write to local file using naming convention:
-   → {agentname}.md (e.g., atendente.md)
+3. READ: Read the file when needed
+   Read("{agentname}.md")
    → User reviews and edits in their editor
 ```
 
@@ -156,7 +158,7 @@ Only use when file operations aren't available (e.g., no Bash tool access):
   - Agent "Suporte Nível 2" → `suporte-nvel-2.md`
 
 **Important:**
-- `get_agent` excludes instructions (use `export_agent_instructions` instead)
+- `get_agent` excludes instructions (use `download_agent_instructions` instead)
 - `update_agent` cannot modify instructions (use upload workflow)
 - Always fetch current instructions before editing to avoid overwriting changes
 - Always prefer upload workflow over direct update (token-efficient, works with files)
@@ -166,29 +168,33 @@ Only use when file operations aren't available (e.g., no Bash tool access):
 User: "Update the Pilot agent instructions to be more friendly"
 
 Claude:
-1. export_agent_instructions(hub_id, agent_id) → signed_url
-2. WebFetch(signed_url) → current instructions content
-3. Write to local file: atendente.md
+1. download_agent_instructions(hub_id, agent_id) → signed_url
+2. curl -L "{signed_url}" -o atendente.md  # Save to disk, don't bloat context
+3. Read("atendente.md") → show current instructions
 4. Show user: "Here are the current instructions. I'll make them more friendly..."
 5. Edit the file with proposed changes
 6. Show diff to user, wait for approval
 7. get_agent_instructions_upload_url(hub_id, agent_id) → upload_url, auth_token
-8. Upload using curl: curl -X POST --data-binary @atendente.md "{upload_url}" -H "Authorization: {auth_token}" -H "Content-Type: text/markdown"
+8. curl -X POST --data-binary @atendente.md "{upload_url}" -H "Authorization: {auth_token}" -H "Content-Type: text/markdown"
 ```
 
 ## Using Templates
 
-1. **List templates:** Read `templates://index` resource
-2. **Get template:** Use `get_template(path)` tool
+1. **List templates:** Read `templates://index` resource or call `get_templates()`
+2. **Download all:** Use `download_templates()` → extract to `./templates/` folder
+3. **Read locally:** `Read("./templates/pt/vertical/pizzaria/pedidos/hub.md")`
 
 ```
 User: "Preciso de um hub para pizzaria"
 
 Claude:
-1. Read resource: templates://index → list available templates
-2. Find matching template (pt/vertical/pizzaria/pedidos)
-3. get_template("pt/vertical/pizzaria/pedidos/hub.md")
-4. get_template("pt/vertical/pizzaria/pedidos/atendente.md")
+1. Check if ./templates/ exists locally
+2. If not: download_templates() → curl → unzip -o templates.zip -d ./
+3. Read resource: templates://index → find matching template (pt/vertical/pizzaria/pedidos)
+4. Read local files:
+   - Read("./templates/pt/vertical/pizzaria/pedidos/hub.md")
+   - Read("./templates/pt/vertical/pizzaria/pedidos/agents/atendente/config.md")
+   - Read("./templates/pt/vertical/pizzaria/pedidos/agents/atendente/instructions.md")
 5. Customize placeholders ({NOME_EMPRESA}, etc.)
 6. Create hub via MCP: create_hub(...)
 7. ⚠️ STOP: Direct user to UI to create Agent connection (OpenAI/OpenRouter)
@@ -196,9 +202,9 @@ Claude:
 9. Add tools to agent as needed
 ```
 
-**Example paths for get_template:**
+**Template paths (inside ./templates/ folder):**
 - `pt/horizontal/sdr/simples/hub.md` - SDR hub config
-- `pt/vertical/odonto/agendamento/recepcionista.md` - Dental receptionist agent
+- `pt/vertical/odonto/agendamento/agents/recepcionista/instructions.md` - Dental receptionist agent
 
 ## Reference Documentation
 
