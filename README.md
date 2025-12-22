@@ -38,7 +38,16 @@ download_workspace()  # Returns URL
 curl -L "<url>" -o workspace.zip && unzip -o workspace.zip -d ./
 ```
 
-Creates `./workspace/` with your org/project/hub structure.
+Creates `./workspace/` folder - keep this structure for version control:
+
+```
+workspace/
+├── workspace.md
+├── last-sync.md
+└── {org}/{project}/{hub}/
+    ├── hub.md
+    └── {agent}.md
+```
 
 ### Templates
 
@@ -49,7 +58,16 @@ download_templates()  # Returns URL
 curl -L "<url>" -o templates.zip && unzip -o templates.zip -d ./
 ```
 
-Creates `./templates/` with ready-to-use hub configurations.
+Creates `./templates/` folder with ready-to-use hub configurations:
+
+```
+templates/
+└── {lang}/{type}/{category}/{variant}/
+    ├── hub.md
+    └── agents/{agent}/
+        ├── config.md
+        └── instructions.md
+```
 
 ### Skill Updates
 
