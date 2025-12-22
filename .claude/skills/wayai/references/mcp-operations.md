@@ -28,6 +28,22 @@ download_workspace()
 ```
 Returns: download URL (expires in 5 minutes)
 
+**To download and extract:**
+```bash
+curl -L "<url>" -o workspace.zip
+unzip -o workspace.zip -d ./
+```
+
+Creates a `./workspace/` folder with structure:
+```
+workspace/
+├── workspace.md
+├── last-sync.md
+└── {org-slug}/{project-slug}/{hub-slug}/
+    ├── hub.md
+    └── {agent-slug}.md
+```
+
 ### download_skill
 Download Claude Code skill files. Use this to install or update the WayAI skill.
 ```

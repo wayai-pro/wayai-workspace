@@ -15,12 +15,14 @@ Conventions for exporting WayAI configurations to Markdown files.
 ## Directory Structure
 
 ```
-workspace.md                              # Workspace overview (orgs/projects/hubs index)
-{org-slug}/                               # Organization folder
-└── {project-slug}/                       # Project folder
-    └── {hub-slug}/                       # Hub folder
-        ├── hub.md                        # Hub settings + agents config + connections table
-        └── {agent-slug}.md               # Agent instructions only
+workspace/                                # Workspace folder (from download_workspace)
+├── workspace.md                          # Workspace overview (orgs/projects/hubs index)
+├── last-sync.md                          # Sync metadata
+└── {org-slug}/                           # Organization folder
+    └── {project-slug}/                   # Project folder
+        └── {hub-slug}/                   # Hub folder
+            ├── hub.md                    # Hub settings + agents config + connections table
+            └── {agent-slug}.md           # Agent instructions only
 ```
 
 ## Slugification Rules
