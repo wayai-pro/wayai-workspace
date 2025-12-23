@@ -22,62 +22,32 @@ Skills are ready to use in `.claude/skills/`. Create a `CLAUDE.md` file at the r
 cat > CLAUDE.md << 'EOF'
 # WayAI Configuration
 
-Use the wayai skill to manage hub configurations.
+**Read `.claude/skills/wayai/SKILL.md` before making any changes.**
 
-## ⚠️ Before Making Changes
+## Workflow
 
-**Always read `.claude/skills/wayai/SKILL.md` before creating or modifying hubs/agents.**
-It contains step-by-step workflows, including steps that require user action in the UI before proceeding.
+1. **Before changes**: Sync local workspace from remote (source of truth)
+2. **Edit locally**: Make changes in `workspace/` files so user can review
+3. **Apply to remote**: Use MCP tools to apply changes (follow SKILL.md workflows)
+4. **After all changes**: Ask user if they want to sync local workspace with remote
+
+## How to Sync
+
+```bash
+download_workspace()  # Returns URL
+curl -L "<url>" -o workspace.zip && unzip -o workspace.zip -d ./
+```
 
 ## Repository Structure
 
 ```
-.claude/skills/wayai/     # WayAI skill (Agent Skills format)
-├── SKILL.md              # Main skill documentation (READ THIS FIRST)
+.claude/skills/wayai/     # WayAI skill - START HERE
+├── SKILL.md              # Workflows and prerequisites
 ├── references/           # Detailed reference docs
 └── assets/templates/     # Hub templates
+workspace/                # Local copy of remote workspace
 .mcp.json                 # MCP server configuration
 ```
-
-## Available Commands
-
-- `get_workspace()` - List all organizations, projects, and hubs
-- `get_hub(hub_id)` - Get hub details with agents and tools
-- `create_hub(...)` - Create a new hub
-- `create_agent(...)` - Add an agent to a hub
-- `update_agent_instructions(...)` - Update agent instructions
-
-## Workflows
-
-### View workspace
-"Show my workspace" or "List my hubs"
-
-### Create a hub
-"Create a customer support hub" - Uses templates from `assets/templates/`
-
-### Update agent instructions
-"Update the Pilot agent instructions" - Downloads, edits, and uploads instructions
-
-## Keeping Updated
-
-### Skill Updates
-```bash
-download_skill()  # Returns URL
-curl -L "<url>" -o skill.zip && unzip -o skill.zip -d ./
-```
-
-### Repository Updates
-```bash
-# First time: add remote and merge with --allow-unrelated-histories
-git remote add template https://github.com/wayai-resources/wayai.git
-git fetch template && git merge template/main --allow-unrelated-histories
-# Future updates: just fetch and merge
-git fetch template && git merge template/main
-```
-
-## Documentation
-
-See `.claude/skills/wayai/SKILL.md` for complete reference.
 EOF
 ```
 
@@ -90,51 +60,58 @@ mv .claude .codex
 cat > AGENTS.md << 'EOF'
 # WayAI Configuration
 
-Use the wayai skill to manage hub configurations.
+**Read `.codex/skills/wayai/SKILL.md` before making any changes.**
 
-## ⚠️ Before Making Changes
+## Workflow
 
-**Always read `.codex/skills/wayai/SKILL.md` before creating or modifying hubs/agents.**
-It contains step-by-step workflows, including steps that require user action in the UI before proceeding.
+1. **Before changes**: Sync local workspace from remote (source of truth)
+2. **Edit locally**: Make changes in `workspace/` files so user can review
+3. **Apply to remote**: Use MCP tools to apply changes (follow SKILL.md workflows)
+4. **After all changes**: Ask user if they want to sync local workspace with remote
+
+## How to Sync
+
+```bash
+download_workspace()  # Returns URL
+curl -L "<url>" -o workspace.zip && unzip -o workspace.zip -d ./
+```
 
 ## Repository Structure
 
 ```
-.codex/skills/wayai/      # WayAI skill (Agent Skills format)
-├── SKILL.md              # Main skill documentation (READ THIS FIRST)
+.codex/skills/wayai/      # WayAI skill - START HERE
+├── SKILL.md              # Workflows and prerequisites
 ├── references/           # Detailed reference docs
 └── assets/templates/     # Hub templates
+workspace/                # Local copy of remote workspace
 .mcp.json                 # MCP server configuration
 ```
+EOF
+```
 
-## Available Commands
+### Cursor
 
-- `get_workspace()` - List all organizations, projects, and hubs
-- `get_hub(hub_id)` - Get hub details with agents and tools
-- `create_hub(...)` - Create a new hub
-- `create_agent(...)` - Add an agent to a hub
-- `update_agent_instructions(...)` - Update agent instructions
+Rename the skills folder, then create a similar instructions file:
 
-## Workflows
-
-### View workspace
-"Show my workspace" or "List my hubs"
-
-### Create a hub
-"Create a customer support hub" - Uses templates from `assets/templates/`
-
-### Update agent instructions
-"Update the Pilot agent instructions" - Downloads, edits, and uploads instructions
+```bash
+mv .claude .cursor
+```
 
 ## Keeping Updated
 
 ### Skill Updates
+
+Get the latest skill files via MCP:
+
 ```bash
 download_skill()  # Returns URL
 curl -L "<url>" -o skill.zip && unzip -o skill.zip -d ./
 ```
 
 ### Repository Updates
+
+Pull updates from the template repository:
+
 ```bash
 # First time: add remote and merge with --allow-unrelated-histories
 git remote add template https://github.com/wayai-resources/wayai.git
@@ -142,19 +119,3 @@ git fetch template && git merge template/main --allow-unrelated-histories
 # Future updates: just fetch and merge
 git fetch template && git merge template/main
 ```
-
-## Documentation
-
-See `.codex/skills/wayai/SKILL.md` for complete reference.
-EOF
-```
-
-### Cursor
-
-Rename the skills folder:
-
-```bash
-mv .claude .cursor
-```
-
-Then create a similar instructions file for Cursor.
