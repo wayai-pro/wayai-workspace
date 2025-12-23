@@ -231,29 +231,41 @@ curl -X POST --data-binary @{file}.md "{upload_url}" \
 ```
 
 ### create_agent
-Create a new agent. After creation, upload instructions using `get_agent_instructions_upload_url`.
+Create a new agent. Use `get_hub` first to find available Agent connections and their supported models. After creation, upload instructions using `get_agent_instructions_upload_url`.
 ```
 create_agent(
-  hub_id,         # Required
-  agent_name,     # Required
-  agent_role,     # Required: Pilot, Copilot, Specialist for Pilot, etc.
-  connection_id,  # Optional: LLM connection (auto-selects if not provided)
-  model,          # Optional: e.g., gpt-4o, gpt-4o-mini
-  temperature     # Optional: 0-2, default 0.7
+  hub_id,            # Required
+  agent_name,        # Required
+  agent_role,        # Required: Pilot, Copilot, Specialist for Pilot, etc.
+  connection_id,     # Required: LLM connection ID (use get_hub to find)
+  model,             # Required: e.g., gpt-4o, claude-sonnet-4-5, gemini-2.5-flash
+  # Optional settings (validated against connector schema):
+  temperature,       # Controls randomness (0=focused, 2=creative)
+  max_tokens,        # Maximum tokens to generate
+  top_p,             # Nucleus sampling (OpenAI, OpenRouter)
+  reasoning_effort,  # OpenAI gpt-5 family: minimal, low, medium, high, none
+  verbosity,         # OpenAI gpt-5 family: low, medium, high
+  service_tier       # OpenAI gpt-5 family: auto, flex, default, priority
 )
 ```
-**Note:** Agent is created with default instructions. Use `get_agent_instructions_upload_url` to upload custom instructions.
+**Note:** Settings are validated against the connector's `agent_settings_schema`. Invalid settings return an error with details.
 
 ### update_agent
 Update an existing agent. To update instructions, use `get_agent_instructions_upload_url` (recommended) or `update_agent_instructions` (fallback when file operations unavailable).
 ```
 update_agent(
-  hub_id,        # Required
-  agent_id,      # Required
-  agent_name,    # Optional
-  agent_role,    # Optional
-  model,         # Optional
-  temperature    # Optional
+  hub_id,            # Required
+  agent_id,          # Required
+  agent_name,        # Optional
+  agent_role,        # Optional
+  # Optional settings (validated against connector schema):
+  model,             # LLM model
+  temperature,       # Controls randomness (0=focused, 2=creative)
+  max_tokens,        # Maximum tokens to generate
+  top_p,             # Nucleus sampling (OpenAI, OpenRouter)
+  reasoning_effort,  # OpenAI gpt-5 family: minimal, low, medium, high, none
+  verbosity,         # OpenAI gpt-5 family: low, medium, high
+  service_tier       # OpenAI gpt-5 family: auto, flex, default, priority
 )
 ```
 
