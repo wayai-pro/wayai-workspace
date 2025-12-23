@@ -231,18 +231,18 @@ curl -X POST --data-binary @{file}.md "{upload_url}" \
 ```
 
 ### create_agent
-Create a new agent.
+Create a new agent. After creation, upload instructions using `get_agent_instructions_upload_url`.
 ```
 create_agent(
   hub_id,         # Required
   agent_name,     # Required
   agent_role,     # Required: Pilot, Copilot, Specialist for Pilot, etc.
-  instructions,   # Required: system instructions
   connection_id,  # Optional: LLM connection (auto-selects if not provided)
   model,          # Optional: e.g., gpt-4o, gpt-4o-mini
   temperature     # Optional: 0-2, default 0.7
 )
 ```
+**Note:** Agent is created with default instructions. Use `get_agent_instructions_upload_url` to upload custom instructions.
 
 ### update_agent
 Update an existing agent. To update instructions, use `get_agent_instructions_upload_url` (recommended) or `update_agent_instructions` (fallback when file operations unavailable).
