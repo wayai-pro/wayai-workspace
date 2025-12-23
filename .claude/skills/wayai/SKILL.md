@@ -60,7 +60,7 @@ Setup order: Organization (signup) → Project → Hub → Connections (UI) → 
 ### ⚠️ Connection Prerequisites
 
 **For creating agents → Agent connection required:**
-- OpenAI or OpenRouter → UI: Settings → Hub → Connections → Agent group
+- OpenAI or OpenRouter → UI: Settings → Organization → Project → Hub → Connections → Agent group
 
 **For enabling/creating tools → Tool connection required:**
 - **Auto-enabled (no connection):** Wayai Conversation, Wayai Meta Tools, Wayai Knowledge

@@ -77,16 +77,14 @@ templates/
     └── vertical/
         └── pizzaria/
             └── pedidos/
-                ├── hub.md
-                └── agents/
-                    └── atendente/
-                        ├── config.md
-                        └── instructions.md
+                ├── hub.md           # Hub config + agents config in frontmatter
+                └── atendente.md     # Agent instructions only
 ```
 
 **After download, read templates locally:**
 ```
-Read("./templates/pt/vertical/pizzaria/pedidos/hub.md")
+Read("./templates/pt/vertical/pizzaria/pedidos/hub.md")         # Hub config
+Read("./templates/pt/vertical/pizzaria/pedidos/atendente.md")   # Agent instructions
 ```
 
 ---
@@ -144,14 +142,27 @@ create_project(
 
 ### create_hub
 Create a new hub in a project.
+
+**Before calling this tool:**
+1. Use `get_workspace()` to list organizations/projects and confirm with the user which project to create the hub in
+2. Use `get_templates()` or read `templates://index` to check available hub templates and ask the user which template to use as reference
+
 ```
 create_hub(
-  project_id,       # Required
-  hub_name,         # Required
-  hub_type,         # Required: "user" | "workflow"
-  hub_description,  # Optional
-  ai_mode,          # Optional: "Pilot+Copilot" | "Pilot" | "Copilot" | "Turned Off"
-  mcp_access        # Optional: "read_write" | "read_only" | "disabled"
+  project_id,                   # Required
+  hub_name,                     # Required
+  hub_type,                     # Required: "user" | "workflow"
+  hub_description,              # Optional
+  ai_mode,                      # Optional: "Pilot+Copilot" | "Pilot" | "Copilot" | "Turned Off"
+  mcp_access,                   # Optional: "read_write" (default) | "read_only" | "disabled"
+  timezone,                     # Optional: default "America/Sao_Paulo"
+  app_permission,               # Optional: "require_permission" (default) | "everyone"
+  non_app_permission,           # Optional: "not_allowed" (default) | "require_permission" | "everyone"
+  followup_message,             # Optional: message sent after inactivity
+  inactivity_interval,          # Optional: minutes before followup message
+  file_handling_mode,           # Optional: "metadata_only" (default) | "always_attach"
+  max_file_size_for_attachment, # Optional: max file size in bytes
+  hub_sla                       # Optional: {time_threshold1, time_threshold2, time_threshold3} in seconds
 )
 ```
 
@@ -169,12 +180,18 @@ get_hub(hub_id)
 Update hub settings.
 ```
 update_hub(
-  hub_id,               # Required
-  hub_name,             # Optional
-  hub_description,      # Optional
-  ai_mode,              # Optional
-  followup_message,     # Optional
-  inactivity_interval   # Optional: minutes
+  hub_id,                       # Required
+  hub_name,                     # Optional
+  hub_description,              # Optional
+  ai_mode,                      # Optional
+  followup_message,             # Optional
+  inactivity_interval,          # Optional: minutes
+  timezone,                     # Optional
+  app_permission,               # Optional: "require_permission" | "everyone"
+  non_app_permission,           # Optional: "not_allowed" | "require_permission" | "everyone"
+  file_handling_mode,           # Optional: "metadata_only" | "always_attach"
+  max_file_size_for_attachment, # Optional: max file size in bytes
+  hub_sla                       # Optional: {time_threshold1, time_threshold2, time_threshold3} in seconds
 )
 ```
 
@@ -188,7 +205,7 @@ update_hub(
 
 Creating agents requires an **Agent connection** (LLM provider):
 - **OpenAI** or **OpenRouter**
-- Created via UI: Settings → Hub → Connections → **Agent** group
+- Created via UI: Settings → Organization → Project → Hub → Connections → **Agent** group
 - If missing, `create_agent` will fail
 
 Direct user to create Agent connection first, then proceed with agent creation.

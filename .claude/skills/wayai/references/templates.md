@@ -6,7 +6,6 @@ Reference for WayAI hub templates.
 - [Available Templates](#available-templates)
 - [Template Structure](#template-structure)
 - [Hub File Format](#hub-file-format)
-- [Agent Config Format](#agent-config-format)
 - [Agent Instructions Format](#agent-instructions-format)
 - [Placeholders](#placeholders)
 - [MCP Access](#mcp-access)
@@ -19,47 +18,42 @@ Reference for WayAI hub templates.
 |----------|------|-------------|
 | pt-vertical-pizzaria-pedidos | vertical | Pizza shop orders via WhatsApp |
 | pt-vertical-odonto-agendamento | vertical | Dental clinic scheduling via WhatsApp |
+| pt-vertical-natacao-atendimento | vertical | Swimming academy visit scheduling via WhatsApp |
 | pt-horizontal-sdr-simples | horizontal | Sales lead qualification |
 
 **Template Types:**
-- `vertical` - Industry-specific (pizzaria, odonto, etc.)
+- `vertical` - Industry-specific (pizzaria, odonto, natacao, etc.)
 - `horizontal` - Cross-industry functions (SDR, support, etc.)
 
 ---
 
 ## Template Structure
 
-Each template contains a hub config and one or more agents:
+Each template contains a hub config and agent instruction files (workspace format):
 
 ```
 {lang}/{type}/{category}/{variant}/
-├── hub.md                          # Hub configuration
-└── agents/
-    └── {agent-name}/
-        ├── config.md               # Agent config (~25 lines)
-        └── instructions.md         # Agent prompt (can be 500+ lines)
+├── hub.md                    # Hub config + agents config in frontmatter
+└── {agent-slug}.md           # Agent instructions only
 ```
 
 **Example:** `pt/vertical/pizzaria/pedidos/`
 ```
-├── hub.md
-└── agents/
-    └── atendente/
-        ├── config.md
-        └── instructions.md
+├── hub.md                    # Hub settings + agent config (model, tools)
+└── atendente.md              # Agent instructions
 ```
 
 **Benefits of this structure:**
-- Config stays small and scannable
-- Instructions can scale to 5k+ tokens
-- Multiple agents per hub organized cleanly
-- Different iteration cycles: config rarely changes, instructions change often
+- Matches `download_workspace()` output format
+- Hub file is the source of truth for configuration
+- Agent instructions are separate for easy editing
+- Simple flat structure (no nested folders)
 
 ---
 
 ## Hub File Format
 
-YAML frontmatter + Markdown body.
+YAML frontmatter with hub settings and agents config, plus Markdown body.
 
 ### Frontmatter Fields
 
@@ -71,6 +65,20 @@ YAML frontmatter + Markdown body.
 | `hub_type` | string | `user` or `workflow` |
 | `followup_message` | string | Message sent after inactivity |
 | `inactivity_interval` | number | Minutes before followup |
+| `agents` | array | Agent configurations (see below) |
+
+### Agent Configuration (in hub.md)
+
+Each agent in the `agents` array:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | string | Agent display name |
+| `role` | string | `Pilot`, `Copilot`, `Specialist for Pilot`, etc. |
+| `model` | string | LLM model (e.g., `gpt-4o`) |
+| `instructions_file` | string | Path to instructions file |
+| `tools.native` | array | Native tool IDs |
+| `tools.custom` | array | Custom tool definitions |
 
 ### Example
 
@@ -82,71 +90,65 @@ ai_mode: Pilot+Copilot
 hub_type: user
 followup_message: "Oi! Ainda está aí?"
 inactivity_interval: 5
----
-```
-
-### Body Sections
-
-- **Casos de Uso** - Use cases
-- **Conexões Necessárias** - Required connections table
-- **Agents** - Agent list with roles and files
-- **Checklist de Customização** - Customization checklist
-
----
-
-## Agent Config Format
-
-Located at `agents/{name}/config.md`. Contains YAML frontmatter + brief description.
-
-### Frontmatter Fields
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `name` | string | Agent display name |
-| `role` | string | `Pilot`, `Copilot`, `Specialist for Pilot`, etc. |
-| `model` | string | LLM model (e.g., `gpt-4o`) |
-| `temperature` | number | 0.0 to 2.0 |
-| `tools.native` | array | Native tool IDs |
-| `tools.custom` | array | Custom tool definitions |
-
-### Example
-
-```yaml
----
-name: Atendente
-role: Pilot
-model: gpt-4o
-temperature: 0.7
-tools:
-  native:
-    - send_whatsapp_message
-  custom:
-    - name: criar_pedido
-      description: Cria um novo pedido no sistema
-      method: POST
-      endpoint: /pedidos
+agents:
+  - name: Atendente
+    role: Pilot
+    model: gpt-4o
+    instructions_file: atendente.md
+    tools:
+      native:
+        - send_whatsapp_message
+      custom:
+        - name: criar_pedido
+          description: Cria um novo pedido no sistema
+          method: POST
+          endpoint: /pedidos
 ---
 
-# Atendente
+# Pizzaria - Pedidos
 
-Atendente virtual para receber pedidos de pizza via WhatsApp.
+Template para atendimento de pedidos de pizzaria via WhatsApp.
 
-## Customization Checklist
+## Casos de Uso
+...
 
-- [ ] Replace `{NOME_EMPRESA}` in instructions
-- [ ] Update menu with actual prices
-- [ ] Configure delivery areas
+## Conexões Necessárias
+| Conexão | Tipo | Finalidade |
+|---------|------|------------|
+| WhatsApp Business | whatsapp | Atendimento ao cliente |
+| OpenAI ou OpenRouter | agent | LLM para os agentes |
+
+## Agents
+| Agent | Role | Instructions |
+|-------|------|--------------|
+| Atendente | Pilot | `atendente.md` |
+
+## Checklist de Customização
+- [ ] Substituir `{NOME_EMPRESA}` pelo nome da pizzaria
+- [ ] Adicionar cardápio completo com preços
 ```
 
 ---
 
 ## Agent Instructions Format
 
-Located at `agents/{name}/instructions.md`. Contains the full agent prompt.
+Located at `{agent-slug}.md` (e.g., `atendente.md`). Contains minimal frontmatter + full agent prompt.
+
+### Frontmatter
+
+```yaml
+---
+agent_name: "Atendente"
+---
+```
 
 ### Structure
 
 ```markdown
+---
+agent_name: "Atendente"
+---
+
 # Instructions
 
 [Opening statement with {NOME_EMPRESA} placeholder]
@@ -188,6 +190,7 @@ Replace these when customizing templates:
 |-------------|-------------|---------|
 | `{NOME_EMPRESA}` | Company/business name | "Pizzaria do João" |
 | `{NOME_CLINICA}` | Clinic name | "Clínica OdontoSorriso" |
+| `{NOME_ACADEMIA}` | Academy name | "Academia AquaFit" |
 | `{NOME_PRODUTO}` | Product name | "CRM Pro" |
 | `{CUSTOMIZE: Section}` | Section requiring customization | Menu, prices, hours |
 | `R$ XX` | Price placeholder | "R$ 45,00" |
@@ -200,6 +203,8 @@ Sections marked `{CUSTOMIZE: ...}` require business-specific content:
 - `{CUSTOMIZE: Informações de Entrega}` - Delivery info
 - `{CUSTOMIZE: Serviços}` - Available services
 - `{CUSTOMIZE: Horários}` - Business hours
+- `{CUSTOMIZE: Modalidades e Horários}` - Class schedules
+- `{CUSTOMIZE: Planos e Preços}` - Plans and pricing
 
 ---
 
@@ -238,14 +243,11 @@ Creates a `./templates/` folder. Then read files locally:
 
 **Examples:**
 ```
-# Hub config
+# Hub config (includes agent config)
 Read("./templates/pt/vertical/pizzaria/pedidos/hub.md")
 
-# Agent config
-Read("./templates/pt/vertical/pizzaria/pedidos/agents/atendente/config.md")
-
 # Agent instructions
-Read("./templates/pt/vertical/pizzaria/pedidos/agents/atendente/instructions.md")
+Read("./templates/pt/vertical/pizzaria/pedidos/atendente.md")
 ```
 
 ### MCP Prompts
@@ -267,9 +269,8 @@ Multi-language guided workflows:
 2. If not: `download_templates()` → curl → unzip
 3. List templates: `templates://index` or `get_templates()`
 4. Read local files:
-   - `Read("./templates/pt/.../hub.md")`
-   - `Read("./templates/pt/.../agents/{name}/config.md")`
-   - `Read("./templates/pt/.../agents/{name}/instructions.md")`
+   - `Read("./templates/pt/.../hub.md")` - hub config + agent config
+   - `Read("./templates/pt/.../{agent}.md")` - agent instructions
 5. Replace placeholders (`{NOME_EMPRESA}`, etc.)
 6. Customize `{CUSTOMIZE: ...}` sections in instructions
 7. Create hub and agent via MCP tools

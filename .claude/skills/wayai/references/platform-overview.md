@@ -49,7 +49,7 @@ WayAI is a SaaS platform for AI-powered omnichannel communication hubs. It integ
 
 ## Connection Types
 
-Connections enable hub functionality. Created via UI (platform.wayai.pro → Hub → Settings → Connections).
+Connections enable hub functionality. Created via UI (Settings → Organization → Project → Hub → Connections).
 
 | Category | Examples |
 |----------|----------|

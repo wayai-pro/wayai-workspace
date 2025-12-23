@@ -1,6 +1,6 @@
 # Connections
 
-Setup guide for WayAI hub connections. Created via **UI** at platform.wayai.pro → Settings → Organizations → Project → Hub → Connections.
+Setup guide for WayAI hub connections. Created via **UI** at Settings → Organization → Project → Hub → Connections.
 
 ## Table of Contents
 - [Connector Types](#connector-types)
