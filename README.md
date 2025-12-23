@@ -24,11 +24,16 @@ cat > CLAUDE.md << 'EOF'
 
 Use the wayai skill to manage hub configurations.
 
+## ⚠️ Before Making Changes
+
+**Always read `.claude/skills/wayai/SKILL.md` before creating or modifying hubs/agents.**
+It contains step-by-step workflows, including steps that require user action in the UI before proceeding.
+
 ## Repository Structure
 
 ```
 .claude/skills/wayai/     # WayAI skill (Agent Skills format)
-├── SKILL.md              # Main skill documentation
+├── SKILL.md              # Main skill documentation (READ THIS FIRST)
 ├── references/           # Detailed reference docs
 └── assets/templates/     # Hub templates
 .mcp.json                 # MCP server configuration
@@ -87,11 +92,16 @@ cat > AGENTS.md << 'EOF'
 
 Use the wayai skill to manage hub configurations.
 
+## ⚠️ Before Making Changes
+
+**Always read `.codex/skills/wayai/SKILL.md` before creating or modifying hubs/agents.**
+It contains step-by-step workflows, including steps that require user action in the UI before proceeding.
+
 ## Repository Structure
 
 ```
 .codex/skills/wayai/      # WayAI skill (Agent Skills format)
-├── SKILL.md              # Main skill documentation
+├── SKILL.md              # Main skill documentation (READ THIS FIRST)
 ├── references/           # Detailed reference docs
 └── assets/templates/     # Hub templates
 .mcp.json                 # MCP server configuration
