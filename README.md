@@ -61,7 +61,7 @@ download_skill()  # Returns URL
 curl -L "<url>" -o skill.zip && unzip -o skill.zip -d ./
 ```
 
-### Template Sync
+### Repository Updates
 ```bash
 # First time: add remote and merge with --allow-unrelated-histories
 git remote add template https://github.com/wayai-resources/wayai.git
@@ -124,7 +124,7 @@ download_skill()  # Returns URL
 curl -L "<url>" -o skill.zip && unzip -o skill.zip -d ./
 ```
 
-### Template Sync
+### Repository Updates
 ```bash
 # First time: add remote and merge with --allow-unrelated-histories
 git remote add template https://github.com/wayai-resources/wayai.git
