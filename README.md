@@ -51,22 +51,20 @@ workspace/
 
 ### Templates
 
-Download hub templates for quick setup:
-
-```bash
-download_templates()  # Returns URL
-curl -L "<url>" -o templates.zip && unzip -o templates.zip -d ./
-```
-
-Creates `./templates/` folder with ready-to-use hub configurations:
+Hub templates are bundled in the skill at `.claude/skills/wayai/assets/templates/`.
 
 ```
-templates/
+.claude/skills/wayai/assets/templates/
+├── index.json
 └── {lang}/{type}/{category}/{variant}/
     ├── hub.md
-    └── agents/{agent}/
-        ├── config.md
-        └── instructions.md
+    └── {agent}.md
+```
+
+To use templates, read them directly from the skill:
+```
+Read("assets/templates/index.json")
+Read("assets/templates/pt/vertical/pizzaria/pedidos/hub.md")
 ```
 
 ### Skill Updates

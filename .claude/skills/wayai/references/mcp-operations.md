@@ -56,37 +56,6 @@ Returns: download URL for skill zip (expires in 5 minutes)
 2. Download and extract: `curl -L "<url>" -o skill.zip && unzip -o skill.zip -d ~/.claude/skills/`
 3. Start a new conversation to load the updated skill
 
-### download_templates
-Download all templates as a zip file. Extract to ./templates/ folder for local access.
-```
-download_templates()
-```
-Returns: download URL (expires in 5 minutes)
-
-**To download and extract:**
-```bash
-curl -L "<url>" -o templates.zip
-unzip -o templates.zip -d ./
-```
-
-Creates a `./templates/` folder with structure:
-```
-templates/
-├── index.json
-└── pt/
-    └── vertical/
-        └── pizzaria/
-            └── pedidos/
-                ├── hub.md           # Hub config + agents config in frontmatter
-                └── atendente.md     # Agent instructions only
-```
-
-**After download, read templates locally:**
-```
-Read("./templates/pt/vertical/pizzaria/pedidos/hub.md")         # Hub config
-Read("./templates/pt/vertical/pizzaria/pedidos/atendente.md")   # Agent instructions
-```
-
 ---
 
 ## Organization Operations
@@ -145,7 +114,7 @@ Create a new hub in a project.
 
 **Before calling this tool:**
 1. Use `get_workspace()` to list organizations/projects and confirm with the user which project to create the hub in
-2. Use `get_templates()` or read `templates://index` to check available hub templates and ask the user which template to use as reference
+2. If wayai skill is available, read `assets/templates/index.json` to check available hub templates and ask the user which template to use as reference
 
 ```
 create_hub(

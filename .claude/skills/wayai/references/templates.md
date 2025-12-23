@@ -8,7 +8,7 @@ Reference for WayAI hub templates.
 - [Hub File Format](#hub-file-format)
 - [Agent Instructions Format](#agent-instructions-format)
 - [Placeholders](#placeholders)
-- [MCP Access](#mcp-access)
+- [Accessing Templates](#accessing-templates)
 
 ---
 
@@ -208,69 +208,35 @@ Sections marked `{CUSTOMIZE: ...}` require business-specific content:
 
 ---
 
-## MCP Access
+## Accessing Templates
 
-### List Templates
+Templates are bundled in this skill at `assets/templates/`. No download needed.
 
-**Resource:**
+**List all templates:**
 ```
-templates://index
-```
-
-**Tool (alternative):**
-```
-get_templates()
+Read("assets/templates/index.json")
 ```
 
-Returns JSON with all available templates (v2.0 format).
-
-### Download All Templates
-
-**Tool:**
-```
-download_templates()
-```
-
-Returns a signed URL (valid for 5 minutes) to download all templates as a zip file.
-
-**Download and extract:**
-```bash
-curl -L "<url>" -o templates.zip
-unzip -o templates.zip -d ./
-```
-
-Creates a `./templates/` folder. Then read files locally:
-
-**Examples:**
+**Read template files:**
 ```
 # Hub config (includes agent config)
-Read("./templates/pt/vertical/pizzaria/pedidos/hub.md")
+Read("assets/templates/pt/vertical/pizzaria/pedidos/hub.md")
 
 # Agent instructions
-Read("./templates/pt/vertical/pizzaria/pedidos/atendente.md")
+Read("assets/templates/pt/vertical/pizzaria/pedidos/atendente.md")
 ```
-
-### MCP Prompts
-
-Multi-language guided workflows:
-
-| Language | Create Hub | Edit Hub |
-|----------|------------|----------|
-| Portuguese | `criar-hub` | `editar-hub` |
-| English | `create-hub` | `edit-hub` |
-| Spanish | `crear-hub` | `editar-hub-es` |
 
 ---
 
 ## Quick Reference
 
 **Workflow:**
-1. Check if `./templates/` folder exists
-2. If not: `download_templates()` → curl → unzip
-3. List templates: `templates://index` or `get_templates()`
-4. Read local files:
-   - `Read("./templates/pt/.../hub.md")` - hub config + agent config
-   - `Read("./templates/pt/.../{agent}.md")` - agent instructions
+1. Read template index: `Read("assets/templates/index.json")`
+2. Find matching template for user's use case
+3. Read template files:
+   - `Read("assets/templates/pt/.../hub.md")` - hub config + agent config
+   - `Read("assets/templates/pt/.../{agent}.md")` - agent instructions
+4. Copy to workspace: `organizations/{org}/{project}/{hub-name}/`
 5. Replace placeholders (`{NOME_EMPRESA}`, etc.)
 6. Customize `{CUSTOMIZE: ...}` sections in instructions
 7. Create hub and agent via MCP tools

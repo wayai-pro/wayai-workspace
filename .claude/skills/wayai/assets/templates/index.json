@@ -1,0 +1,78 @@
+{
+  "version": "2.0",
+  "usage": "Use get_template(path) to fetch template files. Path format: {lang}/{type}/{category}/{variant}/{file}",
+  "templates": [
+    {
+      "id": "pt-vertical-pizzaria-pedidos",
+      "lang": "pt",
+      "type": "vertical",
+      "category": "pizzaria",
+      "variant": "pedidos",
+      "name": "Pizzaria - Pedidos",
+      "description": "Template para atendimento de pedidos de pizzaria via WhatsApp",
+      "files": {
+        "hub": "hub.md",
+        "agents": [
+          {
+            "name": "atendente",
+            "instructions": "atendente.md"
+          }
+        ]
+      }
+    },
+    {
+      "id": "pt-vertical-odonto-agendamento",
+      "lang": "pt",
+      "type": "vertical",
+      "category": "odonto",
+      "variant": "agendamento",
+      "name": "Odonto - Agendamento",
+      "description": "Template para agendamento de consultas em clínicas odontológicas via WhatsApp",
+      "files": {
+        "hub": "hub.md",
+        "agents": [
+          {
+            "name": "recepcionista",
+            "instructions": "recepcionista.md"
+          }
+        ]
+      }
+    },
+    {
+      "id": "pt-horizontal-sdr-simples",
+      "lang": "pt",
+      "type": "horizontal",
+      "category": "sdr",
+      "variant": "simples",
+      "name": "SDR - Simples",
+      "description": "Template para SDR focado em qualificação de leads inbound",
+      "files": {
+        "hub": "hub.md",
+        "agents": [
+          {
+            "name": "sdr",
+            "instructions": "sdr.md"
+          }
+        ]
+      }
+    },
+    {
+      "id": "pt-vertical-natacao-atendimento",
+      "lang": "pt",
+      "type": "vertical",
+      "category": "natacao",
+      "variant": "atendimento",
+      "name": "Natação - Atendimento",
+      "description": "Template para agendamento de visitas em academias de natação via WhatsApp",
+      "files": {
+        "hub": "hub.md",
+        "agents": [
+          {
+            "name": "atendente",
+            "instructions": "atendente.md"
+          }
+        ]
+      }
+    }
+  ]
+}

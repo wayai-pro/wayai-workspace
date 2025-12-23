@@ -95,17 +95,6 @@ AFTER changes:
 | **Tool** | `get_tool`, `add_native_tool`, `add_mcp_tool`, `add_custom_tool`, `update_custom_tool`, `enable_tool`, `disable_tool`, `remove_tool`, `remove_custom_tool` |
 | **Connection** | `enable_connection`, `disable_connection`, `sync_mcp_connection` |
 
-**MCP Resources:**
-| Resource | Description |
-|----------|-------------|
-| `templates://index` | List all available hub templates |
-
-**Template Tools:**
-| Tool | Description |
-|------|-------------|
-| `get_templates` | List all available templates (returns JSON index) |
-| `download_templates` | Download all templates as zip (extract to ./templates/) |
-
 See [references/mcp-operations.md](references/mcp-operations.md) for detailed usage.
 
 ## Editing Agent Instructions
@@ -180,21 +169,21 @@ Claude:
 
 ## Using Templates
 
-1. **List templates:** Read `templates://index` resource or call `get_templates()`
-2. **Download all:** Use `download_templates()` → extract to `./templates/` folder
-3. **Read locally:** `Read("./templates/pt/vertical/pizzaria/pedidos/hub.md")`
+Templates are bundled in this skill at `assets/templates/`. No download needed.
+
+1. **List templates:** `Read("assets/templates/index.json")`
+2. **Read template:** `Read("assets/templates/pt/vertical/pizzaria/pedidos/hub.md")`
 
 ```
 User: "Preciso de um hub para pizzaria"
 
 Claude:
-1. Check if ./templates/ exists locally
-2. If not: download_templates() → curl → unzip -o templates.zip -d ./
-3. Read resource: templates://index → find matching template (pt/vertical/pizzaria/pedidos)
-4. Read local files:
-   - Read("./templates/pt/vertical/pizzaria/pedidos/hub.md")
-   - Read("./templates/pt/vertical/pizzaria/pedidos/agents/atendente/config.md")
-   - Read("./templates/pt/vertical/pizzaria/pedidos/agents/atendente/instructions.md")
+1. Read template index: Read("assets/templates/index.json")
+2. Find matching template (pt/vertical/pizzaria/pedidos)
+3. Read template files:
+   - Read("assets/templates/pt/vertical/pizzaria/pedidos/hub.md")
+   - Read("assets/templates/pt/vertical/pizzaria/pedidos/atendente.md")
+4. Copy to workspace: organizations/{org}/{project}/{hub-name}/
 5. Customize placeholders ({NOME_EMPRESA}, etc.)
 6. Create hub via MCP: create_hub(...)
 7. ⚠️ STOP: Direct user to UI to create Agent connection (OpenAI/OpenRouter)
@@ -202,9 +191,9 @@ Claude:
 9. Add tools to agent as needed
 ```
 
-**Template paths (inside ./templates/ folder):**
+**Template paths (inside assets/templates/):**
 - `pt/horizontal/sdr/simples/hub.md` - SDR hub config
-- `pt/vertical/odonto/agendamento/agents/recepcionista/instructions.md` - Dental receptionist agent
+- `pt/vertical/odonto/agendamento/recepcionista.md` - Dental receptionist agent instructions
 
 ## Reference Documentation
 
