@@ -22,7 +22,7 @@ workspace/                                # Workspace folder (from download_work
     └── {project-slug}/                   # Project folder
         └── {hub-slug}/                   # Hub folder
             ├── hub.md                    # Hub settings + agents config + connections table
-            └── {agent-slug}.md           # Agent instructions only
+            └── {agent-slug}-instructions.md  # Agent instructions only
 ```
 
 ## Slugification Rules
@@ -61,57 +61,55 @@ Hub file contains all settings in YAML frontmatter, including full agents config
 
 ```markdown
 ---
-hub_id: {hub_id}
 name: {name}
 description: {description}
 hub_type: user
 ai_mode: Pilot+Copilot
 followup_message: {followup_message}
 inactivity_interval: {minutes}
+connections:
+  - connector_name: WhatsApp
+    connector_id: "uuid-from-database"
+    connector_type: Channel
+  - connector_name: OpenAI
+    connector_id: "uuid-from-database"
+    connector_type: Agent
 agents:
-  - agent_id: {agent_id}
-    name: "Support Agent"
-    role: Pilot
+  - agent_name: "Support Agent"
+    agent_role: Pilot
     model: gpt-4o
     temperature: 0.7
-    instructions_file: support-agent.md
+    instructions_file: support-agent-instructions.md
     tools:
       native:
-        - tool_id: {tool_id}
-          tool_name: web_search
+        - connector_name: Wayai Conversation
+          connector_id: "uuid-from-database"
+          tools:
+            - tool_name: Close Conversation
+              tool_native_id: "uuid-from-database"
       custom:
         - tool_id: {tool_id}
           tool_name: check_order
-          tool_description_ai: "Check order status"
-          tool_method: GET
-  - agent_id: {agent_id}
-    name: "Escalation Agent"
-    role: Specialist for Pilot
+          tool_description: "Check order status"
+          method: GET
+  - agent_name: "Escalation Agent"
+    agent_role: Specialist for Pilot
     model: gpt-4o
     temperature: 0.5
-    instructions_file: escalation-agent.md
+    instructions_file: escalation-agent-instructions.md
 ---
 
 # {name}
 
 {description}
-
-## Connections
-
-| Name | Type | Status |
-|------|------|--------|
-| WhatsApp Business | whatsapp | enabled |
-| OpenAI | agent | enabled |
-| Order System | webhook | disabled |
 ```
 
-## Agent Instructions File ({agent-slug}.md)
+## Agent Instructions File ({agent-slug}-instructions.md)
 
 Agent instructions in a separate file for easier editing. The agent configuration (model, temperature, tools) is in hub.md.
 
 ```markdown
 ---
-agent_id: {agent_id}
 agent_name: "Support Agent"
 ---
 
@@ -126,26 +124,25 @@ In hub.md under agent's `tools.custom`:
 
 ```yaml
 agents:
-  - agent_id: {agent_id}
-    name: "Order Agent"
+  - agent_name: "Order Agent"
     tools:
       custom:
         - tool_id: {tool_id}
           tool_name: create_order
-          tool_description_ai: "Creates a new order"
-          tool_method: POST
+          tool_description: "Creates a new order"
+          method: POST
         - tool_id: {tool_id}
           tool_name: get_menu
-          tool_description_ai: "Retrieves menu items"
-          tool_method: GET
+          tool_description: "Retrieves menu items"
+          method: GET
 ```
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `tool_name` | string | Tool name (snake_case recommended) |
-| `tool_description_ai` | string | What the tool does (for AI) |
-| `tool_method` | enum | HTTP method: GET, POST, PUT, DELETE, PATCH |
-| `tool_url` | string | Full endpoint URL template |
+| `tool_description` | string | What the tool does (for AI) |
+| `method` | enum | HTTP method: GET, POST, PUT, DELETE, PATCH |
+| `endpoint` | string | Full endpoint URL template |
 | `tool_instructions` | string | Usage instructions for the AI |
 
 ## Download Workflow
@@ -164,8 +161,8 @@ agents:
 
 ```
 1. download_agent_instructions(hub_id, agent_id) → download URL
-2. curl -L "{url}" -o {agentname}.md  # Save to disk (avoids context bloat)
-3. Read("{agentname}.md") when needed
+2. curl -L "{url}" -o {agentname}-instructions.md  # Save to disk (avoids context bloat)
+3. Read("{agentname}-instructions.md") when needed
 ```
 
 ## Import Workflow

@@ -41,7 +41,7 @@ workspace/
 ├── last-sync.md
 └── {org-slug}/{project-slug}/{hub-slug}/
     ├── hub.md
-    └── {agent-slug}.md
+    └── {agent-slug}-instructions.md
 ```
 
 ### download_skill
@@ -208,7 +208,7 @@ Returns:
 
 **Download using curl:**
 ```bash
-curl -L "{download_url}" -o {agentname}.md
+curl -L "{download_url}" -o {agentname}-instructions.md
 ```
 
 Note: The file is recreated from `agent.instructions` on each call to ensure sync with the database. Save to disk first, then Read when needed (avoids context bloat).
@@ -276,7 +276,7 @@ update_agent_instructions(
   hub_id,        # Required
   agent_id,      # Required
   instructions,  # Required: full instructions content (markdown)
-  file_name      # Optional: defaults to {agentname}.md
+  file_name      # Optional: defaults to {agentname}-instructions.md
 )
 ```
 Returns: `file_id`, `file_path`, `instructions_updated`

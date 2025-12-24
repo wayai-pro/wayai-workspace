@@ -33,14 +33,14 @@ Each template contains a hub config and agent instruction files (workspace forma
 
 ```
 {lang}/{type}/{category}/{variant}/
-├── hub.md                    # Hub config + agents config in frontmatter
-└── {agent-slug}.md           # Agent instructions only
+├── hub.md                           # Hub config + agents config in frontmatter
+└── {agent-slug}-instructions.md     # Agent instructions only
 ```
 
 **Example:** `pt/vertical/pizzaria/pedidos/`
 ```
-├── hub.md                    # Hub settings + agent config (model, tools)
-└── atendente.md              # Agent instructions
+├── hub.md                           # Hub settings + agent config (model, tools)
+└── atendente-instructions.md        # Agent instructions
 ```
 
 **Benefits of this structure:**
@@ -73,11 +73,11 @@ Each agent in the `agents` array:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `name` | string | Agent display name |
-| `role` | string | `Pilot`, `Copilot`, `Specialist for Pilot`, etc. |
+| `agent_name` | string | Agent display name |
+| `agent_role` | string | `Pilot`, `Copilot`, `Specialist for Pilot`, etc. |
 | `model` | string | LLM model (e.g., `gpt-4o`) |
-| `instructions_file` | string | Path to instructions file |
-| `tools.native` | array | Native tool IDs |
+| `instructions_file` | string | Path to instructions file (`{agent-slug}-instructions.md`) |
+| `tools.native` | array | Native tools grouped by connector |
 | `tools.custom` | array | Custom tool definitions |
 
 ### Example
@@ -90,19 +90,22 @@ ai_mode: Pilot+Copilot
 hub_type: user
 followup_message: "Oi! Ainda está aí?"
 inactivity_interval: 5
+connections:
+  - connector_name: WhatsApp
+    connector_id: "uuid-from-database"
+    connector_type: Channel
 agents:
-  - name: Atendente
-    role: Pilot
+  - agent_name: "Atendente"
+    agent_role: Pilot
     model: gpt-4o
-    instructions_file: atendente.md
+    instructions_file: atendente-instructions.md
     tools:
       native:
-        - send_whatsapp_message
-      custom:
-        - name: criar_pedido
-          description: Cria um novo pedido no sistema
-          method: POST
-          endpoint: /pedidos
+        - connector_name: Wayai Conversation
+          connector_id: "uuid-from-database"
+          tools:
+            - tool_name: Close Conversation
+              tool_native_id: "uuid-from-database"
 ---
 
 # Pizzaria - Pedidos
@@ -121,7 +124,7 @@ Template para atendimento de pedidos de pizzaria via WhatsApp.
 ## Agents
 | Agent | Role | Instructions |
 |-------|------|--------------|
-| Atendente | Pilot | `atendente.md` |
+| Atendente | Pilot | `atendente-instructions.md` |
 
 ## Checklist de Customização
 - [ ] Substituir `{NOME_EMPRESA}` pelo nome da pizzaria
@@ -132,7 +135,7 @@ Template para atendimento de pedidos de pizzaria via WhatsApp.
 
 ## Agent Instructions Format
 
-Located at `{agent-slug}.md` (e.g., `atendente.md`). Contains minimal frontmatter + full agent prompt.
+Located at `{agent-slug}-instructions.md` (e.g., `atendente-instructions.md`). Contains minimal frontmatter + full agent prompt.
 
 ### Frontmatter
 
@@ -223,7 +226,7 @@ Read("assets/templates/index.json")
 Read("assets/templates/pt/vertical/pizzaria/pedidos/hub.md")
 
 # Agent instructions
-Read("assets/templates/pt/vertical/pizzaria/pedidos/atendente.md")
+Read("assets/templates/pt/vertical/pizzaria/pedidos/atendente-instructions.md")
 ```
 
 ---
@@ -235,7 +238,7 @@ Read("assets/templates/pt/vertical/pizzaria/pedidos/atendente.md")
 2. Find matching template for user's use case
 3. Read template files:
    - `Read("assets/templates/pt/.../hub.md")` - hub config + agent config
-   - `Read("assets/templates/pt/.../{agent}.md")` - agent instructions
+   - `Read("assets/templates/pt/.../{agent}-instructions.md")` - agent instructions
 4. Copy to workspace: `organizations/{org}/{project}/{hub-name}/`
 5. Replace placeholders (`{NOME_EMPRESA}`, etc.)
 6. Customize `{CUSTOMIZE: ...}` sections in instructions
