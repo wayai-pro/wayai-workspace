@@ -5,25 +5,32 @@ ai_mode: Pilot+Copilot
 hub_type: user
 followup_message: "Oi! Vi que você estava agendando uma consulta. Posso ajudar?"
 inactivity_interval: 10
+connections:
+  - connector_name: OpenAI
+    connector_id: "0cd6a292-895b-4667-b89e-dd298628c272"
+    connector_type: Agent
+  - connector_name: WhatsApp
+    connector_id: "5fb214cb-aaa8-4b3d-8c65-c9370b3e7c85"
+    connector_type: Channel
+  - connector_name: Google Calendar
+    connector_id: "189c2e74-2275-43b6-8dac-0fb3b782e9de"
+    connector_type: Tool - Native
 agents:
-  - name: Recepcionista
-    role: Pilot
+  - agent_name: Recepcionista
+    agent_role: Pilot
     model: gpt-4o
-    instructions_file: recepcionista.md
+    instructions_file: recepcionista-instructions.md
     tools:
       native:
-        - send_whatsapp_message
-        - google_calendar_create_event
-        - google_calendar_list_events
-      custom:
-        - name: consultar_agenda
-          description: Consulta horários disponíveis
-          method: GET
-          endpoint: /agenda/disponibilidade
-        - name: criar_agendamento
-          description: Cria novo agendamento
-          method: POST
-          endpoint: /agendamentos
+        - connector_name: Google Calendar
+          connector_id: "189c2e74-2275-43b6-8dac-0fb3b782e9de"
+          tools:
+            - tool_name: Create Event
+              tool_native_id: "2482de79-2f7d-444f-a6a1-e943faf59ec6"
+            - tool_name: List Events
+              tool_native_id: "37f60e18-eb76-4efa-968d-1f961bd8325d"
+            - tool_name: Check Availability
+              tool_native_id: "a5e8c649-0f7d-4b3e-b9ac-96efb8e4c93b"
 ---
 
 # Odonto - Agendamento
@@ -37,23 +44,6 @@ Template para agendamento de consultas em clínicas odontológicas via WhatsApp.
 - Tirar dúvidas sobre procedimentos
 - Informar sobre valores e formas de pagamento
 - Enviar lembretes de consulta
-
-## Conexões Necessárias
-
-| Conexão | Tipo | Finalidade |
-|---------|------|------------|
-| WhatsApp Business | whatsapp | Atendimento ao paciente |
-| OpenAI ou OpenRouter | agent | LLM para o agente |
-| Google Calendar | google_calendar | Gestão de agenda |
-| Webhook (opcional) | webhook | Integração com sistema da clínica |
-
-## Agents
-
-| Agent | Role | Instructions |
-|-------|------|--------------|
-| Recepcionista | Pilot | `recepcionista.md` |
-
----
 
 ## Checklist de Customização
 

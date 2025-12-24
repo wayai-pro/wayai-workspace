@@ -1,6 +1,10 @@
 {
-  "version": "2.0",
+  "version": "2.1",
   "usage": "Use get_template(path) to fetch template files. Path format: {lang}/{type}/{category}/{variant}/{file}",
+  "notes": {
+    "connector_id": "Production UUIDs identifying connector types (OpenAI, WhatsApp, etc.). These are fixed IDs from the WayAI database, not placeholders.",
+    "tool_native_id": "Production UUIDs identifying specific native tools. These are fixed IDs from the WayAI database."
+  },
   "templates": [
     {
       "id": "pt-vertical-pizzaria-pedidos",
@@ -15,7 +19,7 @@
         "agents": [
           {
             "name": "atendente",
-            "instructions": "atendente.md"
+            "instructions": "atendente-instructions.md"
           }
         ]
       }
@@ -33,7 +37,7 @@
         "agents": [
           {
             "name": "recepcionista",
-            "instructions": "recepcionista.md"
+            "instructions": "recepcionista-instructions.md"
           }
         ]
       }
@@ -51,7 +55,7 @@
         "agents": [
           {
             "name": "sdr",
-            "instructions": "sdr.md"
+            "instructions": "sdr-instructions.md"
           }
         ]
       }
@@ -69,7 +73,7 @@
         "agents": [
           {
             "name": "atendente",
-            "instructions": "atendente.md"
+            "instructions": "atendente-instructions.md"
           }
         ]
       }

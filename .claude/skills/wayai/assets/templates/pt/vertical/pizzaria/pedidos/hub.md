@@ -5,23 +5,18 @@ ai_mode: Pilot+Copilot
 hub_type: user
 followup_message: "Oi! Ainda está aí? Posso ajudar com mais alguma coisa?"
 inactivity_interval: 5
+connections:
+  - connector_name: OpenAI
+    connector_id: "0cd6a292-895b-4667-b89e-dd298628c272"
+    connector_type: Agent
+  - connector_name: WhatsApp
+    connector_id: "5fb214cb-aaa8-4b3d-8c65-c9370b3e7c85"
+    connector_type: Channel
 agents:
-  - name: Atendente
-    role: Pilot
+  - agent_name: Atendente
+    agent_role: Pilot
     model: gpt-4o
-    instructions_file: atendente.md
-    tools:
-      native:
-        - send_whatsapp_message
-      custom:
-        - name: criar_pedido
-          description: Cria um novo pedido no sistema
-          method: POST
-          endpoint: /pedidos
-        - name: consultar_cardapio
-          description: Consulta cardápio e preços
-          method: GET
-          endpoint: /cardapio
+    instructions_file: atendente-instructions.md
 ---
 
 # Pizzaria - Pedidos
@@ -34,22 +29,6 @@ Template para atendimento de pedidos de pizzaria via WhatsApp.
 - Tirar dúvidas sobre cardápio
 - Informar tempo de entrega
 - Modificar pedidos antes do preparo
-
-## Conexões Necessárias
-
-| Conexão | Tipo | Finalidade |
-|---------|------|------------|
-| WhatsApp Business | whatsapp | Atendimento ao cliente |
-| OpenAI ou OpenRouter | agent | LLM para os agentes |
-| Webhook (opcional) | webhook | Integração com sistema de pedidos |
-
-## Agents
-
-| Agent | Role | Instructions |
-|-------|------|--------------|
-| Atendente | Pilot | `atendente.md` |
-
----
 
 ## Checklist de Customização
 

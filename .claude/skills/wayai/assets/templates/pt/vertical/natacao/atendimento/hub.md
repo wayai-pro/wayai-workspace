@@ -5,18 +5,42 @@ ai_mode: Pilot+Copilot
 hub_type: user
 followup_message: "Oi! Ainda está interessado em conhecer a academia? Posso agendar uma visita gratuita para você!"
 inactivity_interval: 10
+connections:
+  - connector_name: OpenAI
+    connector_id: "0cd6a292-895b-4667-b89e-dd298628c272"
+    connector_type: Agent
+  - connector_name: WhatsApp
+    connector_id: "5fb214cb-aaa8-4b3d-8c65-c9370b3e7c85"
+    connector_type: Channel
+  - connector_name: Google Calendar
+    connector_id: "189c2e74-2275-43b6-8dac-0fb3b782e9de"
+    connector_type: Tool - Native
+  - connector_name: Wayai Conversation
+    connector_id: "b17d9f3a-4e1b-46c9-b648-a2f0c3611aa4"
+    connector_type: Tool - Native
 agents:
-  - name: Atendente
-    role: Pilot
+  - agent_name: Atendente
+    agent_role: Pilot
     model: gpt-4o
-    instructions_file: atendente.md
+    instructions_file: atendente-instructions.md
     tools:
       native:
-        - google_calendar_check_availability
-        - google_calendar_create_event
-        - google_calendar_update_event
-        - google_calendar_delete_event
-        - transfer_to_team
+        - connector_name: Google Calendar
+          connector_id: "189c2e74-2275-43b6-8dac-0fb3b782e9de"
+          tools:
+            - tool_name: Check Availability
+              tool_native_id: "a5e8c649-0f7d-4b3e-b9ac-96efb8e4c93b"
+            - tool_name: Create Event
+              tool_native_id: "2482de79-2f7d-444f-a6a1-e943faf59ec6"
+            - tool_name: Update Event
+              tool_native_id: "24f82d08-ee88-439e-851f-a33f48c8471e"
+            - tool_name: Delete Event
+              tool_native_id: "763413b8-4464-44d2-989e-682d4c2e8385"
+        - connector_name: Wayai Conversation
+          connector_id: "b17d9f3a-4e1b-46c9-b648-a2f0c3611aa4"
+          tools:
+            - tool_name: Transfer to Team
+              tool_native_id: "1fcac563-34d5-4546-80cd-9ac9c3f19ef7"
 ---
 
 # Natação - Atendimento
@@ -31,22 +55,6 @@ Template para atendimento de academias de natação via WhatsApp, com foco em **
 - Esclarecer dúvidas sobre planos e preços
 - Orientar sobre processo de matrícula
 - Informar sobre regras da piscina e o que trazer
-
-## Conexões Necessárias
-
-| Conexão | Tipo | Finalidade |
-|---------|------|------------|
-| WhatsApp Business | whatsapp | Atendimento ao cliente |
-| OpenAI ou OpenRouter | agent | LLM para o agente |
-| Google Calendar | google_calendar | Agendamento de visitas |
-
-## Agents
-
-| Agent | Role | Instructions |
-|-------|------|--------------|
-| Atendente | Pilot | `atendente.md` |
-
----
 
 ## Checklist de Customização
 
