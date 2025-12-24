@@ -14,8 +14,20 @@ Tools provided by native connectors. Added to agents via `add_native_tool()`.
 ## Conversation Tools
 
 **Connector:** Wayai Conversation
+**connector_id:** `b17d9f3a-4e1b-46c9-b648-a2f0c3611aa4`
 
 Tools for managing conversations, transfers, and agent consultations.
+
+| Tool | tool_native_id |
+|------|----------------|
+| Close Conversation | `8db2461f-7b43-4e06-aca7-b110dbd4317d` |
+| Consult Agent | `f3c7d8e9-1a2b-4e5f-8901-234567abcdef` |
+| Get Internal Files | `e5e6f7a8-9abc-0def-1234-567890abcdef` |
+| Schedule Followup | `9f8e7d6c-5b4a-3e2d-1c0b-9a8f7e6d5c4b` |
+| Send Internal Files | `f6f7a8b9-0bcd-1def-2345-678901bcdef0` |
+| Transfer to Agent | `e1f2a3b4-5c6d-7e8f-9012-345678abcdef` |
+| Transfer to Team | `1fcac563-34d5-4546-80cd-9ac9c3f19ef7` |
+| Update Kanban Status | `c8f7e2b1-9a4d-4e8c-b3f6-1d5a8e9c7b2f` |
 
 ### conversation_transfer
 
@@ -107,8 +119,16 @@ Call a pre-configured consultant agent.
 ## Knowledge Tools
 
 **Connector:** Wayai Knowledge
+**connector_id:** `d45e6f78-9abc-4def-8901-23456789abcd`
 
 Tools for accessing and managing knowledge bases.
+
+| Tool | tool_native_id |
+|------|----------------|
+| Get Knowledge Item | `d4d5e6f7-8a9b-0c1d-2e3f-4a5b6c7d8e9f` |
+| List Knowledge Bases | `c3c4d5e6-7f8a-9b0c-1d2e-3f4a5b6c7d8e` |
+| Retrieve Knowledge Content | `a1a2b3c4-5d6e-7f8a-9b0c-1d2e3f4a5b6c` |
+| Update Knowledge Content | `b2b3c4d5-6e7f-8a9b-0c1d-2e3f4a5b6c7d` |
 
 ### retrieve_knowledge_content
 
@@ -156,8 +176,17 @@ Update an existing knowledge item.
 ## Google Calendar Tools
 
 **Connector:** Google Calendar
+**connector_id:** `189c2e74-2275-43b6-8dac-0fb3b782e9de`
 
 Tools for managing calendar events and availability.
+
+| Tool | tool_native_id |
+|------|----------------|
+| Check Availability - Google Calendar | `a5e8c649-0f7d-4b3e-b9ac-96efb8e4c93b` |
+| Create Event - Google Calendar | `2482de79-2f7d-444f-a6a1-e943faf59ec6` |
+| Delete Event - Google Calendar | `763413b8-4464-44d2-989e-682d4c2e8385` |
+| List Events - Google Calendar | `37f60e18-eb76-4efa-968d-1f961bd8325d` |
+| Update Event - Google Calendar | `24f82d08-ee88-439e-851f-a33f48c8471e` |
 
 ### google_calendar_list_calendars
 
@@ -234,8 +263,14 @@ Check if a time slot is available.
 ## Meta Tools
 
 **Connector:** Wayai Meta Tools
+**connector_id:** `c39d5aca-1c43-47cc-b6f1-56d962fe2bbb`
 
 Tools for meta-level tool management and execution.
+
+| Tool | tool_native_id |
+|------|----------------|
+| Execute Tool | `b4c997fe-91ab-4f4e-85f9-5bc66d2d9e7e` |
+| Get Tool Schema | `a28d74c7-5b78-4847-9a5b-046e398fa6ae` |
 
 ### get_tool_schema
 
@@ -261,8 +296,9 @@ Execute a tool with parameters.
 ## MCP Client Tools
 
 **Connector:** MCP Server (Token or OAuth)
+**connector_id:** Token: `f1a2b3c4-d5e6-7890-abcd-ef1234567890` | OAuth: `a2b3c4d5-e6f7-8901-bcde-f12345678901`
 
-Tools for interfacing with external MCP servers.
+Tools for interfacing with external MCP servers. Tool IDs are dynamically discovered from each connected MCP server.
 
 ### mcp_discover_tools
 
