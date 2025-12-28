@@ -55,7 +55,7 @@ Transfer to team by name (dynamic lookup).
 |-----------|------|----------|-------------|
 | `team_name` | string | Yes | Name of team to transfer to |
 
-### conversation_close
+### close_conversation
 
 Close/end a conversation.
 
@@ -343,7 +343,7 @@ Any tool discovered from connected MCP servers can be executed directly by name.
 
 | Module | Key Tools |
 |--------|-----------|
-| Conversation | `transfer_to_agent`, `transfer_to_team`, `conversation_close`, `consult_agent` |
+| Conversation | `transfer_to_agent`, `transfer_to_team`, `close_conversation`, `consult_agent` |
 | Knowledge | `retrieve_knowledge_content`, `list_knowledge_bases`, `get_knowledge_item` |
 | Google Calendar | `google_calendar_list_events`, `google_calendar_create_event`, `google_calendar_check_availability` |
 | Meta Tools | `get_tool_schema`, `execute_tool` |
