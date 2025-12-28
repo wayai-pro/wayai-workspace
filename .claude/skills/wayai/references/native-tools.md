@@ -13,7 +13,7 @@ Tools provided by native connectors. Added to agents via `add_native_tool()`.
 
 ## Conversation Tools
 
-**Connector:** Wayai Conversation
+**Connector:** Wayai
 **connector_id:** `b17d9f3a-4e1b-46c9-b648-a2f0c3611aa4`
 
 Tools for managing conversations, transfers, and agent consultations.
@@ -262,10 +262,10 @@ Check if a time slot is available.
 
 ## Meta Tools
 
-**Connector:** Wayai Meta Tools
-**connector_id:** `c39d5aca-1c43-47cc-b6f1-56d962fe2bbb`
+**Connector:** Wayai
+**connector_id:** `b17d9f3a-4e1b-46c9-b648-a2f0c3611aa4`
 
-Tools for meta-level tool management and execution.
+Tools for meta-level tool management and execution (part of the Wayai connector).
 
 | Tool | tool_native_id |
 |------|----------------|
