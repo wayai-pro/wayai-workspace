@@ -4,7 +4,7 @@ Tools provided by native connectors. Added to agents via `add_native_tool()`.
 
 ## Table of Contents
 - [Conversation Tools](#conversation-tools)
-- [Knowledge Tools](#knowledge-tools)
+- [Resource Tools](#resource-tools)
 - [Google Calendar Tools](#google-calendar-tools)
 - [Meta Tools](#meta-tools)
 - [MCP Client Tools](#mcp-client-tools)
@@ -116,60 +116,60 @@ Call a pre-configured consultant agent.
 
 ---
 
-## Knowledge Tools
+## Resource Tools
 
-**Connector:** Wayai Knowledge
+**Connector:** Wayai Resource
 **connector_id:** `d45e6f78-9abc-4def-8901-23456789abcd`
 
-Tools for accessing and managing knowledge bases.
+Tools for accessing and managing resource bases.
 
 | Tool | tool_native_id |
 |------|----------------|
-| Get Knowledge Item | `d4d5e6f7-8a9b-0c1d-2e3f-4a5b6c7d8e9f` |
-| List Knowledge Bases | `c3c4d5e6-7f8a-9b0c-1d2e-3f4a5b6c7d8e` |
-| Retrieve Knowledge Content | `a1a2b3c4-5d6e-7f8a-9b0c-1d2e3f4a5b6c` |
-| Update Knowledge Content | `b2b3c4d5-6e7f-8a9b-0c1d-2e3f4a5b6c7d` |
+| Get Resource Item | `d4d5e6f7-8a9b-0c1d-2e3f-4a5b6c7d8e9f` |
+| List Resources | `c3c4d5e6-7f8a-9b0c-1d2e-3f4a5b6c7d8e` |
+| Retrieve Resource Content | `a1a2b3c4-5d6e-7f8a-9b0c-1d2e3f4a5b6c` |
+| Update Resource Content | `b2b3c4d5-6e7f-8a9b-0c1d-2e3f4a5b6c7d` |
 
-### retrieve_knowledge_content
+### retrieve_resource_content
 
-Search and retrieve knowledge items with filtering.
+Search and retrieve resource items with filtering.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `entity_type` | string | No | 'organization', 'project', or 'hub' |
 | `entity_id` | string | No | Entity ID to scope search |
-| `knowledge_id` | string | No | Specific knowledge base ID |
+| `resource_id` | string | No | Specific resource base ID |
 | `search_query` | string | No | Search text |
 | `tags` | array | No | Filter by tags |
 | `content_format` | array | No | Filter by format |
 | `limit` | number | No | Max results (default 10, max 100) |
 | `offset` | number | No | Pagination offset |
 
-### list_knowledge_bases
+### list_resources
 
-List available knowledge bases.
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `knowledge_base_name` | string | No | Filter by specific name |
-
-### get_knowledge_item
-
-Get a specific knowledge item by ID.
+List available resources.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `knowledge_item_id` | string | Yes | Knowledge item ID |
+| `resource_name` | string | No | Filter by specific name |
 
-### update_knowledge_content
+### get_resource_item
 
-Update an existing knowledge item.
+Get a specific resource item by ID.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `knowledge_item_id` | string | Yes | Item ID to update |
-| `knowledge_item_content` | string | Yes | New content |
-| `knowledge_item_title` | string | No | New title |
+| `resource_item_id` | string | Yes | Resource item ID |
+
+### update_resource_content
+
+Update an existing resource item.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `resource_item_id` | string | Yes | Item ID to update |
+| `resource_item_content` | string | Yes | New content |
+| `resource_item_title` | string | No | New title |
 
 ---
 
@@ -344,7 +344,7 @@ Any tool discovered from connected MCP servers can be executed directly by name.
 | Module | Key Tools |
 |--------|-----------|
 | Conversation | `transfer_to_agent`, `transfer_to_team`, `close_conversation`, `consult_agent` |
-| Knowledge | `retrieve_knowledge_content`, `list_knowledge_bases`, `get_knowledge_item` |
+| Resource | `retrieve_resource_content`, `list_resources`, `get_resource_item` |
 | Google Calendar | `google_calendar_list_events`, `google_calendar_create_event`, `google_calendar_check_availability` |
 | Meta Tools | `get_tool_schema`, `execute_tool` |
 | MCP Client | `mcp_discover_tools`, `mcp_read_resource`, dynamic tools |

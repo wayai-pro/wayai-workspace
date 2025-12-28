@@ -206,7 +206,7 @@ See [native-tools.md](native-tools.md) for available tools and their parameters.
 | YouTube | `7c9e2f4a-6b8d-4e1f-9c3a-5d7e8f6a9b2c` | OAuth | Access YouTube channel data, videos, and playlists. |
 | Wayai Conversation | `b17d9f3a-4e1b-46c9-b648-a2f0c3611aa4` | None | Manage conversations, transfers, and agent consultations. |
 | Wayai Meta Tools | `c39d5aca-1c43-47cc-b6f1-56d962fe2bbb` | None | Dynamically execute tools and retrieve tool schemas. |
-| Wayai Knowledge | `d45e6f78-9abc-4def-8901-23456789abcd` | None | Search and manage knowledge base content. |
+| Wayai Resource | `d45e6f78-9abc-4def-8901-23456789abcd` | None | Search and manage resource base content. |
 | Wayai External Storage | `e8f9a0b1-2c3d-4e5f-6789-0abcdef12345` | API Key | Connect to external file storage services. |
 
 ### Google Calendar
@@ -268,16 +268,16 @@ Internal tools for agent orchestration.
 
 **Agent tools:** Transfer to human, end conversation, escalation controls.
 
-### Wayai Knowledge
+### Wayai Resource
 
-Internal knowledge base tools.
+Internal resource base tools.
 
 **Setup:**
 1. Settings → Organizations → Project → Hub → Connections
-2. In the **Tool - Native** group, click the **Wayai Knowledge** card
+2. In the **Tool - Native** group, click the **Wayai Resource** card
 3. Click Save (no credentials required)
 
-**Agent tools:** Search knowledge base, retrieve documents.
+**Agent tools:** Search resource base, retrieve documents.
 
 ### Wayai External Storage
 

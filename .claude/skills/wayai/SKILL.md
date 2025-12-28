@@ -63,7 +63,7 @@ Setup order: Organization (signup) → Project → Hub → Connections (UI) → 
 - OpenAI or OpenRouter → UI: Settings → Organization → Project → Hub → Connections → Agent group
 
 **For enabling/creating tools → Tool connection required:**
-- **Auto-enabled (no connection):** Wayai Conversation, Wayai Meta Tools, Wayai Knowledge
+- **Auto-enabled (no connection):** Wayai Conversation, Wayai Meta Tools, Wayai Resource
 - **Tool - Native (OAuth):** Google Calendar, Drive, YouTube
 - **Tool - Native (API Key):** Wayai External Storage
 - **Tool - User:** Custom API tools (API Key or Basic Auth)

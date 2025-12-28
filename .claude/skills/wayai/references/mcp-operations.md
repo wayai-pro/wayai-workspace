@@ -302,7 +302,7 @@ delete_agent(
 Enabling or creating tools requires a **Tool connection** for the tool's connector:
 
 **Auto-enabled (no connection needed):**
-- Wayai Conversation, Wayai Meta Tools, Wayai Knowledge
+- Wayai Conversation, Wayai Meta Tools, Wayai Resource
 
 **Tool - Native group (via UI):**
 - **Google Calendar, Drive, YouTube** → OAuth
