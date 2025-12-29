@@ -6,7 +6,7 @@ description: |
   (4) Syncing workspace settings with Git, (5) Using hub templates for new deployments.
 ---
 
-<!-- v3.2.0 -->
+<!-- v3.3.0 -->
 
 # WayAI Skill
 
@@ -50,24 +50,26 @@ description: |
 Organization          ← UI only
 └── Project           ← MCP to create
     └── Hub           ← Full MCP control
-        ├── Connections   ← UI to create, MCP to manage
+        ├── Connections   ← Wayai auto-created; others via UI, MCP to manage
         └── Agents        ← Full MCP control
             └── Tools     ← Full MCP control
 ```
 
-Setup order: Organization (signup) → Project → Hub → Connections (UI) → Agents → Tools
+Setup order: Organization (signup) → Project → Hub → Agent Connection (UI) → Agents → Tools
+
+**Note:** Wayai connection (native tools) is auto-created when a hub is created. You only need to add Agent connections (OpenAI, etc.) to create agents.
 
 ### ⚠️ Connection Prerequisites
 
 **For creating agents → Agent connection required:**
-- OpenAI or OpenRouter → UI: Settings → Organization → Project → Hub → Connections → Agent group
+- OpenAI, OpenRouter, Anthropic, or Google AI Studio → UI: Settings → Hub → Connections → Agent group
 
 **For enabling/creating tools → Tool connection required:**
-- **Auto-enabled (no connection):** Wayai Conversation, Wayai Meta Tools, Wayai Resource
-- **Tool - Native (OAuth):** Google Calendar, Drive, YouTube
-- **Tool - Native (API Key):** Wayai External Storage
+- **Wayai (auto-created):** Native tools automatically available when hub is created
+- **Tool - Native (OAuth):** Google Calendar (disabled by default)
+- **Tool - Native (API Key):** External Resources
 - **Tool - User:** Custom API tools (API Key or Basic Auth)
-- **MCP - External:** MCP Server tools (Token or OAuth)
+- **Tool - MCP:** MCP Server tools (Token or OAuth)
 
 ## Core Workflow
 
