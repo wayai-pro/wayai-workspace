@@ -222,9 +222,9 @@ This is the core native toolset providing:
 - **File handling:** Get files, send files from conversations
 - **Resource access:** List resource folders, list resource files
 - **Tool orchestration:** Get tool schema, execute tool dynamically
-- **Skills:** Load skill, read skill file
+- **Skills:** Read skill, read skill file
 
-**Agent tools:** `close_conversation`, `transfer_to_team`, `update_kanban_status`, `schedule_followup`, `transfer_to_agent`, `consult_agent`, `get_files`, `send_files`, `list_resource_folders`, `list_resource_files`, `get_tool_schema`, `execute_tool`, `load_skill`, `read_skill_file`
+**Agent tools:** `close_conversation`, `transfer_to_team`, `update_kanban_status`, `schedule_followup`, `transfer_to_agent`, `consult_agent`, `get_files`, `send_files`, `list_resource_folders`, `list_resource_files`, `get_tool_schema`, `execute_tool`, `read_skill`, `read_skill_file`
 
 ### Google Calendar
 
