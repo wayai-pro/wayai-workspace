@@ -114,7 +114,7 @@ Create a new hub in a project.
 
 **Before calling this tool:**
 1. Use `get_workspace()` to list organizations/projects and confirm with the user which project to create the hub in
-2. If wayai skill is available, read `assets/templates/index.json` to check available hub templates and ask the user which template to use as reference
+2. If wayai skill is available, check `references/templates.md` for available hub templates and ask the user which template to use as reference
 
 ```
 create_hub(

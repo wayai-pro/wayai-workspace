@@ -171,31 +171,21 @@ Claude:
 
 ## Using Templates
 
-Templates are bundled in this skill at `assets/templates/`. No download needed.
-
-1. **List templates:** `Read("assets/templates/index.json")`
-2. **Read template:** `Read("assets/templates/pt/vertical/pizzaria/pedidos/hub.md")`
+Templates are bundled in this skill. See [templates.md](references/templates.md) for the full list with direct links to hub and agent instruction files.
 
 ```
 User: "Preciso de um hub para pizzaria"
 
 Claude:
-1. Read template index: Read("assets/templates/index.json")
-2. Find matching template (pt/vertical/pizzaria/pedidos)
-3. Read template files:
-   - Read("assets/templates/pt/vertical/pizzaria/pedidos/hub.md")
-   - Read("assets/templates/pt/vertical/pizzaria/pedidos/atendente.md")
-4. Copy to workspace: organizations/{org}/{project}/{hub-name}/
-5. Customize placeholders ({NOME_EMPRESA}, etc.)
-6. Create hub via MCP: create_hub(...)
-7. ⚠️ STOP: Direct user to UI to create Agent connection (OpenAI/OpenRouter)
-8. After connection confirmed, create agent via MCP: create_agent(...)
-9. Add tools to agent as needed
+1. Read("references/templates.md") to find matching template
+2. Click the Hub and Agent Instructions links in the table to read template files
+3. Copy to workspace: organizations/{org}/{project}/{hub-name}/
+4. Customize placeholders ({NOME_EMPRESA}, etc.)
+5. Create hub via MCP: create_hub(...)
+6. ⚠️ STOP: Direct user to UI to create Agent connection (OpenAI/OpenRouter)
+7. After connection confirmed, create agent via MCP: create_agent(...)
+8. Add tools to agent as needed
 ```
-
-**Template paths (inside assets/templates/):**
-- `pt/horizontal/sdr/simples/hub.md` - SDR hub config
-- `pt/vertical/odonto/agendamento/recepcionista.md` - Dental receptionist agent instructions
 
 ## Reference Documentation
 
@@ -206,5 +196,6 @@ Claude:
 | [connections.md](references/connections.md) | Setting up hub connections (OAuth, API keys, channels) |
 | [native-tools.md](references/native-tools.md) | Native tool parameters and usage by connector |
 | [user-tools.md](references/user-tools.md) | Creating custom API tools with placeholders |
-| [templates.md](references/templates.md) | Template format, placeholders, available templates |
+| [templates.md](references/templates.md) | Available hub templates catalog |
+| [template-structure.md](references/template-structure.md) | Template file formats, placeholders, structure |
 | [markdown-format.md](references/markdown-format.md) | File format conventions, export/import workflows |
