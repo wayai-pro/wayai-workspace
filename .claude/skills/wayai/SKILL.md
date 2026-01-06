@@ -171,14 +171,14 @@ Claude:
 
 ## Using Templates
 
-Templates are bundled in this skill. See [templates.md](references/templates.md) for the full list with direct links to hub and agent instruction files.
+Templates are bundled in this skill. See [templates.md](references/templates.md) for the full list with paths to hub and agent instruction files.
 
 ```
 User: "Preciso de um hub para pizzaria"
 
 Claude:
 1. Read("references/templates.md") to find matching template
-2. Click the Hub and Agent Instructions links in the table to read template files
+2. Read template files using skill-root paths (e.g., "assets/templates/pt/vertical/pizzaria/pedidos/hub.md")
 3. Copy to workspace: organizations/{org}/{project}/{hub-name}/
 4. Customize placeholders ({NOME_EMPRESA}, etc.)
 5. Create hub via MCP: create_hub(...)
