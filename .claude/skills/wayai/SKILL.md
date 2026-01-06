@@ -112,8 +112,7 @@ When working with agent instructions, always follow this workflow to keep files 
    curl -L "{url}" -o {agentname}.md
    → Saves instructions to disk (doesn't bloat context)
 
-3. READ: Read the file when needed
-   Read("{agentname}.md")
+3. READ: Read the local file when needed
    → User reviews and edits in their editor
 ```
 
@@ -161,7 +160,7 @@ User: "Update the Pilot agent instructions to be more friendly"
 Claude:
 1. download_agent_instructions(hub_id, agent_id) → signed_url
 2. curl -L "{signed_url}" -o atendente.md  # Save to disk, don't bloat context
-3. Read("atendente.md") → show current instructions
+3. Read the local file atendente.md → show current instructions
 4. Show user: "Here are the current instructions. I'll make them more friendly..."
 5. Edit the file with proposed changes
 6. Show diff to user, wait for approval
@@ -177,8 +176,8 @@ Templates are bundled in this skill. See [templates.md](references/templates.md)
 User: "Preciso de um hub para pizzaria"
 
 Claude:
-1. Read("references/templates.md") to find matching template
-2. Read template files using skill-root paths (e.g., "assets/templates/pt/vertical/pizzaria/pedidos/hub.md")
+1. Find matching template in references/templates.md
+2. Read the hub config and agent instructions from template paths
 3. Copy to workspace: organizations/{org}/{project}/{hub-name}/
 4. Customize placeholders ({NOME_EMPRESA}, etc.)
 5. Create hub via MCP: create_hub(...)
