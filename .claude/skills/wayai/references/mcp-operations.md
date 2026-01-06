@@ -356,13 +356,14 @@ add_mcp_tool(
 Create a custom API tool.
 ```
 add_custom_tool(
-  hub_id,                  # Required
-  agent_id,                # Required
-  tool_name,               # Required
-  tool_description_ai,     # Optional: description for AI
-  tool_instructions,       # Optional: usage instructions
-  tool_endpoint_template,  # Optional: API path (e.g., "/orders/{id}")
-  tool_method              # Optional: GET, POST, PUT, DELETE, PATCH
+  hub_id,                      # Required
+  agent_id,                    # Required
+  tool_name,                   # Required
+  tool_description_ai,         # Optional: description for AI
+  tool_instructions,           # Optional: usage instructions
+  tool_endpoint_template,      # Optional: API path (e.g., "/orders/{id}")
+  tool_method,                 # Optional: GET, POST, PUT, DELETE, PATCH
+  include_history_in_context   # Optional: include tool messages in conversation context (default: false)
 )
 ```
 
@@ -370,14 +371,15 @@ add_custom_tool(
 Update an existing custom tool.
 ```
 update_custom_tool(
-  hub_id,                  # Required
-  tool_id,                 # Required
-  tool_name,               # Optional
-  tool_description_ai,     # Optional
-  tool_instructions,       # Optional
-  tool_endpoint_template,  # Optional
-  tool_method,             # Optional
-  enabled                  # Optional: true/false
+  hub_id,                      # Required
+  tool_id,                     # Required
+  tool_name,                   # Optional
+  tool_description_ai,         # Optional
+  tool_instructions,           # Optional
+  tool_endpoint_template,      # Optional
+  tool_method,                 # Optional
+  enabled,                     # Optional: true/false
+  include_history_in_context   # Optional: include tool messages in conversation context
 )
 ```
 
