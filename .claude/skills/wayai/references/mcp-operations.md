@@ -10,6 +10,7 @@ Complete reference for WayAI MCP tools organized by entity type.
 - [Agent Operations](#agent-operations)
 - [Tool Operations](#tool-operations)
 - [Connection Operations](#connection-operations)
+- [Analytics Operations](#analytics-operations)
 - [Quick Reference Table](#quick-reference-table)
 
 ## Workspace Operations
@@ -438,6 +439,88 @@ Returns: tools_count, resources_count
 
 ---
 
+## Analytics Operations
+
+**MCP capabilities:** Read analytics, list conversations, view messages
+
+Query conversation analytics, performance metrics, and drill into individual conversations.
+
+| Operation | MCP |
+|-----------|-----|
+| List variables | `get_analytics_variables(hub_id)` |
+| Query data | `get_analytics_data(...)` |
+| List conversations | `get_conversations_list(...)` |
+| View messages | `get_conversation_messages(...)` |
+| Pin variable | `pin_analytics_variable(...)` |
+
+### get_analytics_variables
+Discover all available analytics variables for a hub, organized by category.
+```
+get_analytics_variables(hub_id)
+```
+Returns: Variables grouped by category (conversation_metrics, instruction_following, escalation_performance, function_calling, user_satisfaction)
+
+### get_analytics_data
+Query analytics data with aggregations and optional trend analysis.
+```
+get_analytics_data(
+  hub_id,           # Required
+  variable_ids,     # Required: list of variable IDs from get_analytics_variables
+  start_date,       # Required: YYYY-MM-DD
+  end_date,         # Required: YYYY-MM-DD
+  periodicity,      # Optional: daily|weekly|monthly|yearly (default: daily)
+  include_trend,    # Optional: true for time series data (default: false)
+  include_summary,  # Optional: true for conversation summary (default: true)
+  filters           # Optional: [{variable_id, filter_type, filter_value}]
+)
+```
+Returns: Summary stats, aggregated metrics per variable, trend data if requested
+
+**Filter types:**
+- Numeric: `eq`, `neq`, `gt`, `gte`, `lt`, `lte`
+- Text: `equals`, `not_equals`, `contains`, `not_contains`, `starts_with`, `ends_with`
+- Categorical: `is`, `is_not`, `in`, `not_in`
+
+### get_conversations_list
+List conversations with optional filtering and pagination.
+```
+get_conversations_list(
+  hub_id,       # Required
+  start_date,   # Optional: filter by date range
+  end_date,     # Optional
+  limit,        # Optional: max results (default: 50)
+  offset,       # Optional: pagination offset (default: 0)
+  filters       # Optional: variable filters
+)
+```
+Returns: List of conversations with participant info, message count, timestamps
+
+### get_conversation_messages
+Get full message history for a specific conversation.
+```
+get_conversation_messages(
+  hub_id,           # Required (for access verification)
+  conversation_id,  # Required
+  limit,            # Optional: max messages (default: 100)
+  offset            # Optional: pagination (default: 0)
+)
+```
+Returns: Conversation metadata and message history with sender info
+
+### pin_analytics_variable
+Pin or unpin a variable for quick access. Requires write access.
+```
+pin_analytics_variable(
+  hub_id,       # Required
+  variable_id,  # Required
+  pinned        # Required: true to pin, false to unpin
+)
+```
+
+See [references/analytics.md](analytics.md) for detailed analytics documentation.
+
+---
+
 ## Quick Reference Table
 
 | Entity | List | View | Create | Update | Delete |
@@ -448,5 +531,7 @@ Returns: tools_count, resources_count
 | Agent | `get_hub` | `get_agent` | MCP | MCP | MCP |
 | Tool | `get_hub` | `get_tool` | MCP | MCP* | MCP |
 | Connection | `get_hub` | - | UI | UI | UI |
+| Analytics | `get_analytics_variables` | `get_analytics_data` | - | `pin_analytics_variable` | - |
+| Conversations | `get_conversations_list` | `get_conversation_messages` | - | - | - |
 
 *Only custom tools can be updated via MCP

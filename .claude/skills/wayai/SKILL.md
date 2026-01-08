@@ -96,6 +96,7 @@ AFTER changes:
 | **Agent** | `get_agent`, `download_agent_instructions`, `get_agent_instructions_upload_url`, `create_agent`, `update_agent`, `update_agent_instructions`, `delete_agent` |
 | **Tool** | `get_tool`, `add_native_tool`, `add_mcp_tool`, `add_custom_tool`, `update_custom_tool`, `enable_tool`, `disable_tool`, `remove_tool`, `remove_custom_tool` |
 | **Connection** | `enable_connection`, `disable_connection`, `sync_mcp_connection` |
+| **Analytics** | `get_analytics_variables`, `get_analytics_data`, `get_conversations_list`, `get_conversation_messages`, `pin_analytics_variable` |
 
 See [references/mcp-operations.md](references/mcp-operations.md) for detailed usage.
 
@@ -192,6 +193,7 @@ Claude:
 |-----------|--------------|
 | [platform-overview.md](references/platform-overview.md) | Understanding WayAI concepts, entity types, AI modes |
 | [mcp-operations.md](references/mcp-operations.md) | MCP tool details, parameters, examples |
+| [analytics.md](references/analytics.md) | Conversation analytics, metrics, and performance analysis |
 | [connections.md](references/connections.md) | Setting up hub connections (OAuth, API keys, channels) |
 | [native-tools.md](references/native-tools.md) | Native tool parameters and usage by connector |
 | [user-tools.md](references/user-tools.md) | Creating custom API tools with placeholders |
