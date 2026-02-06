@@ -174,7 +174,7 @@ agents:
 4. Apply via MCP:
    - update_hub() for hub changes
    - update_agent() for agent settings changes
-   - get_agent_instructions_upload_url() + curl for instruction changes
+   - upload_agent_instructions() for instruction changes
    - add_native_tool() / remove_tool() for tool changes
 ```
 

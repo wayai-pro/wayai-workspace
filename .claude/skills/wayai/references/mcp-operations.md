@@ -185,10 +185,9 @@ Direct user to create Agent connection first, then proceed with agent creation.
 | List | `get_hub(hub_id)` |
 | View | `get_agent(hub_id, agent_id)` |
 | Download instructions | `download_agent_instructions(hub_id, agent_id)` |
-| Get upload URL | `get_agent_instructions_upload_url(hub_id, agent_id)` |
 | Create | `create_agent(...)` |
 | Update settings | `update_agent(...)` |
-| Update instructions | Upload via URL (preferred) or `update_agent_instructions(...)` (fallback) |
+| Upload instructions | `upload_agent_instructions(hub_id, agent_id, instructions)` |
 | Delete | `delete_agent(...)` |
 
 ### get_agent
@@ -214,25 +213,8 @@ curl -L "{download_url}" -o {agentname}-instructions.md
 
 Note: The file is recreated from `agent.instructions` on each call to ensure sync with the database. Save to disk first, then Read when needed (avoids context bloat).
 
-### get_agent_instructions_upload_url
-Get a presigned URL for uploading agent instructions. Use this for large instructions (>10KB) to save tokens.
-```
-get_agent_instructions_upload_url(hub_id, agent_id)
-```
-Returns:
-- `upload_url`: URL for uploading (valid 5 minutes)
-- `auth_token`: Authorization header value
-- `expires_in`: Time until URL expires
-
-**Upload using curl:**
-```bash
-curl -X POST --data-binary @{file}.md "{upload_url}" \
-  -H "Authorization: {auth_token}" \
-  -H "Content-Type: text/markdown"
-```
-
 ### create_agent
-Create a new agent. Use `get_hub` first to find available Agent connections and their supported models. After creation, upload instructions using `get_agent_instructions_upload_url`.
+Create a new agent. Use `get_hub` first to find available Agent connections and their supported models. After creation, upload instructions using `upload_agent_instructions`.
 ```
 create_agent(
   hub_id,            # Required
@@ -252,7 +234,7 @@ create_agent(
 **Note:** Settings are validated against the connector's `agent_settings_schema`. Invalid settings return an error with details.
 
 ### update_agent
-Update an existing agent. To update instructions, use `get_agent_instructions_upload_url` (recommended) or `update_agent_instructions` (fallback when file operations unavailable).
+Update an existing agent. To update instructions, use `upload_agent_instructions`.
 ```
 update_agent(
   hub_id,            # Required
@@ -270,17 +252,16 @@ update_agent(
 )
 ```
 
-### update_agent_instructions
-**Fallback method** - only use when file operations aren't available (e.g., no Bash tool). Prefer `get_agent_instructions_upload_url` for token-efficient upload.
+### upload_agent_instructions
+Upload agent instructions as a markdown file to R2, synced to the agent instructions column.
 ```
-update_agent_instructions(
+upload_agent_instructions(
   hub_id,        # Required
   agent_id,      # Required
-  instructions,  # Required: full instructions content (markdown)
-  file_name      # Optional: defaults to {agentname}-instructions.md
+  instructions   # Required: full instructions content (markdown)
 )
 ```
-Returns: `file_id`, `file_path`, `instructions_updated`
+Returns: `file_id`, `file_path`
 
 ### delete_agent
 Remove an agent from the hub.

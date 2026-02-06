@@ -93,7 +93,7 @@ AFTER changes:
 |----------|-------|
 | **Workspace** | `get_workspace`, `download_workspace`, `download_skill` |
 | **Hub** | `get_hub`, `create_hub`, `update_hub` |
-| **Agent** | `get_agent`, `download_agent_instructions`, `get_agent_instructions_upload_url`, `create_agent`, `update_agent`, `update_agent_instructions`, `delete_agent` |
+| **Agent** | `get_agent`, `download_agent_instructions`, `create_agent`, `update_agent`, `upload_agent_instructions`, `delete_agent` |
 | **Tool** | `get_tool`, `add_native_tool`, `add_mcp_tool`, `add_custom_tool`, `update_custom_tool`, `enable_tool`, `disable_tool`, `remove_tool`, `remove_custom_tool` |
 | **Connection** | `enable_connection`, `disable_connection`, `sync_mcp_connection` |
 | **Analytics** | `get_analytics_variables`, `get_analytics_data`, `get_conversations_list`, `get_conversation_messages`, `pin_analytics_variable` |
@@ -117,27 +117,13 @@ When working with agent instructions, always follow this workflow to keep files 
    → User reviews and edits in their editor
 ```
 
-### Upload Workflow (Recommended)
-Always prefer the presigned URL upload - it's token-efficient and works with local files:
-```
-1. GET URL: get_agent_instructions_upload_url(hub_id, agent_id)
-   → Returns upload_url and auth_token (valid 5 minutes)
-
-2. UPLOAD: Use curl to upload the file directly
-   curl -X POST --data-binary @{file}.md "{upload_url}" \
-     -H "Authorization: {auth_token}" \
-     -H "Content-Type: text/markdown"
-   → Uploads and syncs to database in one step
-```
-
-### Direct Update Workflow (Fallback)
-Only use when file operations aren't available (e.g., no Bash tool access):
+### Upload Workflow
 ```
 1. REVIEW: Show proposed changes (before/after)
-   → Wait for user approval before updating
+   → Wait for user approval before uploading
 
-2. UPDATE: update_agent_instructions(hub_id, agent_id, instructions)
-   → Sends text directly (consumes tokens for large instructions)
+2. UPLOAD: upload_agent_instructions(hub_id, agent_id, instructions)
+   → Uploads file to R2 and syncs to database
 ```
 
 **File Naming Convention:**
@@ -165,8 +151,7 @@ Claude:
 4. Show user: "Here are the current instructions. I'll make them more friendly..."
 5. Edit the file with proposed changes
 6. Show diff to user, wait for approval
-7. get_agent_instructions_upload_url(hub_id, agent_id) → upload_url, auth_token
-8. curl -X POST --data-binary @atendente.md "{upload_url}" -H "Authorization: {auth_token}" -H "Content-Type: text/markdown"
+7. upload_agent_instructions(hub_id, agent_id, instructions) → file_id, file_path
 ```
 
 ## Using Templates
