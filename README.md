@@ -8,8 +8,7 @@ By creating a repository from this template, you get a version-controlled worksp
 
 1. **Create repo from template** — Click "Use this template" on GitHub
 2. **Clone your repo** — `git clone https://github.com/<you>/wayai.git`
-3. **Add your MCP token** — Edit `.mcp.json` with your token from [platform.wayai.pro](https://platform.wayai.pro) → Settings → MCP Access (⚠️ Don't commit tokens to git)
-4. **Start your AI tool** — Run `claude` or `codex` in the repo directory
+3. **Start your AI tool** — Run `claude` or `codex` in the repo directory (you'll be prompted to authenticate with your WayAI account via OAuth)
 
 ## AI Tool Setup
 
