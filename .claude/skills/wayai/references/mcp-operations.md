@@ -187,7 +187,7 @@ Direct user to create Agent connection first, then proceed with agent creation.
 | Download instructions | `download_agent_instructions(hub_id, agent_id)` |
 | Create | `create_agent(...)` |
 | Update settings | `update_agent(...)` |
-| Upload instructions | `upload_agent_instructions(hub_id, agent_id, instructions)` |
+| Upload instructions | `upload_agent_instructions(hub_id, agent_id)` → URL + curl |
 | Delete | `delete_agent(...)` |
 
 ### get_agent
@@ -208,10 +208,10 @@ Returns:
 
 **Download using curl:**
 ```bash
-curl -L "{download_url}" -o {agentname}-instructions.md
+curl -L "{download_url}" -o workspace/{org}/{project}/{hub}/{agentname}-instructions.md
 ```
 
-Note: The file is recreated from `agent.instructions` on each call to ensure sync with the database. Save to disk first, then Read when needed (avoids context bloat).
+Note: The file is recreated from `agent.instructions` on each call to ensure sync with the database. Always save to the `workspace/` directory so the repo stays in sync, then Read when needed (avoids context bloat).
 
 ### create_agent
 Create a new agent. Use `get_hub` first to find available Agent connections and their supported models. After creation, upload instructions using `upload_agent_instructions`.
@@ -253,15 +253,24 @@ update_agent(
 ```
 
 ### upload_agent_instructions
-Upload agent instructions as a markdown file to R2, synced to the agent instructions column.
+Get an upload URL and auth headers for uploading agent instructions. The file is stored in R2 and synced to the agent instructions column.
 ```
 upload_agent_instructions(
   hub_id,        # Required
-  agent_id,      # Required
-  instructions   # Required: full instructions content (markdown)
+  agent_id       # Required
 )
 ```
-Returns: `file_id`, `file_path`
+Returns: upload URL, required headers, and a ready-to-use curl command.
+
+**Upload using the returned curl command:**
+```bash
+curl -X POST '{upload_url}' \
+  -H 'Content-Type: text/markdown' \
+  -H 'Authorization: Bearer {token}' \
+  --data-binary @workspace/{org}/{project}/{hub}/{agentname}-instructions.md
+```
+
+Always upload from the `workspace/` directory so the repo stays in sync with the platform.
 
 ### delete_agent
 Remove an agent from the hub.

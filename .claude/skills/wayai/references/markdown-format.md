@@ -161,8 +161,8 @@ agents:
 
 ```
 1. download_agent_instructions(hub_id, agent_id) → download URL
-2. curl -L "{url}" -o {agentname}-instructions.md  # Save to disk (avoids context bloat)
-3. Read the local file when needed
+2. curl -L "{url}" -o workspace/{org}/{project}/{hub}/{agentname}-instructions.md
+3. Read the workspace file when needed
 ```
 
 ## Import Workflow

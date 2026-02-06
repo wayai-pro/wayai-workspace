@@ -109,11 +109,11 @@ When working with agent instructions, always follow this workflow to keep files 
 1. DOWNLOAD: download_agent_instructions(hub_id, agent_id)
    → Returns signed URL (valid 1 hour)
 
-2. SAVE: curl to local file
-   curl -L "{url}" -o {agentname}.md
-   → Saves instructions to disk (doesn't bloat context)
+2. SAVE: curl to workspace file
+   curl -L "{url}" -o workspace/{org}/{project}/{hub}/{agentname}-instructions.md
+   → Saves instructions to the workspace directory
 
-3. READ: Read the local file when needed
+3. READ: Read the workspace file when needed
    → User reviews and edits in their editor
 ```
 
@@ -122,23 +122,28 @@ When working with agent instructions, always follow this workflow to keep files 
 1. REVIEW: Show proposed changes (before/after)
    → Wait for user approval before uploading
 
-2. UPLOAD: upload_agent_instructions(hub_id, agent_id, instructions)
-   → Uploads file to R2 and syncs to database
+2. GET URL: upload_agent_instructions(hub_id, agent_id)
+   → Returns upload URL, headers, and curl command
+
+3. UPLOAD: Run the returned curl command with the workspace file
+   curl -X POST '{upload_url}' ... --data-binary @workspace/{org}/{project}/{hub}/{agentname}-instructions.md
+   → File stored in R2 and synced to database
 ```
 
 **File Naming Convention:**
-- Pattern: `{agentname}.md`
+- Pattern: `{agentname}-instructions.md`
 - Slugify agent name: lowercase, spaces→hyphens, remove special chars
 - Examples:
-  - Agent "Atendente" → `atendente.md`
-  - Agent "Order Taker" → `order-taker.md`
-  - Agent "Suporte Nível 2" → `suporte-nvel-2.md`
+  - Agent "Atendente" → `atendente-instructions.md`
+  - Agent "Order Taker" → `order-taker-instructions.md`
+  - Agent "Suporte Nível 2" → `suporte-nvel-2-instructions.md`
 
 **Important:**
 - `get_agent` excludes instructions (use `download_agent_instructions` instead)
 - `update_agent` cannot modify instructions (use upload workflow)
 - Always fetch current instructions before editing to avoid overwriting changes
 - Always prefer upload workflow over direct update (token-efficient, works with files)
+- Always save and edit instruction files in the `workspace/` directory (never use `/tmp` or other locations) so the repo stays in sync with the platform without requiring an extra `download_workspace` step
 
 **Example:**
 ```
@@ -146,12 +151,13 @@ User: "Update the Pilot agent instructions to be more friendly"
 
 Claude:
 1. download_agent_instructions(hub_id, agent_id) → signed_url
-2. curl -L "{signed_url}" -o atendente.md  # Save to disk, don't bloat context
-3. Read the local file atendente.md → show current instructions
+2. curl -L "{signed_url}" -o workspace/{org}/{project}/{hub}/atendente-instructions.md
+3. Read the workspace file → show current instructions
 4. Show user: "Here are the current instructions. I'll make them more friendly..."
-5. Edit the file with proposed changes
+5. Edit the workspace file with proposed changes
 6. Show diff to user, wait for approval
-7. upload_agent_instructions(hub_id, agent_id, instructions) → file_id, file_path
+7. upload_agent_instructions(hub_id, agent_id) → upload URL + curl command
+8. Run curl to upload workspace/{org}/{project}/{hub}/atendente-instructions.md
 ```
 
 ## Using Templates
