@@ -1,121 +1,41 @@
 # WayAI
 
-Template for managing WayAI hub configurations with AI coding tools.
+[WayAI](https://wayai.pro) is a platform for building AI-powered communication hubs that connect AI Assistants with human teams across channels like WhatsApp, Email, Instagram, and a native app. You can configure agents, tools, and connections to automate and augment conversations — all managed from a single hub.
+
+By creating a repository from this template, you get a version-controlled workspace for your WayAI platform configuration. It serves as a shared environment where AI coding agents (Claude Code, Codex, Cursor, etc.) have full context about your hubs, agents, and tools — and can make changes directly on the platform through MCP. The local workspace stays in sync with the remote platform, so every configuration change is reviewable, trackable, and reversible through git.
 
 ## Quick Start
 
-1. **Create repo from template** - Click "Use this template" on GitHub
-2. **Clone your repo** - `git clone https://github.com/<you>/wayai.git`
-3. **Add your MCP token** - Edit `.mcp.json` with your token from [platform.wayai.pro](https://platform.wayai.pro) → Settings → MCP Access (⚠️ Don't commit tokens to git)
-4. **Set up AI instructions** - Create `CLAUDE.md` or `AGENTS.md` (see below)
-5. **Start your AI tool** - Run `claude` or `codex` in the repo directory
+1. **Create repo from template** — Click "Use this template" on GitHub
+2. **Clone your repo** — `git clone https://github.com/<you>/wayai.git`
+3. **Add your MCP token** — Edit `.mcp.json` with your token from [platform.wayai.pro](https://platform.wayai.pro) → Settings → MCP Access (⚠️ Don't commit tokens to git)
+4. **Start your AI tool** — Run `claude` or `codex` in the repo directory
 
 ## AI Tool Setup
 
 This template uses the [Agent Skills](https://agentskills.io) open standard.
 
-### Claude Code
-
-Skills are ready to use in `.claude/skills/`. Create a `CLAUDE.md` file at the root:
-
-```bash
-cat > CLAUDE.md << 'EOF'
-# WayAI Configuration
-
-**Read `.claude/skills/wayai/SKILL.md` before making any changes.**
-
-## Workflow
-
-1. **Before changes**: Sync local workspace from remote (source of truth)
-2. **Edit locally**: Make changes in `workspace/` files so user can review
-3. **Apply to remote**: Use MCP tools to apply changes (follow SKILL.md workflows)
-4. **After all changes**: Ask user if they want to sync local workspace with remote
-
-## How to Sync
-
-```bash
-download_workspace()  # Returns URL
-curl -L "<url>" -o workspace.zip && unzip -o workspace.zip -d ./
-```
-
-## Repository Structure
-
-```
-.claude/skills/wayai/     # WayAI skill - START HERE
-├── SKILL.md              # Workflows and prerequisites
-├── references/           # Detailed reference docs
-└── assets/templates/     # Hub templates
-workspace/                # Local copy of remote workspace
-.mcp.json                 # MCP server configuration
-```
-EOF
-```
-
-### OpenAI Codex
-
-Rename the skills folder, then create an `AGENTS.md` file:
-
-```bash
-mv .claude .codex
-cat > AGENTS.md << 'EOF'
-# WayAI Configuration
-
-**Read `.codex/skills/wayai/SKILL.md` before making any changes.**
-
-## Workflow
-
-1. **Before changes**: Sync local workspace from remote (source of truth)
-2. **Edit locally**: Make changes in `workspace/` files so user can review
-3. **Apply to remote**: Use MCP tools to apply changes (follow SKILL.md workflows)
-4. **After all changes**: Ask user if they want to sync local workspace with remote
-
-## How to Sync
-
-```bash
-download_workspace()  # Returns URL
-curl -L "<url>" -o workspace.zip && unzip -o workspace.zip -d ./
-```
-
-## Repository Structure
-
-```
-.codex/skills/wayai/      # WayAI skill - START HERE
-├── SKILL.md              # Workflows and prerequisites
-├── references/           # Detailed reference docs
-└── assets/templates/     # Hub templates
-workspace/                # Local copy of remote workspace
-.mcp.json                 # MCP server configuration
-```
-EOF
-```
-
-### Cursor
-
-Rename the skills folder, then create a similar instructions file:
-
-```bash
-mv .claude .cursor
-```
+| Tool | Status | Setup |
+|------|--------|-------|
+| **Claude Code** | Ready to use | `CLAUDE.md` and `.claude/skills/` are included |
+| **OpenAI Codex** | Rename + copy | `mv .claude .codex && cp CLAUDE.md AGENTS.md` (update paths inside) |
+| **Cursor** | Rename + copy | `mv .claude .cursor && cp CLAUDE.md .cursorrules` (update paths inside) |
 
 ## Keeping Updated
 
-### Skill Updates
-
-Get the latest skill files via MCP:
+**Skill updates** — get the latest skill files via MCP:
 
 ```bash
 download_skill()  # Returns URL
 curl -L "<url>" -o skill.zip && unzip -o skill.zip -d ./
 ```
 
-### Repository Updates
-
-Pull updates from the template repository:
+**Repository updates** — pull from the template:
 
 ```bash
-# First time: add remote and merge with --allow-unrelated-histories
+# First time
 git remote add template https://github.com/wayai-resources/wayai.git
 git fetch template && git merge template/main --allow-unrelated-histories
-# Future updates: just fetch and merge
+# Future updates
 git fetch template && git merge template/main
 ```
