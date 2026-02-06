@@ -13,27 +13,36 @@ All platform operations (creating hubs, configuring agents, managing tools, etc.
 3. **Sync after changes**: Download workspace again so local files reflect the new state
 4. **Commit**: Git commit the updated workspace as a versioned snapshot
 
-## Sync Procedure
+## Sync
 
-The platform is the source of truth. The local `workspace/` directory is a Markdown mirror — used for agent context, user review, and git history.
+There are two types of sync — keep them distinct:
 
-```
-Session start
-  └─ download_workspace → unzip → git diff (see what changed remotely)
+### Workspace sync (platform → local)
 
-Making changes
-  └─ Use MCP tools to apply changes on the platform
-      └─ download_workspace → unzip → git diff (reflect what was just changed)
-
-End of session
-  └─ git commit (snapshot the final state)
-```
-
-How to sync:
+Syncs your hub configuration from the platform into the local `workspace/` directory. The platform is the source of truth — the local files are a Markdown mirror for agent context, user review, and git history.
 
 ```bash
 download_workspace()  # MCP tool — returns a download URL (expires in 5 min)
 curl -L "<url>" -o workspace.zip && unzip -o workspace.zip -d ./
+```
+
+When to sync:
+- **Before working** — catch changes made outside the agent (UI, other users)
+- **After changes** — reflect what was just applied via MCP tools
+
+### Repository sync (template → local)
+
+Syncs the repo with the upstream template to get the latest skill files, instructions, and templates.
+
+```bash
+git fetch template && git merge template/main
+```
+
+If the `template` remote isn't set up yet:
+
+```bash
+git remote add template https://github.com/wayai-resources/wayai.git
+git fetch template && git merge template/main --allow-unrelated-histories
 ```
 
 ## Repository Structure

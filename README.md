@@ -23,14 +23,7 @@ This template uses the [Agent Skills](https://agentskills.io) open standard.
 
 ## Keeping Updated
 
-**Skill updates** — get the latest skill files via MCP:
-
-```bash
-download_skill()  # Returns URL
-curl -L "<url>" -o skill.zip && unzip -o skill.zip -d ./
-```
-
-**Repository updates** — pull from the template:
+Pull updates from the template repository to get the latest skill files, instructions, and templates:
 
 ```bash
 # First time
