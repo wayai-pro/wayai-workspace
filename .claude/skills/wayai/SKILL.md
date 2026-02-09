@@ -76,15 +76,17 @@ Setup order: Organization (signup) → Project → Hub → Agent Connection (UI)
 ```
 BEFORE changes:
 1. get_workspace()     → discover hub_id
-2. get_hub(hub_id)     → current state (JSON)
+2. Read workspace/<hub_folder>/CONTEXT.md (create if missing — see CLAUDE.md)
+3. get_hub(hub_id)     → current state (JSON)
 
 MAKING changes:
-3. Use MCP tools OR edit local Markdown files
-4. Apply changes via MCP tools
+4. Use MCP tools OR edit local Markdown files
+5. Apply changes via MCP tools
 
 AFTER changes:
-5. Update local Markdown files from JSON
-6. Commit to Git
+6. Update workspace/<hub_folder>/CONTEXT.md if decisions or context changed
+7. Update local Markdown files from JSON
+8. Commit to Git
 ```
 
 ## MCP Tools Quick Reference
