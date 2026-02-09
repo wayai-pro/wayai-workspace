@@ -7,7 +7,7 @@ Setup guide for WayAI hub connections. Created via **UI** at Settings → Organi
 - [Agent](#agent)
 - [Channel](#channel)
 - [Tool - Native](#tool---native)
-- [Tool - Custom](#tool---user)
+- [Tool - Custom](#tool---custom)
 - [Tool - MCP](#tool---mcp)
 - [STT](#stt)
 - [TTS](#tts)
@@ -258,7 +258,7 @@ Connect to external file storage services for agent file access.
 
 ## Tool - Custom
 
-Custom API integrations you create. Connect agents to your own APIs or third-party services.
+Custom API integrations you create. Connect agents to your own APIs or third-party services. A Tool - Custom connection is **required** before creating custom tools — each tool must reference a connection for authentication.
 
 See [user-tools.md](user-tools.md) for how to create custom tools.
 
@@ -284,7 +284,7 @@ Connect to any REST API using API key authentication.
    - **Custom Headers** (optional): Additional headers to include in all requests
 4. Click Save
 
-**Usage:** After creating the connection, add custom tools to agents that call your API endpoints.
+**Usage:** A Tool - Custom connection is required before creating custom tools. Each custom tool must reference a connection for authentication.
 
 ### User Tool - Basic
 

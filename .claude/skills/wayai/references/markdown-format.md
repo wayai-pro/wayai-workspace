@@ -131,10 +131,14 @@ agents:
           tool_name: create_order
           tool_description: "Creates a new order"
           method: POST
+          connection_id: {connection_id}
+          connection_name: "My API Connection"
         - tool_id: {tool_id}
           tool_name: get_menu
           tool_description: "Retrieves menu items"
           method: GET
+          connection_id: {connection_id}
+          connection_name: "My API Connection"
 ```
 
 | Field | Type | Description |
@@ -143,6 +147,8 @@ agents:
 | `tool_description` | string | What the tool does (for AI) |
 | `method` | enum | HTTP method: GET, POST, PUT, DELETE, PATCH |
 | `endpoint` | string | Full endpoint URL template |
+| `connection_id` | string | ID of the Tool - Custom connection |
+| `connection_name` | string | Display name of the connection |
 | `tool_instructions` | string | Usage instructions for the AI |
 
 ## Download Workflow

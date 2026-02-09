@@ -344,11 +344,12 @@ add_mcp_tool(
 ```
 
 ### add_custom_tool
-Create a custom API tool.
+Create a custom API tool. Requires a Tool - Custom connection.
 ```
 add_custom_tool(
   hub_id,                      # Required
   agent_id,                    # Required
+  connection_id,               # Required: ID of a Tool - Custom connection
   tool_name,                   # Required
   tool_description,            # Optional: description for AI
   tool_instructions,           # Optional: usage instructions
@@ -366,6 +367,7 @@ Update an existing custom tool.
 update_custom_tool(
   hub_id,                      # Required
   tool_id,                     # Required
+  connection_id,               # Optional: new Tool - Custom connection
   tool_name,                   # Optional
   tool_description,            # Optional
   tool_instructions,           # Optional

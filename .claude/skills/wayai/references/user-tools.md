@@ -14,8 +14,8 @@ Create custom API integrations for agents using Tool - Custom connections.
 ## Overview
 
 Custom tools allow agents to call external APIs. They require:
-1. A **User Tool connection** (API Key or Basic Auth) - created via UI
-2. A **custom tool** attached to an agent - created via MCP or UI
+1. A **Tool - Custom connection** (API Key or Basic Auth) - created via UI
+2. A **custom tool** attached to an agent - created via MCP or UI. Each custom tool **must** reference a connection for authentication
 
 ---
 
@@ -27,6 +27,7 @@ Custom tools allow agents to call external APIs. They require:
 add_custom_tool(
   hub_id,                  # Required
   agent_id,                # Required
+  connection_id,           # Required: ID of a Tool - Custom connection
   tool_name,               # Required: display name
   tool_description,        # Optional: description for AI
   tool_instructions,       # Optional: usage guidance for AI
@@ -110,6 +111,7 @@ Placeholders are replaced at runtime in URLs, headers, query params, and body.
 add_custom_tool(
   hub_id: "hub-123",
   agent_id: "agent-456",
+  connection_id: "conn-789",
   tool_name: "Get Order Status",
   tool_description: "Retrieve the current status of a customer order by order ID",
   tool_url: "/orders/{{order_id}}",
@@ -141,6 +143,7 @@ Authorization: Bearer sk-xxx
 add_custom_tool(
   hub_id: "hub-123",
   agent_id: "agent-456",
+  connection_id: "conn-789",
   tool_name: "Create Ticket",
   tool_description: "Create a new support ticket with customer issue details",
   tool_url: "/tickets",
@@ -212,8 +215,8 @@ Authorization: Bearer sk-xxx
 
 | Operation | MCP Tool |
 |-----------|----------|
-| Create | `add_custom_tool(hub_id, agent_id, tool_name, ...)` |
-| Update | `update_custom_tool(hub_id, tool_id, ...)` |
+| Create | `add_custom_tool(hub_id, agent_id, connection_id, tool_name, ...)` |
+| Update | `update_custom_tool(hub_id, tool_id, connection_id?, ...)` |
 | Enable/Disable | `enable_tool()` / `disable_tool()` |
 | Remove from agent | `remove_tool(hub_id, agent_id, tool_id)` |
 | Delete completely | `remove_custom_tool(hub_id, tool_id)` |
