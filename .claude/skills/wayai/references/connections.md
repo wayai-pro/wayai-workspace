@@ -7,7 +7,7 @@ Setup guide for WayAI hub connections. Created via **UI** at Settings → Organi
 - [Agent](#agent)
 - [Channel](#channel)
 - [Tool - Native](#tool---native)
-- [Tool - User](#tool---user)
+- [Tool - Custom](#tool---user)
 - [Tool - MCP](#tool---mcp)
 - [STT](#stt)
 - [TTS](#tts)
@@ -22,7 +22,7 @@ Setup guide for WayAI hub connections. Created via **UI** at Settings → Organi
 | `Agent` | LLM providers for AI agents (OpenAI, Anthropic, Google, OpenRouter) |
 | `Channel` | Messaging channels (WhatsApp, Instagram, Gmail) |
 | `Tool - Native` | Platform-provided tool integrations |
-| `Tool - User` | Custom API integrations you create |
+| `Tool - Custom` | Custom API integrations you create |
 | `Tool - MCP` | External MCP server connections |
 | `STT` | Speech-to-text services |
 | `TTS` | Text-to-speech services |
@@ -256,7 +256,7 @@ Connect to external file storage services for agent file access.
 
 ---
 
-## Tool - User
+## Tool - Custom
 
 Custom API integrations you create. Connect agents to your own APIs or third-party services.
 
@@ -275,7 +275,7 @@ Connect to any REST API using API key authentication.
 
 **Setup:**
 1. Settings → Organizations → Project → Hub → Connections
-2. In the **Tool - User** group, click the **User Tool - API Key** card
+2. In the **Tool - Custom** group, click the **User Tool - API Key** card
 3. Fill the form:
    - **Connection Name** (required): A name to identify this connection
    - **Base URL** (optional): Base URL for the API (e.g., `https://api.example.com`)
@@ -292,7 +292,7 @@ Connect to APIs using Basic Authentication.
 
 **Setup:**
 1. Settings → Organizations → Project → Hub → Connections
-2. In the **Tool - User** group, click the **User Tool - Basic** card
+2. In the **Tool - Custom** group, click the **User Tool - Basic** card
 3. Fill the form:
    - **Connection Name** (required): A name to identify this connection
    - **Base URL** (optional): Base URL for the API
@@ -451,8 +451,8 @@ Text-to-speech services for generating voice responses.
 | External Resources | `e8f9a0b1-2c3d-4e5f-6789-0abcdef12345` | Tool - Native | API Key | Enabled |
 | Google Drive | `3b8d9e5f-7a1c-4d2e-9b3f-8a7c6d5e4f3a` | Tool - Native | OAuth | Disabled |
 | YouTube | `7c9e2f4a-6b8d-4e1f-9c3a-5d7e8f6a9b2c` | Tool - Native | OAuth | Disabled |
-| User Tool - API Key | `b15fb991-63e1-4a79-a174-d10aa66f4414` | Tool - User | API Key | Enabled |
-| User Tool - Basic | `c25fb992-63e1-4a79-a174-d10aa66f4415` | Tool - User | Basic Auth | Enabled |
+| User Tool - API Key | `b15fb991-63e1-4a79-a174-d10aa66f4414` | Tool - Custom | API Key | Enabled |
+| User Tool - Basic | `c25fb992-63e1-4a79-a174-d10aa66f4415` | Tool - Custom | Basic Auth | Enabled |
 | MCP Server - Token | `f1a2b3c4-d5e6-7890-abcd-ef1234567890` | Tool - MCP | Bearer/None | Enabled |
 | MCP Server - OAuth | `a2b3c4d5-e6f7-8901-bcde-f12345678901` | Tool - MCP | OAuth | Enabled |
 | Groq STT | `78328cbf-19d5-4310-9c37-fea2d792f356` | STT | API Key | Enabled |

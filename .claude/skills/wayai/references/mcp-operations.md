@@ -299,7 +299,7 @@ Enabling or creating tools requires a **Tool connection** for the tool's connect
 - **Google Calendar, Drive, YouTube** → OAuth
 - **Wayai External Storage** → API Key
 
-**Tool - User group (via UI):**
+**Tool - Custom group (via UI):**
 - **Custom API tools** → API Key or Basic Auth
 
 **MCP - External group (via UI):**
@@ -350,10 +350,12 @@ add_custom_tool(
   hub_id,                      # Required
   agent_id,                    # Required
   tool_name,                   # Required
-  tool_description_ai,         # Optional: description for AI
+  tool_description,            # Optional: description for AI
   tool_instructions,           # Optional: usage instructions
-  tool_endpoint_template,      # Optional: API path (e.g., "/orders/{id}")
-  tool_method,                 # Optional: GET, POST, PUT, DELETE, PATCH
+  tool_url,                    # Optional: URL endpoint (e.g., "/orders/{{order_id}}")
+  tool_method,                 # Optional: get, post, put, delete, patch
+  tool_headers,                # Optional: HTTP headers as [{key, value}] array
+  tool_body,                   # Optional: default body parameters
   include_history_in_context   # Optional: include tool messages in conversation context (default: false)
 )
 ```
@@ -365,10 +367,12 @@ update_custom_tool(
   hub_id,                      # Required
   tool_id,                     # Required
   tool_name,                   # Optional
-  tool_description_ai,         # Optional
+  tool_description,            # Optional
   tool_instructions,           # Optional
-  tool_endpoint_template,      # Optional
+  tool_url,                    # Optional
   tool_method,                 # Optional
+  tool_headers,                # Optional
+  tool_body,                   # Optional
   enabled,                     # Optional: true/false
   include_history_in_context   # Optional: include tool messages in conversation context
 )

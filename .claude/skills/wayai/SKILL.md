@@ -68,7 +68,7 @@ Setup order: Organization (signup) → Project → Hub → Agent Connection (UI)
 - **Wayai (auto-created):** Native tools automatically available when hub is created
 - **Tool - Native (OAuth):** Google Calendar (disabled by default)
 - **Tool - Native (API Key):** External Resources
-- **Tool - User:** Custom API tools (API Key or Basic Auth)
+- **Tool - Custom:** Custom API tools (API Key or Basic Auth)
 - **Tool - MCP:** MCP Server tools (Token or OAuth)
 
 ## Core Workflow

@@ -1,6 +1,6 @@
 # User Tools (Custom Tools)
 
-Create custom API integrations for agents using Tool - User connections.
+Create custom API integrations for agents using Tool - Custom connections.
 
 ## Table of Contents
 - [Overview](#overview)
@@ -28,10 +28,12 @@ add_custom_tool(
   hub_id,                  # Required
   agent_id,                # Required
   tool_name,               # Required: display name
-  tool_description_ai,     # Optional: description for AI
+  tool_description,        # Optional: description for AI
   tool_instructions,       # Optional: usage guidance for AI
-  tool_endpoint_template,  # Optional: API path (e.g., "/orders/{{order_id}}")
-  tool_method              # Optional: GET, POST, PUT, DELETE, PATCH
+  tool_url,                # Optional: URL endpoint (e.g., "/orders/{{order_id}}")
+  tool_method,             # Optional: get, post, put, delete, patch
+  tool_headers,            # Optional: HTTP headers as [{key, value}] array
+  tool_body                # Optional: default body parameters
 )
 ```
 
@@ -75,7 +77,7 @@ OpenAI function calling format. Required fields: `name`, `description`, `paramet
 }
 ```
 
-> **Note:** `tool_name_ai` and `tool_description_ai` are auto-populated from `tool_config.name` and `tool_config.description`.
+> **Note:** `tool_name` and `tool_description` are auto-populated from `tool_config.name` and `tool_config.description` by a database trigger.
 
 ---
 
@@ -109,9 +111,9 @@ add_custom_tool(
   hub_id: "hub-123",
   agent_id: "agent-456",
   tool_name: "Get Order Status",
-  tool_description_ai: "Retrieve the current status of a customer order by order ID",
-  tool_endpoint_template: "/orders/{{order_id}}",
-  tool_method: "GET"
+  tool_description: "Retrieve the current status of a customer order by order ID",
+  tool_url: "/orders/{{order_id}}",
+  tool_method: "get"
 )
 ```
 
@@ -140,9 +142,9 @@ add_custom_tool(
   hub_id: "hub-123",
   agent_id: "agent-456",
   tool_name: "Create Ticket",
-  tool_description_ai: "Create a new support ticket with customer issue details",
-  tool_endpoint_template: "/tickets",
-  tool_method: "POST"
+  tool_description: "Create a new support ticket with customer issue details",
+  tool_url: "/tickets",
+  tool_method: "post"
 )
 ```
 
