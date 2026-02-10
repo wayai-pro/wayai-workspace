@@ -31,7 +31,7 @@ add_custom_tool(
   tool_name,               # Required: display name
   tool_description,        # Optional: description for AI
   tool_instructions,       # Optional: usage guidance for AI
-  tool_url,                # Optional: URL endpoint (e.g., "/orders/{{order_id}}")
+  tool_path,                # Optional: URL endpoint (e.g., "/orders/{{order_id}}")
   tool_method,             # Optional: get, post, put, delete, patch
   tool_headers,            # Optional: HTTP headers as [{key, value}] array
   tool_body,               # Optional: default body parameters
@@ -53,7 +53,7 @@ add_custom_tool(
 |-------|-------------|
 | `tool_name` | Display name for the tool |
 | `tool_method` | HTTP method: GET, POST, PUT, DELETE, PATCH |
-| `tool_url` | Endpoint path, supports `{{placeholders}}` |
+| `tool_path` | Path relative to connection base_url, supports `{{placeholders}}` |
 | `tool_config` | OpenAI function schema (auto-generated or custom) |
 | `tool_headers` | Additional headers array: `[{key, value}]` |
 | `tool_body_format` | Body encoding: `json` (default) or `form` (`application/x-www-form-urlencoded`) |
@@ -116,7 +116,7 @@ add_custom_tool(
   connection_id: "conn-789",
   tool_name: "Get Order Status",
   tool_description: "Retrieve the current status of a customer order by order ID",
-  tool_url: "/orders/{{order_id}}",
+  tool_path: "/orders/{{order_id}}",
   tool_method: "get"
 )
 ```
@@ -148,7 +148,7 @@ add_custom_tool(
   connection_id: "conn-789",
   tool_name: "Create Ticket",
   tool_description: "Create a new support ticket with customer issue details",
-  tool_url: "/tickets",
+  tool_path: "/tickets",
   tool_method: "post"
 )
 ```

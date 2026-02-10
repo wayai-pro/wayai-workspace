@@ -353,7 +353,7 @@ add_custom_tool(
   tool_name,                   # Required
   tool_description,            # Optional: description for AI
   tool_instructions,           # Optional: usage instructions
-  tool_url,                    # Optional: URL endpoint (e.g., "/orders/{{order_id}}")
+  tool_path,                    # Optional: URL endpoint (e.g., "/orders/{{order_id}}")
   tool_method,                 # Optional: get, post, put, delete, patch
   tool_headers,                # Optional: HTTP headers as [{key, value}] array
   tool_body,                   # Optional: default body parameters
@@ -372,7 +372,7 @@ update_custom_tool(
   tool_name,                   # Optional
   tool_description,            # Optional
   tool_instructions,           # Optional
-  tool_url,                    # Optional
+  tool_path,                    # Optional
   tool_method,                 # Optional
   tool_headers,                # Optional
   tool_body,                   # Optional
