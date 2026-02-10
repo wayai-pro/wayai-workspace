@@ -34,7 +34,8 @@ add_custom_tool(
   tool_url,                # Optional: URL endpoint (e.g., "/orders/{{order_id}}")
   tool_method,             # Optional: get, post, put, delete, patch
   tool_headers,            # Optional: HTTP headers as [{key, value}] array
-  tool_body                # Optional: default body parameters
+  tool_body,               # Optional: default body parameters
+  tool_body_format         # Optional: 'json' (default) or 'form' (x-www-form-urlencoded)
 )
 ```
 
@@ -55,6 +56,7 @@ add_custom_tool(
 | `tool_url` | Endpoint path, supports `{{placeholders}}` |
 | `tool_config` | OpenAI function schema (auto-generated or custom) |
 | `tool_headers` | Additional headers array: `[{key, value}]` |
+| `tool_body_format` | Body encoding: `json` (default) or `form` (`application/x-www-form-urlencoded`) |
 | `tool_instructions` | AI guidance for when/how to use the tool |
 
 ### tool_config Schema

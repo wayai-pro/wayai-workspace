@@ -357,6 +357,7 @@ add_custom_tool(
   tool_method,                 # Optional: get, post, put, delete, patch
   tool_headers,                # Optional: HTTP headers as [{key, value}] array
   tool_body,                   # Optional: default body parameters
+  tool_body_format,            # Optional: 'json' (default) or 'form' (x-www-form-urlencoded)
   include_history_in_context   # Optional: include tool messages in conversation context (default: false)
 )
 ```
@@ -375,6 +376,7 @@ update_custom_tool(
   tool_method,                 # Optional
   tool_headers,                # Optional
   tool_body,                   # Optional
+  tool_body_format,            # Optional: 'json' (default) or 'form' (x-www-form-urlencoded)
   enabled,                     # Optional: true/false
   include_history_in_context   # Optional: include tool messages in conversation context
 )
