@@ -146,6 +146,7 @@ When working with agent instructions, always follow this workflow to keep files 
 - Always fetch current instructions before editing to avoid overwriting changes
 - Always prefer upload workflow over direct update (token-efficient, works with files)
 - Always save and edit instruction files in the `workspace/` directory (never use `/tmp` or other locations) so the repo stays in sync with the platform without requiring an extra `download_workspace` step
+- Instructions support dynamic placeholders like `{{now()}}`, `{{user_name()}}`, `{{state()}}`, etc. — see [agent-placeholders.md](references/agent-placeholders.md)
 
 **Example:**
 ```
@@ -190,6 +191,7 @@ Claude:
 | [connections.md](references/connections.md) | Setting up hub connections (OAuth, API keys, channels) |
 | [native-tools.md](references/native-tools.md) | Native tool parameters and usage by connector |
 | [user-tools.md](references/user-tools.md) | Creating custom API tools with placeholders |
+| [agent-placeholders.md](references/agent-placeholders.md) | Dynamic placeholders for agent instructions (`{{now()}}`, `{{state()}}`, etc.) |
 | [templates.md](references/templates.md) | Available hub templates catalog |
 | [template-structure.md](references/template-structure.md) | Template file formats, placeholders, structure |
 | [markdown-format.md](references/markdown-format.md) | File format conventions, export/import workflows |
