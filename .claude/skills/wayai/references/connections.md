@@ -1,8 +1,10 @@
 # Connections
 
-Setup guide for WayAI hub connections. Created via **UI** at Settings → Organization → Project → Hub → Connections.
+Setup guide for WayAI hub connections. Non-OAuth connections can be created via **MCP** (using organization credentials) or via **UI**. OAuth connections require **UI** setup.
 
 ## Table of Contents
+- [Organization Credentials](#organization-credentials)
+- [Creating Connections via MCP](#creating-connections-via-mcp)
 - [Connector Types](#connector-types)
 - [Agent](#agent)
 - [Channel](#channel)
@@ -12,6 +14,85 @@ Setup guide for WayAI hub connections. Created via **UI** at Settings → Organi
 - [STT](#stt)
 - [TTS](#tts)
 - [Quick Reference](#quick-reference)
+
+---
+
+## Organization Credentials
+
+Organization credentials store API keys, tokens, and passwords at the organization level. Instead of entering credentials per-connection, you create a credential once and reference it when adding connections to any hub.
+
+**Supported auth types:** API Key, Bearer Token, Basic Auth
+
+**Setup (UI only):**
+1. Settings → Organization → Credentials tab
+2. Click "+ Add Credential"
+3. Enter name, description, auth type, and credential fields
+4. Save — credentials are stored securely in vault
+
+**Using with MCP:**
+```
+1. list_organization_credentials(organization_id)  → discover available credentials
+2. add_connection(hub_id, connector_id, organization_credential_id)  → create connection
+```
+
+**Benefits:**
+- **No duplication** — same API key used across multiple hubs
+- **MCP-compatible** — agents can create connections autonomously (no raw secrets needed)
+- **Easy rotation** — update one credential, all connections use the new value
+
+**Supported connectors (non-OAuth):**
+- All Agent connectors (OpenAI, Anthropic, Google AI Studio, OpenRouter)
+- Tool - Custom (User Tool - API Key, User Tool - Basic)
+- Tool - MCP (MCP Server - Token)
+- Tool - Native (External Resources)
+- STT (Groq STT, OpenAI STT)
+- TTS (OpenAI TTS, ElevenLabs TTS)
+
+**Not supported (OAuth — requires UI):**
+- Channel connectors (WhatsApp, Instagram, Gmail)
+- Tool - Native (Google Calendar, Google Drive, YouTube)
+- Tool - MCP (MCP Server - OAuth)
+
+---
+
+## Creating Connections via MCP
+
+Non-OAuth connections can be created directly through MCP tools using organization credentials:
+
+### MCP Tools
+
+| Tool | Description |
+|------|-------------|
+| `list_organization_credentials(organization_id)` | List available org credentials (ID, name, auth type) |
+| `add_connection(hub_id, connector_id, ...)` | Create a new connection on a hub |
+| `update_connection(hub_id, connection_id, ...)` | Update connection settings or credential reference |
+| `enable_connection(hub_id, connection_id)` | Enable a disabled connection |
+| `disable_connection(hub_id, connection_id)` | Disable an enabled connection |
+| `sync_mcp_connection(hub_id, connection_id)` | Refresh tools from an MCP server connection |
+
+### `add_connection` Parameters
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `hub_id` | Yes | Hub to add the connection to |
+| `connector_id` | Yes | Connector type (see Quick Reference for IDs) |
+| `organization_credential_id` | For non-OAuth, non-NoAuth | Org credential providing authentication |
+| `connection_display_name` | No | Display name for the connection |
+| `base_url` | No | Base URL for API connections |
+| `connection_headers` | No | Custom headers (key-value pairs) |
+| `settings` | No | Connection settings (model, voice, etc.) |
+
+### Example: Full Hub Setup via MCP
+
+```
+1. get_workspace()                              → find org_id, project_id
+2. create_hub(project_id, "Customer Support")   → hub_id
+3. list_organization_credentials(org_id)        → find OpenAI credential ID
+4. add_connection(hub_id, "0cd6a292-...",        → create OpenAI connection
+     organization_credential_id: "cred-id")
+5. create_agent(hub_id, "Pilot", ...)           → agent_id
+6. add_native_tool(hub_id, agent_id, tool_id)   → enable tools
+```
 
 ---
 

@@ -40,7 +40,8 @@ description: |
 | **Organization** | Read (`get_workspace`) | Create, update, delete, users |
 | **Project** | Read, Create | Update, delete |
 | **Hub** | Create, Read, Update | Delete |
-| **Connection** | Enable, disable, sync MCP | Create, delete, OAuth setup |
+| **Connection** | Create (non-OAuth), enable, disable, sync MCP | Delete, OAuth setup |
+| **Org Credential** | List | Create, update, delete |
 | **Agent** | Full CRUD | - |
 | **Tool** | Full CRUD | - |
 
@@ -48,28 +49,36 @@ description: |
 
 ```
 Organization          ← UI only
+├── Org Credentials   ← UI to create; MCP to list
 └── Project           ← MCP to create
     └── Hub           ← Full MCP control
-        ├── Connections   ← Wayai auto-created; others via UI, MCP to manage
+        ├── Connections   ← Wayai auto-created; non-OAuth via MCP (using org credentials); OAuth via UI
         └── Agents        ← Full MCP control
             └── Tools     ← Full MCP control
 ```
 
-Setup order: Organization (signup) → Project → Hub → Agent Connection (UI) → Agents → Tools
+Setup order: Organization (signup) → Org Credentials (UI) → Project → Hub → Connections (MCP for non-OAuth, UI for OAuth) → Agents → Tools
 
-**Note:** Wayai connection (native tools) is auto-created when a hub is created. You only need to add Agent connections (OpenAI, etc.) to create agents.
+**Note:** Wayai connection (native tools) is auto-created when a hub is created. Non-OAuth connections (Agent, STT, TTS, Custom Tool) can be created via MCP using organization credentials. OAuth connections (WhatsApp, Instagram, Gmail, Google Calendar) require UI setup.
 
 ### ⚠️ Connection Prerequisites
 
+**Organization credentials (one-time setup in UI):**
+- Store API keys at the organization level: UI → Settings → Organization → Credentials tab
+- Reusable across hubs — no need to re-enter keys per connection
+- Supported auth types: API Key, Bearer Token, Basic Auth
+
 **For creating agents → Agent connection required:**
-- OpenAI, OpenRouter, Anthropic, or Google AI Studio → UI: Settings → Hub → Connections → Agent group
+- OpenAI, OpenRouter, Anthropic, or Google AI Studio
+- **Via MCP:** `list_organization_credentials(org_id)` → `add_connection(hub_id, connector_id, organization_credential_id)`
+- **Via UI:** Settings → Hub → Connections → Agent group
 
 **For enabling/creating tools → Tool connection required:**
 - **Wayai (auto-created):** Native tools automatically available when hub is created
-- **Tool - Native (OAuth):** Google Calendar (disabled by default)
-- **Tool - Native (API Key):** External Resources
-- **Tool - Custom:** Custom API tools (API Key or Basic Auth)
-- **Tool - MCP:** MCP Server tools (Token or OAuth)
+- **Tool - Native (OAuth):** Google Calendar — UI only
+- **Tool - Native (API Key):** External Resources — MCP with org credential or UI
+- **Tool - Custom:** Custom API tools — MCP with org credential or UI
+- **Tool - MCP:** MCP Server (Token) — MCP with org credential or UI; MCP Server (OAuth) — UI only
 
 ## Core Workflow
 
@@ -97,7 +106,7 @@ AFTER changes:
 | **Hub** | `get_hub`, `create_hub`, `update_hub` |
 | **Agent** | `get_agent`, `download_agent_instructions`, `create_agent`, `update_agent`, `upload_agent_instructions`, `delete_agent` |
 | **Tool** | `get_tool`, `add_native_tool`, `add_mcp_tool`, `add_custom_tool`, `update_custom_tool`, `enable_tool`, `disable_tool`, `remove_tool`, `remove_custom_tool` |
-| **Connection** | `enable_connection`, `disable_connection`, `sync_mcp_connection` |
+| **Connection** | `list_organization_credentials`, `add_connection`, `update_connection`, `enable_connection`, `disable_connection`, `sync_mcp_connection` |
 | **Analytics** | `get_analytics_variables`, `get_analytics_data`, `get_conversations_list`, `get_conversation_messages`, `pin_analytics_variable` |
 
 See [references/mcp-operations.md](references/mcp-operations.md) for detailed usage.
@@ -176,9 +185,11 @@ Claude:
 3. Copy to workspace: organizations/{org}/{project}/{hub-name}/
 4. Customize placeholders ({NOME_EMPRESA}, etc.)
 5. Create hub via MCP: create_hub(...)
-6. ⚠️ STOP: Direct user to UI to create Agent connection (OpenAI/OpenRouter)
-7. After connection confirmed, create agent via MCP: create_agent(...)
-8. Add tools to agent as needed
+6. list_organization_credentials(org_id) → check for matching credential
+7a. If org credential exists: add_connection(hub_id, connector_id, org_credential_id) → create connection via MCP
+7b. If no org credential: ⚠️ STOP — direct user to UI: Organization → Credentials tab to create one, then retry
+8. Create agent via MCP: create_agent(...)
+9. Add tools to agent as needed
 ```
 
 ## Reference Documentation

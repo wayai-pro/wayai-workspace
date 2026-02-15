@@ -4,7 +4,7 @@ WayAI is a platform for building AI-powered communication hubs that connect AI A
 
 This repository is a version-controlled workspace for the WayAI platform configuration. It gives you full context about the hubs, agents, and tools — and lets you make changes directly on the platform through MCP. The local workspace stays in sync with the remote platform, so every configuration change is reviewable, trackable, and reversible through git.
 
-All platform operations (creating hubs, configuring agents, managing tools, etc.) are done through the **WayAI MCP server** configured in `.mcp.json`. Detailed instructions, workflows, and reference docs are in the skill at `.claude/skills/wayai/` — **read `SKILL.md` before making any changes**.
+All platform operations (creating hubs, configuring agents, managing tools, etc.) are done through the **WayAI MCP server** configured in `.mcp.json`. Non-OAuth connections (LLM providers, custom tools, STT/TTS) can be created via MCP using **organization credentials** — pre-stored API keys at the org level. OAuth connections (WhatsApp, Instagram, Gmail) still require UI setup. Detailed instructions, workflows, and reference docs are in the skill at `.claude/skills/wayai/` — **read `SKILL.md` before making any changes**.
 
 ## Agent Goal
 
