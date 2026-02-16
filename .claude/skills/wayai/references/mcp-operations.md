@@ -11,6 +11,7 @@ Complete reference for WayAI MCP tools organized by entity type.
 - [Tool Operations](#tool-operations)
 - [Connection Operations](#connection-operations)
 - [Analytics Operations](#analytics-operations)
+- [Evals Operations](#evals-operations)
 - [Quick Reference Table](#quick-reference-table)
 
 ## Workspace Operations
@@ -519,6 +520,124 @@ See [references/analytics.md](analytics.md) for detailed analytics documentation
 
 ---
 
+## Evals Operations
+
+**MCP capabilities:** Full CRUD on scenarios, create/run sessions, view results and analytics
+
+Manage evaluation scenarios (test cases), run sessions, and review results. Scenarios test how agents respond to specific inputs.
+
+| Operation | MCP |
+|-----------|-----|
+| List scenarios | `get_evals(hub_id)` |
+| Create scenario | `create_eval(...)` |
+| Update scenario | `update_eval(...)` |
+| Delete scenario | `delete_eval(hub_id, eval_id)` |
+| Create session | `create_eval_session(...)` |
+| Run session | `run_eval_session(hub_id, session_id)` |
+| Session details | `get_eval_session_details(hub_id, session_id)` |
+| Session runs | `get_eval_session_runs(hub_id, session_id, eval_id?)` |
+| Analytics | `get_eval_analytics(hub_id)` |
+
+### get_evals
+Get all evaluation scenarios for a hub.
+```
+get_evals(hub_id)
+```
+Returns: List of scenarios with name, path, status, and runs-per-session count.
+
+### create_eval
+Create a new evaluation scenario.
+```
+create_eval(
+  hub_id,                      # Required
+  eval_name,                   # Required: name of the scenario
+  responder_agent_fk,          # Required: ID of the agent that responds
+  message_text,                # Required: {role: "user", content: "..."} — the test input
+  message_expected_response,   # Required: {role: "assistant", content: "..."} — expected output
+  eval_path,                   # Optional: category path for organizing (e.g., "greeting")
+  evaluator_instructions,      # Optional: custom instructions for the evaluator agent
+  number_of_runs,              # Optional: 1-10 runs per session (default: 1)
+  enabled                      # Optional: default true
+)
+```
+
+### update_eval
+Update an existing scenario.
+```
+update_eval(
+  hub_id,                    # Required (for access verification)
+  eval_id,                   # Required
+  eval_name,                 # Optional
+  eval_path,                 # Optional
+  evaluator_instructions,    # Optional
+  number_of_runs,            # Optional
+  enabled                    # Optional
+)
+```
+
+### delete_eval
+Delete a scenario.
+```
+delete_eval(hub_id, eval_id)
+```
+
+### create_eval_session
+Create a new evaluation session. Sessions group scenario runs together.
+```
+create_eval_session(
+  hub_id,              # Required
+  session_name,        # Required
+  session_description  # Optional
+)
+```
+Returns: Session ID and status (draft). Use `run_eval_session` to start.
+
+### run_eval_session
+Start running all enabled scenarios in a session.
+```
+run_eval_session(hub_id, session_id)
+```
+Triggers AI agents to respond to each test case. Use `get_eval_session_details` to check progress.
+
+### get_eval_session_details
+Get session results with per-scenario aggregated scores.
+```
+get_eval_session_details(hub_id, session_id)
+```
+Returns: Session status, run counts, success rates, and per-scenario results with aggregated scores.
+
+### get_eval_session_runs
+Get individual run results with AI responses and evaluator feedback.
+```
+get_eval_session_runs(
+  hub_id,      # Required
+  session_id,  # Required
+  eval_id      # Optional: filter by specific scenario
+)
+```
+Returns: Per-run pass/fail, response content, evaluator comment, execution time, and dimensional scores.
+
+### get_eval_analytics
+Get aggregated analytics across all scenarios and sessions.
+```
+get_eval_analytics(hub_id)
+```
+Returns: Total counts, success rates, top-performing agents, and recent trends.
+
+### Evals Workflow
+
+```
+1. Create scenarios     → create_eval(...) for each test case
+2. Create session       → create_eval_session(hub_id, session_name)
+3. Run session          → run_eval_session(hub_id, session_id)
+4. Check progress       → get_eval_session_details(hub_id, session_id)
+5. Review individual    → get_eval_session_runs(hub_id, session_id)
+6. Overall analytics    → get_eval_analytics(hub_id)
+7. Iterate              → update_eval(...) to refine, create new session, re-run
+```
+
+---
+
 ## Quick Reference Table
 
 | Entity | List | View | Create | Update | Delete |
@@ -531,5 +650,8 @@ See [references/analytics.md](analytics.md) for detailed analytics documentation
 | Connection | `get_hub` | - | UI | UI | UI |
 | Analytics | `get_analytics_variables` | `get_analytics_data` | - | `pin_analytics_variable` | - |
 | Conversations | `get_conversations_list` | `get_conversation_messages` | - | - | - |
+| Eval Scenario | `get_evals` | - | MCP | MCP | MCP |
+| Eval Session | `get_eval_session_details` | `get_eval_session_runs` | MCP | `run_eval_session` | - |
+| Eval Analytics | - | `get_eval_analytics` | - | - | - |
 
 *Only custom tools can be updated via MCP

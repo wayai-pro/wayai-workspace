@@ -44,6 +44,7 @@ description: |
 | **Org Credential** | List | Create, update, delete |
 | **Agent** | Full CRUD | - |
 | **Tool** | Full CRUD | - |
+| **Evals** | Full CRUD (scenarios, sessions, analytics) | - |
 
 ## Entity Hierarchy
 
@@ -108,6 +109,7 @@ AFTER changes:
 | **Tool** | `get_tool`, `add_native_tool`, `add_mcp_tool`, `add_custom_tool`, `update_custom_tool`, `enable_tool`, `disable_tool`, `remove_tool`, `remove_custom_tool` |
 | **Connection** | `list_organization_credentials`, `add_connection`, `update_connection`, `enable_connection`, `disable_connection`, `sync_mcp_connection` |
 | **Analytics** | `get_analytics_variables`, `get_analytics_data`, `get_conversations_list`, `get_conversation_messages`, `pin_analytics_variable` |
+| **Evals** | `get_evals`, `create_eval`, `update_eval`, `delete_eval`, `create_eval_session`, `run_eval_session`, `get_eval_session_details`, `get_eval_session_runs`, `get_eval_analytics` |
 
 See [references/mcp-operations.md](references/mcp-operations.md) for detailed usage.
 
