@@ -16,6 +16,7 @@ description: |
 - [Quick Decision: MCP or UI?](#quick-decision-mcp-or-ui)
 - [Entity Hierarchy](#entity-hierarchy)
 - [Connection Prerequisites](#️-connection-prerequisites)
+- [Hub Environments](#hub-environments)
 - [Core Workflow](#core-workflow)
 - [MCP Tools Quick Reference](#mcp-tools-quick-reference)
 - [Editing Agent Instructions](#editing-agent-instructions)
@@ -39,7 +40,7 @@ description: |
 |--------|-----|---------|
 | **Organization** | Read (`get_workspace`) | Create, update, delete, users |
 | **Project** | Read, Create | Update, delete |
-| **Hub** | Create, Read, Update | Delete |
+| **Hub** | Create, Read, Update, Publish, Sync, Replicate | Delete |
 | **Connection** | Create (non-OAuth), enable, disable, sync MCP | Delete, OAuth setup |
 | **Org Credential** | List | Create, update, delete |
 | **Agent** | Full CRUD | - |
@@ -81,22 +82,35 @@ Setup order: Organization (signup) → Org Credentials (UI) → Project → Hub 
 - **Tool - Custom:** Custom API tools — MCP with org credential or UI
 - **Tool - MCP:** MCP Server (Token) — MCP with org credential or UI; MCP Server (OAuth) — UI only
 
+## Hub Environments
+
+Hubs use a **preview/production branching** model:
+
+- **New hubs** start as `preview` — fully editable
+- **`publish_hub(hub_id)`** — first-time promotion to production (clones all config)
+- **`sync_hub(hub_id)`** — pushes subsequent preview changes to production
+- **`replicate_preview(hub_id)`** — creates a new preview from production for experimentation
+- **Production hubs are read-only** — all config changes must flow through preview → sync
+
+When `get_hub` returns hub info, check the `Environment` field (`[PREVIEW]` or `[PRODUCTION]`) and available operations. See [platform-overview.md](references/platform-overview.md) for details.
+
 ## Core Workflow
 
 ```
 BEFORE changes:
 1. get_workspace()     → discover hub_id
 2. Read workspace/<hub_folder>/CONTEXT.md (create if missing — see CLAUDE.md)
-3. get_hub(hub_id)     → current state (JSON)
+3. get_hub(hub_id)     → current state (JSON) — check environment (preview/production)
 
 MAKING changes:
-4. Use MCP tools OR edit local Markdown files
+4. Use MCP tools OR edit local Markdown files (only on preview hubs)
 5. Apply changes via MCP tools
 
 AFTER changes:
 6. Update workspace/<hub_folder>/CONTEXT.md if decisions or context changed
 7. Update local Markdown files from JSON
 8. Commit to Git
+9. If ready for production: publish_hub(hub_id) or sync_hub(hub_id)
 ```
 
 ## MCP Tools Quick Reference
@@ -104,7 +118,7 @@ AFTER changes:
 | Category | Tools |
 |----------|-------|
 | **Workspace** | `get_workspace`, `download_workspace`, `download_skill` |
-| **Hub** | `get_hub`, `create_hub`, `update_hub` |
+| **Hub** | `get_hub`, `create_hub`, `update_hub`, `publish_hub`, `sync_hub`, `replicate_preview` |
 | **Agent** | `get_agent`, `download_agent_instructions`, `create_agent`, `update_agent`, `upload_agent_instructions`, `delete_agent` |
 | **Tool** | `get_tool`, `add_native_tool`, `add_mcp_tool`, `add_custom_tool`, `update_custom_tool`, `enable_tool`, `disable_tool`, `remove_tool`, `remove_custom_tool` |
 | **Connection** | `list_organization_credentials`, `add_connection`, `update_connection`, `enable_connection`, `disable_connection`, `sync_mcp_connection` |

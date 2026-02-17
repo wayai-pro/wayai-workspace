@@ -6,6 +6,10 @@ This repository is a version-controlled workspace for the WayAI platform configu
 
 All platform operations (creating hubs, configuring agents, managing tools, etc.) are done through the **WayAI MCP server** configured in `.mcp.json`. Non-OAuth connections (LLM providers, custom tools, STT/TTS) can be created via MCP using **organization credentials** — pre-stored API keys at the org level. OAuth connections (WhatsApp, Instagram, Gmail) still require UI setup. Detailed instructions, workflows, and reference docs are in the skill at `.claude/skills/wayai/` — **read `SKILL.md` before making any changes**.
 
+## Hub Environments
+
+Hubs use a **preview/production branching** model. New hubs start as `preview` (editable). Use `publish_hub` for first-time promotion, `sync_hub` to push subsequent changes, and `replicate_preview` to create experimental previews from production. Production hubs are **read-only** — all config changes must flow through a preview hub. See SKILL.md for details.
+
 ## Agent Goal
 
 Your primary role is to manage hub settings for the user through the WayAI MCP server. When the user asks you to do anything hub-related:

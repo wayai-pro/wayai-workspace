@@ -3,6 +3,7 @@
 ## Table of Contents
 - [What is WayAI](#what-is-wayai)
 - [Hub Types](#hub-types)
+- [Hub Environments](#hub-environments)
 - [AI Modes](#ai-modes)
 - [Agent Roles](#agent-roles)
 - [Connection Types](#connection-types)
@@ -23,6 +24,28 @@ WayAI is a SaaS platform for AI-powered omnichannel communication hubs. It integ
 **Decision guide:**
 - Need WhatsApp/Instagram/Email? → Use `user`
 - Processing objects/tasks (not people)? → Use `workflow`
+
+## Hub Environments
+
+Hubs use a **preview/production branching** model for safe configuration management.
+
+| Environment | Description |
+|-------------|-------------|
+| `preview` | Default. Editable workspace for configuring and testing changes |
+| `production` | Read-only. Serves live traffic. Changes must flow from preview via sync |
+
+**Lifecycle:**
+1. **New hubs** start as `preview` — edit freely
+2. **Publish** (`publish_hub`) — first-time promotion creates a `production` hub cloned from preview
+3. **Sync** (`sync_hub`) — pushes subsequent preview changes to the linked production hub
+4. **Replicate** (`replicate_preview`) — creates a new preview hub from production for experimentation
+
+**Rules:**
+- Production hubs are **read-only** — all config mutations (agents, tools, connections, etc.) are blocked
+- Changes always flow: preview → sync → production
+- MCP `read_write` access is **not available** on production hubs (clamped to `read_only` on publish/sync)
+- Multiple preview hubs can link to the same production hub (many-to-1)
+- Deleting a production hub requires deleting all linked previews first
 
 ## AI Modes
 
@@ -82,8 +105,10 @@ See [connections.md](connections.md) for setup instructions.
 
 Hubs can be configured with different MCP access:
 
-| Level | Description |
-|-------|-------------|
-| `read_write` | Full read/write access |
-| `read_only` | Read-only access |
-| `disabled` | MCP disabled |
+| Level | Description | Environments |
+|-------|-------------|-------------|
+| `read_write` | Full read/write access | Preview only |
+| `read_only` | Read-only access | Preview and Production |
+| `disabled` | MCP disabled | Preview and Production |
+
+**Note:** Production hubs cannot have `read_write` MCP access. If a preview hub has `read_write`, it is automatically clamped to `read_only` when published or synced to production.

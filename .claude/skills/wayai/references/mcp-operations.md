@@ -101,7 +101,7 @@ create_project(
 
 ## Hub Operations
 
-**MCP capabilities:** Create, Read, Update (delete via UI)
+**MCP capabilities:** Create, Read, Update, Publish, Sync, Replicate (delete via UI)
 
 | Operation | MCP | UI |
 |-----------|-----|----|
@@ -109,6 +109,9 @@ create_project(
 | View | `get_hub(hub_id)` | - |
 | Create | `create_hub(...)` | platform.wayai.pro |
 | Update | `update_hub(...)` | platform.wayai.pro |
+| Publish | `publish_hub(hub_id)` | platform.wayai.pro |
+| Sync | `sync_hub(hub_id)` | platform.wayai.pro |
+| Replicate | `replicate_preview(hub_id)` | platform.wayai.pro |
 | Delete | - | platform.wayai.pro settings |
 
 ### create_hub
@@ -148,7 +151,7 @@ get_hub(hub_id)
 ```
 
 ### update_hub
-Update hub settings.
+Update hub settings. Only works on preview hubs — production hubs are read-only.
 ```
 update_hub(
   hub_id,                       # Required
@@ -164,6 +167,53 @@ update_hub(
   max_file_size_for_attachment, # Optional: max file size in bytes
   hub_sla                       # Optional: {time_threshold1, time_threshold2, time_threshold3} in seconds
 )
+```
+
+### Hub Environment Operations
+
+Hubs use a preview/production branching model. New hubs start as `preview`. Use these operations to promote and manage environments.
+
+#### publish_hub
+Publish a preview hub to production for the first time. Creates a production hub cloned from the preview with all config (agents, tools, connections, channels, etc.).
+```
+publish_hub(hub_id)   # Must be a preview hub with no existing production link
+```
+Returns: `production_hub_id`
+
+**Requirements:**
+- Hub must be `preview` environment
+- Hub must not already have a linked production hub (use `sync_hub` instead)
+
+#### sync_hub
+Push changes from a preview hub to its linked production hub. Updates, creates, and deletes production entities to match the preview.
+```
+sync_hub(hub_id)   # Must be a preview hub linked to production
+```
+
+**Requirements:**
+- Hub must be `preview` environment
+- Hub must have a linked production hub (published at least once)
+
+**Note:** `mcp_access = 'read_write'` on preview is clamped to `'read_only'` on production.
+
+#### replicate_preview
+Create a new preview hub cloned from a production hub for experimentation. Multiple previews can link to the same production hub.
+```
+replicate_preview(hub_id)   # Must be a production hub
+```
+Returns: `preview_hub_id`
+
+**Requirements:**
+- Hub must be `production` environment
+
+#### Hub Environment Workflow
+```
+1. Create hub              → starts as preview
+2. Configure freely        → agents, tools, connections, etc.
+3. publish_hub(hub_id)     → creates production clone (first time only)
+4. Make more changes       → edit the preview hub
+5. sync_hub(hub_id)        → push changes to production
+6. replicate_preview(prod_hub_id) → create new preview for experimentation
 ```
 
 ---
@@ -640,11 +690,11 @@ Returns: Total counts, success rates, top-performing agents, and recent trends.
 
 ## Quick Reference Table
 
-| Entity | List | View | Create | Update | Delete |
-|--------|------|------|--------|--------|--------|
-| Organization | `get_workspace` | - | UI | UI | UI |
-| Project | `get_workspace` | `get_project` | MCP | UI | UI |
-| Hub | `get_workspace` | `get_hub` | MCP | MCP | UI |
+| Entity | List | View | Create | Update | Delete | Environment |
+|--------|------|------|--------|--------|--------|-------------|
+| Organization | `get_workspace` | - | UI | UI | UI | - |
+| Project | `get_workspace` | `get_project` | MCP | UI | UI | - |
+| Hub | `get_workspace` | `get_hub` | MCP | MCP | UI | `publish_hub`, `sync_hub`, `replicate_preview` |
 | Agent | `get_hub` | `get_agent` | MCP | MCP | MCP |
 | Tool | `get_hub` | `get_tool` | MCP | MCP* | MCP |
 | Connection | `get_hub` | - | UI | UI | UI |
