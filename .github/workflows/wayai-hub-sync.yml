@@ -1,0 +1,79 @@
+name: WayAI Hub Sync
+
+on:
+  pull_request:
+    types: [opened, synchronize, closed]
+    paths:
+      - 'workspace/**/wayai.yaml'
+      - 'workspace/**/agents/**'
+  push:
+    branches: [main]
+    paths:
+      - 'workspace/**/wayai.yaml'
+      - 'workspace/**/agents/**'
+
+jobs:
+  sync-preview:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: .github/actions/wayai-sync/package-lock.json
+      - name: Build action
+        run: cd .github/actions/wayai-sync && npm ci && npm run build
+      - uses: ./.github/actions/wayai-sync
+        with:
+          api-url: ${{ vars.WAYAI_API_URL }}
+          api-token: ${{ secrets.WAYAI_API_TOKEN }}
+          action: sync
+
+  publish-production:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: .github/actions/wayai-sync/package-lock.json
+      - name: Build action
+        run: cd .github/actions/wayai-sync && npm ci && npm run build
+      - uses: ./.github/actions/wayai-sync
+        with:
+          api-url: ${{ vars.WAYAI_API_URL }}
+          api-token: ${{ secrets.WAYAI_API_TOKEN }}
+          action: sync
+      - uses: ./.github/actions/wayai-sync
+        with:
+          api-url: ${{ vars.WAYAI_API_URL }}
+          api-token: ${{ secrets.WAYAI_API_TOKEN }}
+          action: publish
+
+  cleanup-branch:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: .github/actions/wayai-sync/package-lock.json
+      - name: Build action
+        run: cd .github/actions/wayai-sync && npm ci && npm run build
+      - uses: ./.github/actions/wayai-sync
+        with:
+          api-url: ${{ vars.WAYAI_API_URL }}
+          api-token: ${{ secrets.WAYAI_API_TOKEN }}
+          action: cleanup

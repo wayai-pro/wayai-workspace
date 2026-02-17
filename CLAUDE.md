@@ -10,6 +10,25 @@ All platform operations (creating hubs, configuring agents, managing tools, etc.
 
 Hubs use a **preview/production branching** model. New hubs start as `preview` (editable). Use `publish_hub` for first-time promotion, `sync_hub` to push subsequent changes, and `replicate_preview` to create experimental previews from production. Production hubs are **read-only** — all config changes must flow through a preview hub. See SKILL.md for details.
 
+### MCP Access Modes
+
+Each hub has an `mcp_access` setting that determines how changes flow:
+
+- **`read_write`** — Agent edits hub directly via MCP tools. Agile, no git needed. Best for rapid iteration.
+- **`read_only`** — Changes must flow through git: edit YAML files → PR → GitHub Action syncs to preview → test → merge → publish to production. Governed workflow.
+- **`disabled`** — No MCP access. Hub managed via UI only.
+
+### GitOps Workflow (for `read_only` hubs)
+
+When a production hub has `mcp_access: read_only`, configuration changes are managed as code:
+
+1. **Edit hub config files** — modify `wayai.yaml` and `agents/*.md` in `workspace/<org>/<project>/<hub>/`
+2. **Create a PR** — GitHub Action detects changed hub folders and creates a branch preview per production hub
+3. **Test the preview** — verify changes work as expected
+4. **Merge the PR** — GitHub Action syncs and publishes each changed hub to production
+
+GitOps only applies to **production hubs**. Preview-only hubs are managed via MCP/UI.
+
 ## Agent Goal
 
 Your primary role is to manage hub settings for the user through the WayAI MCP server. When the user asks you to do anything hub-related:
@@ -61,6 +80,30 @@ git remote add template https://github.com/wayai-resources/wayai.git
 git fetch template && git merge template/main --allow-unrelated-histories
 ```
 
+## Workspace Format (HubAsCode)
+
+Each hub folder in `workspace/` contains structured YAML config plus separate `.md` files for agent instructions:
+
+```
+workspace/<org>/<project>/<hub>/
+├── wayai.yaml              # Hub config + agents + tools + states (structured, diffable)
+├── agents/
+│   ├── pilot.md            # Instructions for "Pilot Agent" (slugified name)
+│   └── specialist-billing.md
+├── CONTEXT.md              # Living notes — purpose, decisions, ongoing work (NOT synced to backend)
+└── references/             # Supporting files (NOT synced to backend)
+```
+
+### `wayai.yaml` key fields
+
+- **`hub_id`** and **`hub_environment`** — read-only metadata at top level. Do not edit these.
+- **`hub`** — hub settings (name, ai_mode, timezone, permissions, SLA, kanban, etc.)
+- **`agents`** — list of agents with `name`, `role`, `connection` (display name), `instructions` (path to `.md`), `settings`, `tools`
+- **`states`** — conversation/user state schemas
+- **`connections`** — read-only reference showing available connections (managed via UI/MCP, not synced back)
+
+Agents reference connections by display name. Tools are grouped as `native` (platform built-ins), `delegation` (agent-to-agent/team), and `custom` (HTTP endpoints).
+
 ## Repository Structure
 
 ```
@@ -69,11 +112,14 @@ CLAUDE.md                     # This file — agent instructions
 ├── SKILL.md                  # Workflows and prerequisites
 ├── references/               # Detailed reference docs
 └── assets/templates/         # Hub templates
+.github/
+├── actions/wayai-sync/       # GitOps action (sync, publish, cleanup)
+└── workflows/wayai-hub-sync.yml  # PR/merge workflow for hub changes
 workspace/                    # Local copy of remote workspace
 ├── <hub_folder>/
+│   ├── wayai.yaml            # Hub configuration (synced from platform)
+│   ├── agents/               # Agent instruction files
 │   ├── CONTEXT.md            # Hub context — purpose, decisions, ongoing work
-│   ├── references/           # Supporting files referenced by CONTEXT.md
-│   ├── hub.md                # Hub configuration (synced from platform)
-│   └── ...
+│   └── references/           # Supporting files referenced by CONTEXT.md
 .mcp.json                     # MCP server configuration
 ```
