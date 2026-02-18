@@ -52,12 +52,12 @@ wayai login          # Opens browser for OAuth — or use `wayai login --token` 
 
 ## Workflow
 
-1. **Sync before working**: `wayai pull` to fetch hub config from platform to local files
+1. **Sync before working**: `wayai pull --all` to fetch all hub configs from platform to local files
 2. **Make changes**: Use WayAI MCP tools to apply changes on the platform (follow SKILL.md workflows)
-3. **Sync after changes**: `wayai pull` again so local files reflect the new state
+3. **Sync after changes**: `wayai pull --all` again so local files reflect the new state
 4. **Commit**: Git commit the updated workspace as a versioned snapshot
 
-To push local changes to the platform: `wayai push` (shows diff, prompts for confirmation, syncs to preview).
+To push local changes to the platform: `wayai push` from the repo root auto-detects changed hubs via git status and pushes each one.
 
 ## Sync
 
@@ -68,14 +68,20 @@ There are two types of sync — keep them distinct:
 Syncs your hub configuration from the platform into the local `workspace/` directory. The platform is the source of truth — the local files are a Markdown mirror for agent context, user review, and git history.
 
 ```bash
-# Recommended: WayAI CLI
-wayai pull <org/project/hub>     # Fetches config, shows diff, writes local files
-wayai push                       # Parses local files, shows diff, syncs to preview
+# Recommended: WayAI CLI (from repo root)
+wayai pull --all                 # Pull all hubs in workspace
+wayai pull --all -y              # Same, skip confirmation prompts
+wayai pull acme/support/hub      # Pull a specific hub (resolves to workspace/ folder)
+wayai push                       # Auto-detect changed hubs via git, push each
+wayai push -y                    # Same, skip confirmation prompts
+wayai push acme/support/hub      # Push a specific hub
 
 # Alternative (MCP): download_workspace
 download_workspace()  # Returns a download URL (expires in 5 min)
 curl -L "<url>" -o workspace.zip && unzip -o workspace.zip -d ./
 ```
+
+The CLI is workspace-aware — from the repo root it resolves hub paths to `workspace/org/project/hub/` folders automatically. Use `--yes` / `-y` to skip confirmation prompts (useful for scripting and CI).
 
 When to sync:
 - **Before working** — catch changes made outside the agent (UI, other users)

@@ -197,14 +197,19 @@ agents:
 
 ### Using WayAI CLI (Recommended)
 
+```bash
+# From repo root — pull all hubs:
+wayai pull --all
+wayai pull --all -y              # Skip confirmation prompts
+
+# From repo root — pull a specific hub:
+wayai pull acme/support/hub      # Resolves to workspace/acme/support/hub/
+
+# From a hub folder:
+wayai pull                       # Uses wayai.yaml in current directory
 ```
-1. wayai pull <org/project/hub>
-   → Fetches hub config from platform
-   → Shows diff against local files (if they exist)
-   → Writes wayai.yaml + agents/*.md on confirmation
-2. git diff to review
-3. git commit
-```
+
+Each pull fetches hub config from the platform, shows a diff against local files (if they exist), and writes `wayai.yaml` + `agents/*.md` on confirmation.
 
 ### Alternative: Using download_workspace (MCP)
 
@@ -228,16 +233,23 @@ agents:
 
 Push local changes to the platform using the WayAI CLI:
 
+```bash
+# From repo root — auto-detect changed hubs:
+wayai push                       # Detects changed hub files via git status
+wayai push -y                    # Skip confirmation prompts
+
+# From repo root — push a specific hub:
+wayai push acme/support/hub      # Resolves to workspace/acme/support/hub/
+
+# From a hub folder:
+wayai push                       # Uses wayai.yaml in current directory
 ```
-1. Edit wayai.yaml and/or agents/*.md locally
-2. wayai push
-   → Parses local files into HubAsCodePayload
-   → Computes diff against current platform state
-   → Shows changes and prompts for confirmation
-   → Syncs to a preview hub on confirmation
-3. Test the preview hub
-4. Publish to production when ready (via MCP: publish_hub or sync_hub)
-```
+
+Each push parses local files, computes a diff against the current platform state, shows changes, and syncs to a preview hub on confirmation.
+
+After pushing:
+1. Test the preview hub
+2. Publish to production when ready (via MCP: `publish_hub` or `sync_hub`)
 
 ## Sync via GitOps
 

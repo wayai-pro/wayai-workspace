@@ -127,7 +127,7 @@ MAKING changes:
 
 AFTER changes:
 6. Update workspace/<hub_folder>/CONTEXT.md if decisions or context changed
-7. Sync local files: `wayai pull` (or `download_workspace` as alternative)
+7. Sync local files: `wayai pull --all -y` (or `wayai pull <org/project/hub>` for one hub)
 8. Commit to Git
 9. If ready for production: publish_hub(hub_id) or sync_hub(hub_id)
 ```
@@ -137,12 +137,22 @@ AFTER changes:
 The WayAI CLI provides direct file-based sync with diff confirmation at each step:
 
 ```bash
-wayai pull <org/project/hub>    # Fetch hub config → show diff → write local files
-# Edit wayai.yaml and agents/*.md locally
-wayai push                       # Parse local files → show diff → confirm → sync to preview
+# From repo root (workspace-aware):
+wayai pull --all                 # Pull all hubs in workspace
+wayai pull acme/support/hub      # Pull a specific hub → resolves to workspace/ folder
+wayai push                       # Auto-detect changed hubs via git status, push each
+wayai push acme/support/hub      # Push a specific hub
+
+# From a hub folder (has wayai.yaml):
+wayai pull                       # Pull current hub
+wayai push                       # Push current hub
+
+# Flags:
+#   --yes, -y    Skip confirmation prompts (useful for scripting/CI)
+#   --all        Pull all hubs in workspace (pull only)
 ```
 
-This is simpler than the `download_workspace` → curl → unzip flow for bulk operations. The CLI shows a diff before applying changes in either direction, so you can review what will change before confirming.
+The CLI is workspace-aware — from the repo root it resolves hub paths to `workspace/org/project/hub/` folders automatically. It shows a diff before applying changes in either direction, so you can review what will change before confirming.
 
 Install: `npm install -g @wayai/cli` — authenticate: `wayai login`
 
@@ -157,7 +167,7 @@ Install: `npm install -g @wayai/cli` — authenticate: `wayai login`
 | **Connection** | `list_organization_credentials`, `add_connection`, `update_connection`, `enable_connection`, `disable_connection`, `sync_mcp_connection` |
 | **Analytics** | `get_analytics_variables`, `get_analytics_data`, `get_conversations_list`, `get_conversation_messages`, `pin_analytics_variable` |
 | **Evals** | `get_evals`, `create_eval`, `update_eval`, `delete_eval`, `create_eval_session`, `run_eval_session`, `get_eval_session_details`, `get_eval_session_runs`, `get_eval_analytics` |
-| **CLI** | `wayai login`, `wayai pull`, `wayai push`, `wayai status`, `wayai logout` |
+| **CLI** | `wayai login`, `wayai pull [path] [--all] [--yes]`, `wayai push [path] [--yes]`, `wayai status`, `wayai logout` |
 
 See [references/mcp-operations.md](references/mcp-operations.md) for detailed usage.
 
