@@ -106,7 +106,7 @@ Each hub has an `mcp_access` setting that determines how changes flow:
 
 When a production hub has `mcp_access: read_only`, configuration is managed as code via `wayai.yaml`:
 
-1. **Edit hub config files** — modify `wayai.yaml` and `agents/*.md` in `workspace/<org>/<project>/<hub>/`
+1. **Edit hub config files** — modify `wayai.yaml` and `agents/*.md` in `workspace/<project>/<hub>/`
 2. **Create a PR** — GitHub Action detects changed hub folders and creates a branch preview per production hub
 3. **Test the preview** — verify changes work as expected
 4. **Merge the PR** — GitHub Action syncs and publishes each changed hub to production
@@ -139,9 +139,9 @@ The WayAI CLI provides direct file-based sync with diff confirmation at each ste
 ```bash
 # From repo root (workspace-aware):
 wayai pull --all                 # Pull all hubs in workspace
-wayai pull acme/support/hub      # Pull a specific hub → resolves to workspace/ folder
+wayai pull support/hub      # Pull a specific hub → resolves to workspace/ folder
 wayai push                       # Auto-detect changed hubs via git status, push each
-wayai push acme/support/hub      # Push a specific hub
+wayai push support/hub      # Push a specific hub
 
 # From a hub folder (has wayai.yaml):
 wayai pull                       # Pull current hub
@@ -152,9 +152,9 @@ wayai push                       # Push current hub
 #   --all        Pull all hubs in workspace (pull only)
 ```
 
-The CLI is workspace-aware — from the repo root it resolves hub paths to `workspace/org/project/hub/` folders automatically. It shows a diff before applying changes in either direction, so you can review what will change before confirming.
+The CLI is workspace-aware — from the repo root it resolves hub paths to `workspace/project/hub/` folders automatically. It shows a diff before applying changes in either direction, so you can review what will change before confirming.
 
-Install: `npm install -g @wayai/cli` — authenticate: `wayai login`
+Install: `npm install -g @wayai/cli` — authenticate: `wayai login` — link to org: `wayai init`
 
 ## MCP Tools Quick Reference
 
@@ -167,7 +167,7 @@ Install: `npm install -g @wayai/cli` — authenticate: `wayai login`
 | **Connection** | `list_organization_credentials`, `add_connection`, `update_connection`, `enable_connection`, `disable_connection`, `sync_mcp_connection` |
 | **Analytics** | `get_analytics_variables`, `get_analytics_data`, `get_conversations_list`, `get_conversation_messages`, `pin_analytics_variable` |
 | **Evals** | `get_evals`, `create_eval`, `update_eval`, `delete_eval`, `create_eval_session`, `run_eval_session`, `get_eval_session_details`, `get_eval_session_runs`, `get_eval_analytics` |
-| **CLI** | `wayai login`, `wayai pull [path] [--all] [--yes]`, `wayai push [path] [--yes]`, `wayai status`, `wayai logout` |
+| **CLI** | `wayai login`, `wayai init [org]`, `wayai pull [path] [--all] [--yes]`, `wayai push [path] [--yes]`, `wayai status`, `wayai logout` |
 
 See [references/mcp-operations.md](references/mcp-operations.md) for detailed usage.
 
@@ -181,7 +181,7 @@ When working with agent instructions, always follow this workflow to keep files 
    → Returns signed URL (valid 1 hour)
 
 2. SAVE: curl to workspace file
-   curl -L "{url}" -o workspace/{org}/{project}/{hub}/agents/{agentname}.md
+   curl -L "{url}" -o workspace/{project}/{hub}/agents/{agentname}.md
    → Saves instructions to the workspace directory
 
 3. READ: Read the workspace file when needed
@@ -197,7 +197,7 @@ When working with agent instructions, always follow this workflow to keep files 
    → Returns upload URL, headers, and curl command
 
 3. UPLOAD: Run the returned curl command with the workspace file
-   curl -X POST '{upload_url}' ... --data-binary @workspace/{org}/{project}/{hub}/agents/{agentname}.md
+   curl -X POST '{upload_url}' ... --data-binary @workspace/{project}/{hub}/agents/{agentname}.md
    → File stored in R2 and synced to database
 ```
 
@@ -242,7 +242,7 @@ User: "Preciso de um hub para pizzaria"
 Claude:
 1. Find matching template in references/templates.md
 2. Read the hub config and agent instructions from template paths
-3. Copy to workspace: organizations/{org}/{project}/{hub-name}/
+3. Copy to workspace: workspace/{project}/{hub-name}/
 4. Customize placeholders ({NOME_EMPRESA}, etc.)
 5. Create hub via MCP: create_hub(...)
 6. list_organization_credentials(org_id) → check for matching credential

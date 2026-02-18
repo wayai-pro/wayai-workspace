@@ -14,19 +14,31 @@ Conventions for the workspace directory structure and `wayai.yaml` configuration
 ## Directory Structure
 
 ```
-workspace/                                # Workspace folder (from download_workspace)
-├── workspace.md                          # Workspace overview (orgs/projects/hubs index)
+.wayai.yaml                               # Repo config — organization scope (created by `wayai init`)
+workspace/                                # Workspace folder (from download_workspace or wayai pull)
+├── workspace.md                          # Workspace overview (projects/hubs index)
 ├── last-sync.md                          # Sync metadata
-└── {org-slug}/                           # Organization folder
-    └── {project-slug}/                   # Project folder
-        └── {hub-slug}/                   # Hub folder
-            ├── wayai.yaml                # Hub config + agents + tools + states
-            ├── agents/                   # Agent instruction files
-            │   ├── pilot.md              # Instructions for "Pilot Agent"
-            │   └── specialist-billing.md # Instructions for "Specialist - Billing"
-            ├── CONTEXT.md                # Living notes (NOT synced to backend)
-            └── references/               # Supporting files (NOT synced to backend)
+└── {project-slug}/                       # Project folder
+    ├── {hub-slug}/                       # Production hub folder
+    │   ├── wayai.yaml                    # Hub config + agents + tools + states
+    │   ├── agents/                       # Agent instruction files
+    │   │   ├── pilot.md                  # Instructions for "Pilot Agent"
+    │   │   └── specialist-billing.md     # Instructions for "Specialist - Billing"
+    │   ├── CONTEXT.md                    # Living notes (NOT synced to backend)
+    │   └── references/                   # Supporting files (NOT synced to backend)
+    └── {hub-slug}-{label}/               # Preview hub folder (disambiguated)
+        ├── wayai.yaml
+        └── agents/
 ```
+
+### Preview Hub Folder Naming
+
+Preview hubs get a suffix to avoid colliding with their production counterpart:
+- **With `preview_label`:** `hub-slug-my-label`
+- **With `branch_name`:** `hub-slug-feat-new-flow`
+- **Fallback (hub_id prefix):** `hub-slug-abc12345`
+
+Production hubs use the plain `hub-slug` name.
 
 ## Slugification Rules
 
@@ -203,7 +215,7 @@ wayai pull --all
 wayai pull --all -y              # Skip confirmation prompts
 
 # From repo root — pull a specific hub:
-wayai pull acme/support/hub      # Resolves to workspace/acme/support/hub/
+wayai pull support/hub      # Resolves to workspace/acme/support/hub/
 
 # From a hub folder:
 wayai pull                       # Uses wayai.yaml in current directory
@@ -214,7 +226,7 @@ Each pull fetches hub config from the platform, shows a diff against local files
 ### Alternative: Using download_workspace (MCP)
 
 ```
-1. download_workspace() → download URL
+1. download_workspace(organization="My Org") → download URL
 2. Download and extract zip
 3. Replace local workspace folders
 4. git diff to review
@@ -225,7 +237,7 @@ Each pull fetches hub config from the platform, shows a diff against local files
 
 ```
 1. download_agent_instructions(hub_id, agent_id) → signed download URL
-2. curl -L "{url}" -o workspace/{org}/{project}/{hub}/agents/{agentname}.md
+2. curl -L "{url}" -o workspace/{project}/{hub}/agents/{agentname}.md
 3. Read the workspace file when needed
 ```
 
@@ -239,7 +251,7 @@ wayai push                       # Detects changed hub files via git status
 wayai push -y                    # Skip confirmation prompts
 
 # From repo root — push a specific hub:
-wayai push acme/support/hub      # Resolves to workspace/acme/support/hub/
+wayai push support/hub      # Resolves to workspace/acme/support/hub/
 
 # From a hub folder:
 wayai push                       # Uses wayai.yaml in current directory

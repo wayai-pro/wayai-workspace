@@ -22,7 +22,7 @@ Each hub has an `mcp_access` setting that determines how changes flow:
 
 When a production hub has `mcp_access: read_only`, configuration changes are managed as code:
 
-1. **Edit hub config files** — modify `wayai.yaml` and `agents/*.md` in `workspace/<org>/<project>/<hub>/`
+1. **Edit hub config files** — modify `wayai.yaml` and `agents/*.md` in `workspace/<project>/<hub>/`
 2. **Create a PR** — GitHub Action detects changed hub folders and creates a branch preview per production hub
 3. **Test the preview** — verify changes work as expected
 4. **Merge the PR** — GitHub Action syncs and publishes each changed hub to production
@@ -48,6 +48,7 @@ The WayAI CLI (`@wayai/cli`) is the recommended tool for syncing hub configurati
 ```bash
 npm install -g @wayai/cli
 wayai login          # Opens browser for OAuth — or use `wayai login --token` for headless/CI
+wayai init           # Link repo to your organization (creates .wayai.yaml)
 ```
 
 ## Workflow
@@ -71,17 +72,17 @@ Syncs your hub configuration from the platform into the local `workspace/` direc
 # Recommended: WayAI CLI (from repo root)
 wayai pull --all                 # Pull all hubs in workspace
 wayai pull --all -y              # Same, skip confirmation prompts
-wayai pull acme/support/hub      # Pull a specific hub (resolves to workspace/ folder)
+wayai pull support/customer-hub  # Pull a specific hub (resolves to workspace/ folder)
 wayai push                       # Auto-detect changed hubs via git, push each
 wayai push -y                    # Same, skip confirmation prompts
-wayai push acme/support/hub      # Push a specific hub
+wayai push support/customer-hub  # Push a specific hub
 
 # Alternative (MCP): download_workspace
-download_workspace()  # Returns a download URL (expires in 5 min)
+download_workspace(organization="My Org")  # Returns a download URL (expires in 5 min)
 curl -L "<url>" -o workspace.zip && unzip -o workspace.zip -d ./
 ```
 
-The CLI is workspace-aware — from the repo root it resolves hub paths to `workspace/org/project/hub/` folders automatically. Use `--yes` / `-y` to skip confirmation prompts (useful for scripting and CI).
+The CLI is workspace-aware — from the repo root it resolves hub paths to `workspace/project/hub/` folders automatically. Use `--yes` / `-y` to skip confirmation prompts (useful for scripting and CI).
 
 When to sync:
 - **Before working** — catch changes made outside the agent (UI, other users)
@@ -107,7 +108,7 @@ git fetch template && git merge template/main --allow-unrelated-histories
 Each hub folder in `workspace/` contains structured YAML config plus separate `.md` files for agent instructions:
 
 ```
-workspace/<org>/<project>/<hub>/
+workspace/<project>/<hub>/
 ├── wayai.yaml              # Hub config + agents + tools + states (structured, diffable)
 ├── agents/
 │   ├── pilot.md            # Instructions for "Pilot Agent" (slugified name)
@@ -130,6 +131,7 @@ Agents reference connections by display name. Tools are grouped as `native` (pla
 
 ```
 CLAUDE.md                     # This file — agent instructions
+.wayai.yaml                   # Repo config — organization scope (created by `wayai init`)
 .claude/skills/wayai/         # WayAI skill - START HERE
 ├── SKILL.md                  # Workflows and prerequisites
 ├── references/               # Detailed reference docs
@@ -137,11 +139,13 @@ CLAUDE.md                     # This file — agent instructions
 .github/
 ├── actions/wayai-sync/       # GitOps action (sync, publish, cleanup)
 └── workflows/wayai-hub-sync.yml  # PR/merge workflow for hub changes
-workspace/                    # Local copy of remote workspace
-├── <hub_folder>/
+workspace/                    # Local copy of remote workspace (org-scoped)
+├── <project>/<hub>/
 │   ├── wayai.yaml            # Hub configuration (synced from platform)
 │   ├── agents/               # Agent instruction files
 │   ├── CONTEXT.md            # Hub context — purpose, decisions, ongoing work
 │   └── references/           # Supporting files referenced by CONTEXT.md
 .mcp.json                     # MCP server configuration
 ```
+
+Preview hubs use disambiguated folder names: `hub-slug-<preview_label>`, `hub-slug-<branch_name>`, or `hub-slug-<hub_id_prefix>`. Production hubs use plain `hub-slug`.

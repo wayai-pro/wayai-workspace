@@ -24,9 +24,12 @@ get_workspace()
 Returns: workspace hierarchy with org/project/hub IDs and names
 
 ### download_workspace
-Download entire workspace as downloadable zip with Markdown files.
+Download workspace for a specific organization as downloadable zip with YAML configuration files.
 ```
-download_workspace()
+download_workspace(
+  organization,     # Required — organization name
+  project           # Optional — filter to a specific project
+)
 ```
 Returns: download URL (expires in 5 minutes)
 
@@ -41,9 +44,9 @@ Creates a `./workspace/` folder with structure:
 workspace/
 ├── workspace.md
 ├── last-sync.md
-└── {org-slug}/{project-slug}/{hub-slug}/
-    ├── hub.md
-    └── {agent-slug}-instructions.md
+└── {project-slug}/{hub-slug}/
+    ├── wayai.yaml
+    └── agents/{agent-slug}.md
 ```
 
 ### download_skill
@@ -259,7 +262,7 @@ Returns:
 
 **Download using curl:**
 ```bash
-curl -L "{download_url}" -o workspace/{org}/{project}/{hub}/{agentname}-instructions.md
+curl -L "{download_url}" -o workspace/{project}/{hub}/{agentname}-instructions.md
 ```
 
 Note: The file is recreated from `agent.instructions` on each call to ensure sync with the database. Always save to the `workspace/` directory so the repo stays in sync, then Read when needed (avoids context bloat).
@@ -318,7 +321,7 @@ Returns: upload URL, required headers, and a ready-to-use curl command.
 curl -X POST '{upload_url}' \
   -H 'Content-Type: text/markdown' \
   -H 'Authorization: Bearer {token}' \
-  --data-binary @workspace/{org}/{project}/{hub}/{agentname}-instructions.md
+  --data-binary @workspace/{project}/{hub}/{agentname}-instructions.md
 ```
 
 Always upload from the `workspace/` directory so the repo stays in sync with the platform.
