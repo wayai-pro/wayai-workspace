@@ -6,7 +6,7 @@ description: |
   (4) Syncing workspace settings with Git, (5) Using hub templates for new deployments.
 ---
 
-<!-- v3.3.0 -->
+<!-- v3.4.0 -->
 
 # WayAI Skill
 
@@ -94,6 +94,25 @@ Hubs use a **preview/production branching** model:
 
 When `get_hub` returns hub info, check the `Environment` field (`[PREVIEW]` or `[PRODUCTION]`) and available operations. See [platform-overview.md](references/platform-overview.md) for details.
 
+### MCP Access Modes
+
+Each hub has an `mcp_access` setting that determines how changes flow:
+
+- **`read_write`** — Agent edits hub directly via MCP tools. Agile, no git needed. Best for rapid iteration.
+- **`read_only`** — Changes must flow through git: edit YAML files → PR → GitHub Action syncs to preview → test → merge → publish to production. Governed workflow.
+- **`disabled`** — No MCP access. Hub managed via UI only.
+
+### GitOps Workflow (for `read_only` hubs)
+
+When a production hub has `mcp_access: read_only`, configuration is managed as code via `wayai.yaml`:
+
+1. **Edit hub config files** — modify `wayai.yaml` and `agents/*.md` in `workspace/<org>/<project>/<hub>/`
+2. **Create a PR** — GitHub Action detects changed hub folders and creates a branch preview per production hub
+3. **Test the preview** — verify changes work as expected
+4. **Merge the PR** — GitHub Action syncs and publishes each changed hub to production
+
+GitOps only applies to **production hubs**. Preview-only hubs are managed via MCP/UI.
+
 ## Core Workflow
 
 ```
@@ -103,12 +122,12 @@ BEFORE changes:
 3. get_hub(hub_id)     → current state (JSON) — check environment (preview/production)
 
 MAKING changes:
-4. Use MCP tools OR edit local Markdown files (only on preview hubs)
+4. Use MCP tools OR edit local YAML/Markdown files (only on preview hubs)
 5. Apply changes via MCP tools
 
 AFTER changes:
 6. Update workspace/<hub_folder>/CONTEXT.md if decisions or context changed
-7. Update local Markdown files from JSON
+7. Download workspace to sync local files with platform state
 8. Commit to Git
 9. If ready for production: publish_hub(hub_id) or sync_hub(hub_id)
 ```
@@ -137,7 +156,7 @@ When working with agent instructions, always follow this workflow to keep files 
    → Returns signed URL (valid 1 hour)
 
 2. SAVE: curl to workspace file
-   curl -L "{url}" -o workspace/{org}/{project}/{hub}/{agentname}-instructions.md
+   curl -L "{url}" -o workspace/{org}/{project}/{hub}/agents/{agentname}.md
    → Saves instructions to the workspace directory
 
 3. READ: Read the workspace file when needed
@@ -153,24 +172,24 @@ When working with agent instructions, always follow this workflow to keep files 
    → Returns upload URL, headers, and curl command
 
 3. UPLOAD: Run the returned curl command with the workspace file
-   curl -X POST '{upload_url}' ... --data-binary @workspace/{org}/{project}/{hub}/{agentname}-instructions.md
+   curl -X POST '{upload_url}' ... --data-binary @workspace/{org}/{project}/{hub}/agents/{agentname}.md
    → File stored in R2 and synced to database
 ```
 
 **File Naming Convention:**
-- Pattern: `{agentname}-instructions.md`
+- Pattern: `agents/{agentname}.md`
 - Slugify agent name: lowercase, spaces→hyphens, remove special chars
 - Examples:
-  - Agent "Atendente" → `atendente-instructions.md`
-  - Agent "Order Taker" → `order-taker-instructions.md`
-  - Agent "Suporte Nível 2" → `suporte-nvel-2-instructions.md`
+  - Agent "Atendente" → `agents/atendente.md`
+  - Agent "Order Taker" → `agents/order-taker.md`
+  - Agent "Suporte Nível 2" → `agents/suporte-nvel-2.md`
 
 **Important:**
 - `get_agent` excludes instructions (use `download_agent_instructions` instead)
 - `update_agent` cannot modify instructions (use upload workflow)
 - Always fetch current instructions before editing to avoid overwriting changes
 - Always prefer upload workflow over direct update (token-efficient, works with files)
-- Always save and edit instruction files in the `workspace/` directory (never use `/tmp` or other locations) so the repo stays in sync with the platform without requiring an extra `download_workspace` step
+- Always save and edit instruction files in the `workspace/` directory under `agents/` (never use `/tmp` or other locations) so the repo stays in sync with the platform without requiring an extra `download_workspace` step
 - Instructions support dynamic placeholders like `{{now()}}`, `{{user_name()}}`, `{{state()}}`, etc. — see [agent-placeholders.md](references/agent-placeholders.md)
 
 **Example:**
@@ -179,13 +198,13 @@ User: "Update the Pilot agent instructions to be more friendly"
 
 Claude:
 1. download_agent_instructions(hub_id, agent_id) → signed_url
-2. curl -L "{signed_url}" -o workspace/{org}/{project}/{hub}/atendente-instructions.md
+2. curl -L "{signed_url}" -o workspace/{org}/{project}/{hub}/agents/atendente.md
 3. Read the workspace file → show current instructions
 4. Show user: "Here are the current instructions. I'll make them more friendly..."
 5. Edit the workspace file with proposed changes
 6. Show diff to user, wait for approval
 7. upload_agent_instructions(hub_id, agent_id) → upload URL + curl command
-8. Run curl to upload workspace/{org}/{project}/{hub}/atendente-instructions.md
+8. Run curl to upload workspace/{org}/{project}/{hub}/agents/atendente.md
 ```
 
 ## Using Templates
@@ -221,4 +240,4 @@ Claude:
 | [agent-placeholders.md](references/agent-placeholders.md) | Dynamic placeholders for agent instructions (`{{now()}}`, `{{state()}}`, etc.) |
 | [templates.md](references/templates.md) | Available hub templates catalog |
 | [template-structure.md](references/template-structure.md) | Template file formats, placeholders, structure |
-| [markdown-format.md](references/markdown-format.md) | File format conventions, export/import workflows |
+| [workspace-format.md](references/workspace-format.md) | HubAsCode YAML format, workspace structure, sync workflows |
