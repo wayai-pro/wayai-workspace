@@ -41,12 +41,23 @@ Your primary role is to manage hub settings for the user through the WayAI MCP s
 
 The `CONTEXT.md` file is a living document — it ensures continuity across sessions and prevents repeated questions about the same hub.
 
+## CLI Setup
+
+The WayAI CLI (`@wayai/cli`) is the recommended tool for syncing hub configuration between local files and the platform. Install and authenticate once:
+
+```bash
+npm install -g @wayai/cli
+wayai login          # Opens browser for OAuth — or use `wayai login --token` for headless/CI
+```
+
 ## Workflow
 
-1. **Sync before working**: Download workspace from remote — the platform is the source of truth
+1. **Sync before working**: `wayai pull` to fetch hub config from platform to local files
 2. **Make changes**: Use WayAI MCP tools to apply changes on the platform (follow SKILL.md workflows)
-3. **Sync after changes**: Download workspace again so local files reflect the new state
+3. **Sync after changes**: `wayai pull` again so local files reflect the new state
 4. **Commit**: Git commit the updated workspace as a versioned snapshot
+
+To push local changes to the platform: `wayai push` (shows diff, prompts for confirmation, syncs to preview).
 
 ## Sync
 
@@ -57,7 +68,12 @@ There are two types of sync — keep them distinct:
 Syncs your hub configuration from the platform into the local `workspace/` directory. The platform is the source of truth — the local files are a Markdown mirror for agent context, user review, and git history.
 
 ```bash
-download_workspace()  # MCP tool — returns a download URL (expires in 5 min)
+# Recommended: WayAI CLI
+wayai pull <org/project/hub>     # Fetches config, shows diff, writes local files
+wayai push                       # Parses local files, shows diff, syncs to preview
+
+# Alternative (MCP): download_workspace
+download_workspace()  # Returns a download URL (expires in 5 min)
 curl -L "<url>" -o workspace.zip && unzip -o workspace.zip -d ./
 ```
 

@@ -104,11 +104,18 @@ export function parseHubFolder(hubFolder: string): HubAsCodePayload {
   }
 
   // Resolve agent instructions from .md files
+  // Synced with cli/src/lib/parser.ts
   const agents = config.agents?.map((agent) => {
     const resolved = { ...agent };
 
     if (typeof resolved.instructions === 'string' && resolved.instructions.endsWith('.md')) {
-      const instructionsPath = path.join(hubFolder, 'agents', resolved.instructions);
+      // Instructions can be either:
+      //   "agents/pilot.md" (relative to hubFolder — standard format per workspace-format.md)
+      //   "pilot.md" (legacy — just filename, looked up under agents/)
+      const instrValue = resolved.instructions as string;
+      const instructionsPath = instrValue.startsWith('agents/')
+        ? path.join(hubFolder, instrValue)
+        : path.join(hubFolder, 'agents', instrValue);
 
       if (fs.existsSync(instructionsPath)) {
         resolved.instructions = fs.readFileSync(instructionsPath, 'utf-8');

@@ -195,7 +195,18 @@ agents:
 
 ## Download Workflow
 
-### Using download_workspace (Recommended)
+### Using WayAI CLI (Recommended)
+
+```
+1. wayai pull <org/project/hub>
+   → Fetches hub config from platform
+   → Shows diff against local files (if they exist)
+   → Writes wayai.yaml + agents/*.md on confirmation
+2. git diff to review
+3. git commit
+```
+
+### Alternative: Using download_workspace (MCP)
 
 ```
 1. download_workspace() → download URL
@@ -211,6 +222,21 @@ agents:
 1. download_agent_instructions(hub_id, agent_id) → signed download URL
 2. curl -L "{url}" -o workspace/{org}/{project}/{hub}/agents/{agentname}.md
 3. Read the workspace file when needed
+```
+
+## Push Workflow
+
+Push local changes to the platform using the WayAI CLI:
+
+```
+1. Edit wayai.yaml and/or agents/*.md locally
+2. wayai push
+   → Parses local files into HubAsCodePayload
+   → Computes diff against current platform state
+   → Shows changes and prompts for confirmation
+   → Syncs to a preview hub on confirmation
+3. Test the preview hub
+4. Publish to production when ready (via MCP: publish_hub or sync_hub)
 ```
 
 ## Sync via GitOps

@@ -18,7 +18,20 @@ interface CleanupParams {
   branch_name: string;
 }
 
+interface DiffParams {
+  hub_id: string;
+  config: HubAsCodePayload;
+  direction?: 'push' | 'pull';
+}
+
+interface DiffResult {
+  has_changes: boolean;
+  direction: 'push' | 'pull';
+  summary: string;
+}
+
 interface ApiClient {
+  diff(params: DiffParams): Promise<DiffResult>;
   sync(params: SyncParams): Promise<void>;
   publish(params: PublishParams): Promise<void>;
   cleanup(params: CleanupParams): Promise<void>;
@@ -94,6 +107,15 @@ export async function createApiClient(apiUrl: string, apiToken: string): Promise
 
   // Step 3: Return client with typed methods
   return {
+    async diff(params: DiffParams): Promise<DiffResult> {
+      const result = await apiRequest('POST', '/api/ci/diff', {
+        hub_id: params.hub_id,
+        config: params.config,
+        direction: params.direction || 'push',
+      });
+      return result as DiffResult;
+    },
+
     async sync(params: SyncParams): Promise<void> {
       await apiRequest('POST', '/api/ci/sync', {
         hub_id: params.hub_id,

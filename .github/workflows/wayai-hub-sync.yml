@@ -16,6 +16,9 @@ jobs:
   sync-preview:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,6 +35,8 @@ jobs:
           api-url: ${{ vars.WAYAI_API_URL }}
           api-token: ${{ secrets.WAYAI_API_TOKEN }}
           action: sync
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish-production:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
