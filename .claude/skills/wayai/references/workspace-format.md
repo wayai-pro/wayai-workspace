@@ -94,10 +94,11 @@ hub:
     - name: Resolved
 
 agents:
-  - name: Pilot Agent
+  - id: "agent-uuid-123"             # stable ID (set by pull, used for rename detection)
+    name: Pilot Agent
     role: Pilot
     connection: anthropic             # connection display name (must exist on hub)
-    instructions: agents/pilot.md     # relative path to .md file
+    # instructions resolved by convention: agents/pilot-agent.md (slugified name)
     enabled: true
     include_message_timestamps: false
     settings:
@@ -116,7 +117,8 @@ agents:
           tool: transfer_to_team
           target: Tier 2 Support
       custom:
-        - name: check_order_status
+        - id: "tool-uuid-456"        # stable ID (set by pull)
+          name: check_order_status
           description: Check order status by email
           method: post
           path: /api/orders/status
@@ -124,7 +126,8 @@ agents:
           connection: my-api-connection
 
 states:
-  - name: order_tracking
+  - id: "state-uuid-789"            # stable ID (set by pull)
+    name: order_tracking
     scope: conversation          # conversation | user
     description: Tracks current order
     enabled: true
@@ -146,31 +149,38 @@ connections:
 
 ### Key rules
 
-- **`hub_id`** and **`hub_environment`** are read-only — do not edit
+- **`hub_id`**, **`hub_environment`**, and **`id`** fields are read-only — do not edit (set by `wayai pull`)
 - **Agents** reference connections by `connection` display name (must match a connection on the hub)
 - **Tools** are grouped as `native` (by tool name), `delegation` (agent or team), and `custom` (HTTP endpoints)
-- **States** are matched by `name` + `scope` (unique per hub)
+- **Renaming:** To rename an agent, custom tool, or state, just change its `name` field in YAML — the `id` field ensures the diff engine detects it as a rename (not delete + create). For agents, `wayai push` also auto-renames the `.md` file.
 - **Default omission:** Fields matching defaults are omitted to keep YAML concise (e.g., `enabled: true` is default, only `enabled: false` appears)
 - **Connections section** is read-only reference — adding/removing connections is done via UI or MCP
 
 ### Entity matching (for sync/diff)
 
-| Entity | Matched by |
-|--------|------------|
-| Agent | `name` (unique per hub) |
-| State | `name` + `scope` |
-| Native tool | `tool_name` (per agent) |
-| Custom tool | `name` (per agent) |
-| Delegation tool | `target` name (per agent) |
+Entities are matched by **`id` first** (stable UUID), then by name as fallback. This enables safe renaming — when an entity is matched by ID but the name differs, the diff engine treats it as a rename (update), not delete + create.
+
+| Entity | Primary match | Fallback match |
+|--------|--------------|----------------|
+| Agent | `id` | `name` (unique per hub) |
+| State | `id` | `name` + `scope` |
+| Native tool | `tool_name` (per agent) | — |
+| Custom tool | `id` | `name` (per agent) |
+| Delegation tool | `target` name (per agent) | — |
+
+The `id` field is set automatically by `wayai pull` and should not be edited manually. Agents, custom tools, and states without an `id` fall back to name-based matching (backwards-compatible).
 
 ## Agent Instructions
 
 Agent instructions are stored in separate `.md` files under `agents/` for easier editing and diff-friendly PRs:
 
-- **Path convention:** `agents/{slugified-agent-name}.md`
-- **Referenced from wayai.yaml:** `instructions: agents/pilot.md`
+- **Path convention:** `agents/{slugified-agent-name}.md` — resolved automatically by the parser (no explicit path needed in YAML)
+- **How it works:** The parser looks for `agents/{slugify(agent.name)}.md` and inlines the content when pushing. No `instructions` key is needed in `wayai.yaml`.
+- **Explicit path (optional):** You can still set `instructions: agents/custom-name.md` in YAML to override the convention
 - **Content:** Pure instruction text (no frontmatter, no metadata)
 - Supports dynamic placeholders: `{{now()}}`, `{{user_name()}}`, `{{state()}}`, etc. — see [agent-placeholders.md](agent-placeholders.md)
+
+**Renaming agents:** When you rename an agent (change `name:` in YAML while keeping the same `id:`), `wayai push` automatically renames the `.md` file to match the new slug. No manual file rename needed.
 
 ## Custom Tool Definition
 

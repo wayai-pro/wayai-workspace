@@ -2,6 +2,19 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
 
+/** Slugify a string: lowercase, normalize accents, replace non-alphanumeric with hyphens.
+ *  Keep in sync with cli/src/lib/utils.ts slugify — cannot import due to separate deployment bundle. */
+function slugify(input: string): string {
+  return input
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 50);
+}
+
 /**
  * HubAsCodePayload - the JSON representation of a hub folder's configuration.
  * Parsed from wayai.yaml + agents/*.md files.
@@ -27,6 +40,7 @@ export interface HubAsCodePayload {
     kanban_statuses?: Array<{ name: string }>;
   };
   agents?: Array<{
+    id?: string;
     name: string;
     role: string;
     connection: string;
@@ -39,6 +53,7 @@ export interface HubAsCodePayload {
       native?: string[];
       delegation?: Array<{ type: string; tool: string; target: string }>;
       custom?: Array<{
+        id?: string;
         name: string;
         description?: string;
         method?: string;
@@ -54,6 +69,7 @@ export interface HubAsCodePayload {
     };
   }>;
   states?: Array<{
+    id?: string;
     name: string;
     scope: string;
     description?: string;
@@ -109,9 +125,7 @@ export function parseHubFolder(hubFolder: string): HubAsCodePayload {
     const resolved = { ...agent };
 
     if (typeof resolved.instructions === 'string' && resolved.instructions.endsWith('.md')) {
-      // Instructions can be either:
-      //   "agents/pilot.md" (relative to hubFolder — standard format per workspace-format.md)
-      //   "pilot.md" (legacy — just filename, looked up under agents/)
+      // Explicit path: "agents/pilot.md" or "pilot.md" (legacy)
       const instrValue = resolved.instructions as string;
       const instructionsPath = instrValue.startsWith('agents/')
         ? path.join(hubFolder, instrValue)
@@ -123,6 +137,12 @@ export function parseHubFolder(hubFolder: string): HubAsCodePayload {
         throw new Error(
           `Agent instructions file not found: ${instructionsPath} (referenced by agent "${agent.name}")`
         );
+      }
+    } else if (resolved.instructions === undefined && typeof agent.name === 'string') {
+      // Convention-based: derive path from agent name slug
+      const conventionPath = path.join(hubFolder, 'agents', `${slugify(agent.name)}.md`);
+      if (fs.existsSync(conventionPath)) {
+        resolved.instructions = fs.readFileSync(conventionPath, 'utf-8');
       }
     }
 

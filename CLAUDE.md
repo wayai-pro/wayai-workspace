@@ -121,7 +121,7 @@ workspace/<project>/<hub>/
 
 - **`hub_id`** and **`hub_environment`** — read-only metadata at top level. Do not edit these.
 - **`hub`** — hub settings (name, ai_mode, timezone, permissions, SLA, kanban, etc.)
-- **`agents`** — list of agents with `name`, `role`, `connection` (display name), `instructions` (path to `.md`), `settings`, `tools`
+- **`agents`** — list of agents with `id` (stable UUID, set by pull), `name`, `role`, `connection` (display name), `settings`, `tools`. Instructions are resolved by convention from `agents/{slugified-name}.md` (no explicit path needed in YAML)
 - **`states`** — conversation/user state schemas
 - **`connections`** — read-only reference showing available connections (managed via UI/MCP, not synced back)
 
