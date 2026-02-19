@@ -266,3 +266,4 @@ Claude:
 | [templates.md](references/templates.md) | Available hub templates catalog |
 | [template-structure.md](references/template-structure.md) | Template file formats, placeholders, structure |
 | [workspace-format.md](references/workspace-format.md) | HubAsCode YAML format, workspace structure, sync workflows |
+| [ui-navigation.md](references/ui-navigation.md) | WebMCP tools for navigating the WayAI UI (guided tours, teaching) |
