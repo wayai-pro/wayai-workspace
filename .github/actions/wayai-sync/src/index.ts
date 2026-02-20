@@ -20,11 +20,14 @@ async function run(): Promise<void> {
     const changedHubs = getChangedHubs();
 
     if (changedHubs.length === 0) {
-      core.info('No production hub changes detected. Nothing to do.');
+      core.info('No hub changes detected. Nothing to do.');
       return;
     }
 
-    core.info(`Found ${changedHubs.length} changed hub(s): ${changedHubs.map((h) => h.hubId).join(', ')}`);
+    const previewHubs = changedHubs.filter((h) => h.hubEnvironment === 'preview');
+    const productionHubs = changedHubs.filter((h) => h.hubEnvironment === 'production');
+
+    core.info(`Found ${changedHubs.length} changed hub(s): ${previewHubs.length} preview, ${productionHubs.length} production`);
 
     const commitSha = process.env.GITHUB_SHA;
     if (!commitSha) {
@@ -44,12 +47,39 @@ async function run(): Promise<void> {
     if (action === 'sync') {
       const diffSummaries: Array<{ hubId: string; summary: string }> = [];
 
-      for (const hub of changedHubs) {
-        core.info(`Syncing hub ${hub.hubId} from ${hub.hubFolder}...`);
+      // Preview hubs: push config directly (same as CLI push)
+      for (const hub of previewHubs) {
+        core.info(`Pushing preview hub ${hub.hubId} from ${hub.hubFolder}...`);
 
         const config = parseHubFolder(hub.hubFolder);
 
-        // Get diff before sync
+        try {
+          const diffResult = await client.diff({
+            hub_id: hub.hubId,
+            config,
+          });
+
+          if (diffResult.has_changes) {
+            diffSummaries.push({ hubId: hub.hubId, summary: diffResult.summary });
+          }
+        } catch (err) {
+          core.warning(`Could not compute diff for hub ${hub.hubId}: ${err instanceof Error ? err.message : String(err)}`);
+        }
+
+        await client.push({
+          hub_id: hub.hubId,
+          config,
+        });
+
+        core.info(`Preview hub ${hub.hubId} pushed successfully.`);
+      }
+
+      // Production hubs: create/update branch preview (existing behavior)
+      for (const hub of productionHubs) {
+        core.info(`Syncing production hub ${hub.hubId} from ${hub.hubFolder}...`);
+
+        const config = parseHubFolder(hub.hubFolder);
+
         try {
           const diffResult = await client.diff({
             hub_id: hub.hubId,
@@ -70,7 +100,7 @@ async function run(): Promise<void> {
           commit_sha: commitSha,
         });
 
-        core.info(`Hub ${hub.hubId} synced successfully.`);
+        core.info(`Production hub ${hub.hubId} synced successfully.`);
       }
 
       // Post diff summary as PR comment
@@ -79,26 +109,55 @@ async function run(): Promise<void> {
         await postDiffComment(prNumber, diffSummaries, 'synced');
       }
     } else if (action === 'publish') {
-      for (const hub of changedHubs) {
-        core.info(`Publishing hub ${hub.hubId}...`);
+      // Preview hubs: push final state + sync to production (if linked)
+      for (const hub of previewHubs) {
+        const config = parseHubFolder(hub.hubFolder);
+
+        core.info(`Pushing preview hub ${hub.hubId} (final state)...`);
+        await client.push({
+          hub_id: hub.hubId,
+          config,
+        });
+
+        core.info(`Publishing preview hub ${hub.hubId} to production...`);
+        const result = await client.publishPreview({
+          hub_id: hub.hubId,
+        });
+
+        if (result.synced) {
+          core.info(`Preview hub ${hub.hubId} synced to production ${result.production_hub_id}.`);
+        } else {
+          core.warning(`Preview hub ${hub.hubId} has no linked production hub — nothing published. Run publish_hub() first to link it.`);
+        }
+      }
+
+      // Production hubs: publish branch preview to production (existing behavior)
+      for (const hub of productionHubs) {
+        core.info(`Publishing production hub ${hub.hubId}...`);
 
         await client.publish({
           hub_id: hub.hubId,
           branch_name: branchName,
         });
 
-        core.info(`Hub ${hub.hubId} published successfully.`);
+        core.info(`Production hub ${hub.hubId} published successfully.`);
       }
     } else if (action === 'cleanup') {
-      for (const hub of changedHubs) {
-        core.info(`Cleaning up branch preview for hub ${hub.hubId}...`);
+      // Preview hubs: skip (permanent hubs, no ephemeral branch preview to clean up)
+      for (const hub of previewHubs) {
+        core.info(`Skipping cleanup for preview hub ${hub.hubId} (permanent hub).`);
+      }
+
+      // Production hubs: clean up ephemeral branch preview (existing behavior)
+      for (const hub of productionHubs) {
+        core.info(`Cleaning up branch preview for production hub ${hub.hubId}...`);
 
         await client.cleanup({
           hub_id: hub.hubId,
           branch_name: branchName,
         });
 
-        core.info(`Branch preview for hub ${hub.hubId} cleaned up.`);
+        core.info(`Branch preview for production hub ${hub.hubId} cleaned up.`);
       }
     }
 

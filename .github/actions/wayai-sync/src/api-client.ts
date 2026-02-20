@@ -18,6 +18,20 @@ interface CleanupParams {
   branch_name: string;
 }
 
+interface PushParams {
+  hub_id: string;
+  config: HubAsCodePayload;
+}
+
+interface PublishPreviewParams {
+  hub_id: string;
+}
+
+interface PublishPreviewResult {
+  synced: boolean;
+  production_hub_id?: string;
+}
+
 interface DiffParams {
   hub_id: string;
   config: HubAsCodePayload;
@@ -33,7 +47,9 @@ interface DiffResult {
 interface ApiClient {
   diff(params: DiffParams): Promise<DiffResult>;
   sync(params: SyncParams): Promise<void>;
+  push(params: PushParams): Promise<void>;
   publish(params: PublishParams): Promise<void>;
+  publishPreview(params: PublishPreviewParams): Promise<PublishPreviewResult>;
   cleanup(params: CleanupParams): Promise<void>;
 }
 
@@ -125,11 +141,25 @@ export async function createApiClient(apiUrl: string, apiToken: string): Promise
       });
     },
 
+    async push(params: PushParams): Promise<void> {
+      await apiRequest('POST', '/api/ci/push', {
+        hub_id: params.hub_id,
+        config: params.config,
+      });
+    },
+
     async publish(params: PublishParams): Promise<void> {
       await apiRequest('POST', '/api/ci/publish', {
         hub_id: params.hub_id,
         branch_name: params.branch_name,
       });
+    },
+
+    async publishPreview(params: PublishPreviewParams): Promise<PublishPreviewResult> {
+      const result = await apiRequest('POST', '/api/ci/publish-preview', {
+        hub_id: params.hub_id,
+      });
+      return result as PublishPreviewResult;
     },
 
     async cleanup(params: CleanupParams): Promise<void> {

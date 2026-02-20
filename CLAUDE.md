@@ -12,22 +12,25 @@ Hubs use a **preview/production branching** model. New hubs start as `preview` (
 
 ### MCP Access Modes
 
-Each hub has an `mcp_access` setting that determines how changes flow:
+Each hub has an `mcp_access` setting. The two main contexts:
 
-- **`read_write`** — Agent edits hub directly via MCP tools. Agile, no git needed. Best for rapid iteration.
-- **`read_only`** — Changes must flow through git: edit YAML files → PR → GitHub Action syncs to preview → test → merge → publish to production. Governed workflow.
+- **`read_write`** — For non-repo users (ChatGPT, Claude.ai, UI). Agent writes directly via MCP tools. No git needed. Best for rapid iteration.
+- **`read_only`** — For repo users (Claude Code, Cursor). Agent edits local files + uses CLI (`wayai push`). MCP is read-only for discovery/inspection (`get_workspace`, `get_hub`, `get_analytics_data`, `download_agent_instructions`). MCP operations that don't conflict with files still work: `publish_hub`, `sync_hub`, `replicate_preview`.
 - **`disabled`** — No MCP access. Hub managed via UI only.
 
-### GitOps Workflow (for `read_only` hubs)
+### GitOps Workflow (preview-first)
 
-When a production hub has `mcp_access: read_only`, configuration changes are managed as code:
+Preview hub files are the source of truth in the repo. Production is a downstream artifact, never directly edited.
 
-1. **Edit hub config files** — modify `wayai.yaml` and `agents/*.md` in `workspace/<project>/<hub>/`
-2. **Create a PR** — GitHub Action detects changed hub folders and creates a branch preview per production hub
-3. **Test the preview** — verify changes work as expected
-4. **Merge the PR** — GitHub Action syncs and publishes each changed hub to production
+1. **`wayai pull --all`** — sync before working (catch changes made outside the agent)
+2. **Edit files** — modify `wayai.yaml` and `agents/*.md` in `workspace/<project>/<hub>/`
+3. **`wayai push`** (optional) — apply changes to preview hub immediately for testing
+4. **Create a PR** — CI pushes to preview hub (idempotent safety net, with or without prior push)
+5. **Merge the PR** — CI pushes final state + syncs preview to production (if linked via `production_hub_fk`)
 
-GitOps only applies to **production hubs**. Preview-only hubs are managed via MCP/UI.
+CI handles both hub environments:
+- **Preview hubs**: CI pushes config directly. On merge, also syncs to production if the preview has a linked production hub.
+- **Production hubs** (legacy): CI creates/updates ephemeral branch previews. On merge, publishes and cleans up.
 
 ## Agent Goal
 
@@ -59,12 +62,18 @@ project_id: your-project-uuid-here  # optional — enables 1-part hub paths
 
 ## Workflow
 
+For `read_write` hubs (MCP as write path):
 1. **Sync before working**: `wayai pull --all` to fetch all hub configs from platform to local files
 2. **Make changes**: Use WayAI MCP tools to apply changes on the platform (follow SKILL.md workflows)
 3. **Sync after changes**: `wayai pull --all` again so local files reflect the new state
 4. **Commit**: Git commit the updated workspace as a versioned snapshot
 
-To push local changes to the platform: `wayai push` from the repo root auto-detects changed hubs via git status and pushes each one.
+For `read_only` hubs (CLI as write path):
+1. **Sync before working**: `wayai pull --all` to fetch all hub configs
+2. **Edit files**: Modify `wayai.yaml` and `agents/*.md` directly
+3. **Push for testing** (optional): `wayai push` to apply changes to preview hub immediately
+4. **Create PR**: CI pushes to preview hub automatically (idempotent if already pushed)
+5. **Merge**: CI pushes final state and syncs preview to production
 
 ## Sync
 

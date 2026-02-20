@@ -96,22 +96,21 @@ When `get_hub` returns hub info, check the `Environment` field (`[PREVIEW]` or `
 
 ### MCP Access Modes
 
-Each hub has an `mcp_access` setting that determines how changes flow:
+Each hub has an `mcp_access` setting. The two main contexts:
 
-- **`read_write`** — Agent edits hub directly via MCP tools. Agile, no git needed. Best for rapid iteration.
-- **`read_only`** — Changes must flow through git: edit YAML files → PR → GitHub Action syncs to preview → test → merge → publish to production. Governed workflow.
+- **`read_write`** — For non-repo users (ChatGPT, Claude.ai, UI). Agent writes directly via MCP tools. No git needed.
+- **`read_only`** — For repo users (Claude Code, Cursor). Agent edits local files + uses CLI (`wayai push`). MCP is read-only for discovery/inspection. MCP operations that don't conflict with files still work: `publish_hub`, `sync_hub`, `replicate_preview`.
 - **`disabled`** — No MCP access. Hub managed via UI only.
 
-### GitOps Workflow (for `read_only` hubs)
+### GitOps Workflow (preview-first)
 
-When a production hub has `mcp_access: read_only`, configuration is managed as code via `wayai.yaml`:
+Preview hub files are the source of truth in the repo. Production is a downstream artifact.
 
-1. **Edit hub config files** — modify `wayai.yaml` and `agents/*.md` in `workspace/<project>/<hub>/`
-2. **Create a PR** — GitHub Action detects changed hub folders and creates a branch preview per production hub
-3. **Test the preview** — verify changes work as expected
-4. **Merge the PR** — GitHub Action syncs and publishes each changed hub to production
-
-GitOps only applies to **production hubs**. Preview-only hubs are managed via MCP/UI.
+1. **`wayai pull --all`** — sync before working
+2. **Edit files** — modify `wayai.yaml` and `agents/*.md` in `workspace/<project>/<hub>/`
+3. **`wayai push`** (optional) — apply changes to preview hub immediately for testing
+4. **Create a PR** — CI pushes to preview hub (idempotent safety net)
+5. **Merge the PR** — CI pushes final state + syncs preview to production (if linked)
 
 ## Core Workflow
 

@@ -16,9 +16,8 @@ export interface ChangedHub {
  * - For push events: diffs against the previous commit (HEAD~1)
  *
  * Filters to files matching workspace/** /wayai.yaml and workspace/** /agents/*.md,
- * extracts unique hub folder paths, reads each wayai.yaml to get hub_id and
- * hub_environment, and skips any hubs where hub_environment is not 'production'
- * (GitOps only operates on production hubs).
+ * extracts unique hub folder paths, and reads each wayai.yaml to get hub_id and
+ * hub_environment. Returns all hub environments (preview and production).
  */
 export function getChangedHubs(): ChangedHub[] {
   const isPullRequest = !!process.env.GITHUB_HEAD_REF;
@@ -73,7 +72,7 @@ export function getChangedHubs(): ChangedHub[] {
     }
   }
 
-  // Read each hub folder's wayai.yaml and filter to production hubs
+  // Read each hub folder's wayai.yaml and collect changed hubs
   const changedHubs: ChangedHub[] = [];
 
   for (const hubFolder of hubFolders) {
@@ -91,11 +90,6 @@ export function getChangedHubs(): ChangedHub[] {
       };
 
       if (!config || !config.hub_id || !config.hub_environment) {
-        continue;
-      }
-
-      // GitOps only for production hubs
-      if (config.hub_environment !== 'production') {
         continue;
       }
 
