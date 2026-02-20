@@ -119,13 +119,18 @@ The files + CLI workflow described in this skill assumes `read_only` or `read_wr
 ## Core Workflow
 
 ```
+PREREQUISITES (resolve automatically):
+0. Ensure .wayai.yaml exists at repo root — if missing, call get_workspace() via MCP
+   to discover organization_id, create the file, and continue.
+
 BEFORE changes:
 1. wayai pull --all              → sync local files from platform
 2. Read workspace/<hub>/CONTEXT.md → understand hub context (create if missing)
 
-MAKING changes:
+MAKING changes (edit + push = single action):
 3. Edit wayai.yaml and/or agents/*.md
-4. wayai push                    → apply changes to preview hub
+4. wayai push -y                 → apply changes to preview hub immediately
+   Editing and pushing are a single action — always complete both together.
    If the task requires MCP-only operations (connections, publish/sync, analytics, evals):
    → Use MCP tools, then wayai pull --all -y to sync back to local files
 
@@ -218,10 +223,8 @@ User: "Update the Pilot agent instructions to be more friendly"
 
 Agent:
 1. Read workspace/{project}/{hub}/agents/pilot.md
-2. Show current instructions to user
-3. Edit the file with proposed changes
-4. Show diff, wait for approval
-5. wayai push → applies to preview hub
+2. Edit the file with proposed changes
+3. wayai push -y → applies to preview hub immediately (edit + push = single action)
 ```
 
 ## Using Templates

@@ -89,12 +89,13 @@ CI handles both hub environments:
 
 Your primary role is to help the user manage hub configuration through this repository. When the user asks you to do anything hub-related:
 
-1. **Identify the hub** — determine which hub the request applies to. If unclear, **ask the user**. Never guess or assume.
-2. **Read CONTEXT.md** — check `workspace/<hub_folder>/CONTEXT.md` for background on the hub's purpose, decisions, and ongoing work.
-3. **Create CONTEXT.md if missing** — after syncing the workspace, create it with what you know about the hub. Ask the user to confirm or enrich.
-4. **Make changes via files** — edit `wayai.yaml` and `agents/*.md`, then `wayai push`. Use MCP only for operations without file equivalents (see [How to Make Changes](#how-to-make-changes)).
-5. **Update CONTEXT.md** — after significant changes or new context, update the file for future sessions.
-6. **Use `references/`** for supporting files — business rules, API specs, tone guides. Reference them from `CONTEXT.md`.
+1. **Identify the hub** — determine which hub the request applies to. If unclear, **ask the user**.
+2. **Ensure `.wayai.yaml` exists** — before any CLI operation, check that `.wayai.yaml` exists at the repo root. If missing, call `get_workspace()` via MCP to discover the organization_id, create the file, and continue automatically.
+3. **Read CONTEXT.md** — check `workspace/<hub_folder>/CONTEXT.md` for background on the hub's purpose, decisions, and ongoing work.
+4. **Create CONTEXT.md if missing** — after syncing the workspace, create it with what you know about the hub. Ask the user to confirm or enrich.
+5. **Make changes via files, then push immediately** — edit `wayai.yaml` and `agents/*.md`, then run `wayai push -y` as part of the same flow. Editing and pushing are a single action — always complete both together. Use MCP only for operations without file equivalents (see [How to Make Changes](#how-to-make-changes)).
+6. **Update CONTEXT.md** — after significant changes or new context, update the file for future sessions.
+7. **Use `references/`** for supporting files — business rules, API specs, tone guides. Reference them from `CONTEXT.md`.
 
 The `CONTEXT.md` file is a living document — it ensures continuity across sessions and prevents repeated questions about the same hub.
 
@@ -117,7 +118,9 @@ wayai init <org-name>   # Direct — creates .wayai.yaml with org ID
 The generated file looks like:
 ```yaml
 organization_id: your-org-uuid-here
-project_id: your-project-uuid-here  # optional — enables 1-part hub paths
+organization_name: Your Org          # optional — for readability
+project_id: your-project-uuid-here   # optional — enables 1-part hub paths
+project_name: Your Project           # optional — for readability
 ```
 
 ### CLI Commands
