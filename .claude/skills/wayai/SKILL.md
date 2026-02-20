@@ -6,14 +6,14 @@ description: |
   (4) Syncing workspace settings with Git, (5) Using hub templates for new deployments.
 ---
 
-<!-- v3.4.0 -->
+<!-- v3.5.0 -->
 
 # WayAI Skill
 
 ## Table of Contents
 - [Agent Guidelines](#agent-guidelines)
-- [Tool Usage Priority](#tool-usage-priority)
-- [Quick Decision: MCP or UI?](#quick-decision-mcp-or-ui)
+- [Write Path Priority](#write-path-priority)
+- [Quick Decision: Files, MCP, or UI?](#quick-decision-files-mcp-or-ui)
 - [Entity Hierarchy](#entity-hierarchy)
 - [Connection Prerequisites](#️-connection-prerequisites)
 - [Hub Environments](#hub-environments)
@@ -27,25 +27,32 @@ description: |
 
 - Only provide information from this skill, MCP tool descriptions, or MCP resources
 - Do not invent URLs, paths, or steps
-- When editing agent instructions, follow the [Editing Agent Instructions](#editing-agent-instructions) workflow
+- **Edit local files + `wayai push` for config changes** — use MCP only for operations without file equivalents
+- When editing agent instructions, see [Editing Agent Instructions](#editing-agent-instructions)
 
-## Tool Usage Priority
+## Write Path Priority
 
-1. **WayAI MCP Server** - Use for ALL settings operations (CRUD on hubs, agents, tools, connections)
-2. **UI (platform.wayai.pro)** - Use when MCP doesn't support the operation (OAuth, delete hub, user management)
+1. **Files + CLI (`wayai push`)** — for all config in `wayai.yaml` and `agents/*.md`: hub settings, agents, tools, states, instructions
+2. **WayAI MCP Server** — for operations without file equivalents: `create_hub`, connections, `publish_hub`/`sync_hub`, analytics, evals, skills
+3. **UI (platform.wayai.pro)** — for OAuth connections, delete hub, user management
 
-## Quick Decision: MCP or UI?
+## Quick Decision: Files, MCP, or UI?
 
-| Entity | MCP | UI Only |
-|--------|-----|---------|
-| **Organization** | Read (`get_workspace`) | Create, update, delete, users |
-| **Project** | Read, Create | Update, delete |
-| **Hub** | Create, Read, Update, Publish, Sync, Replicate | Delete |
-| **Connection** | Create (non-OAuth), enable, disable, sync MCP | Delete, OAuth setup |
-| **Org Credential** | List | Create, update, delete |
-| **Agent** | Full CRUD | - |
-| **Tool** | Full CRUD | - |
-| **Evals** | Full CRUD (scenarios, sessions, analytics) | - |
+| Entity | Files + CLI | MCP | UI Only |
+|--------|------------|-----|---------|
+| **Hub settings** | Edit `wayai.yaml` → push | `create_hub` (new hubs only) | Delete |
+| **Agent config** | Edit `wayai.yaml` → push | `create_agent` (fallback) | — |
+| **Agent instructions** | Edit `agents/*.md` → push | `upload_agent_instructions` (fallback) | — |
+| **Tools (native/custom)** | Edit `wayai.yaml` → push | `add_native_tool`, `add_custom_tool` (fallback) | — |
+| **States** | Edit `wayai.yaml` → push | — | — |
+| **Project** | — | Read, Create (`get_workspace`) | Update, delete |
+| **Connection** | — (read-only in YAML) | Create (non-OAuth), enable, disable, sync MCP | Delete, OAuth setup |
+| **Publish/Sync** | — | `publish_hub`, `sync_hub`, `replicate_preview` | — |
+| **Analytics** | — | `get_analytics_data`, conversations, messages | — |
+| **Evals** | — | Full CRUD (scenarios, sessions, analytics) | — |
+| **Skills** | — | Full CRUD, link/unlink agents | — |
+| **Organization** | — | Read (`get_workspace`) | Create, update, delete, users |
+| **Org Credential** | — | List | Create, update, delete |
 
 ## Entity Hierarchy
 
@@ -53,17 +60,20 @@ description: |
 Organization          ← UI only
 ├── Org Credentials   ← UI to create; MCP to list
 └── Project           ← MCP to create
-    └── Hub           ← Full MCP control
-        ├── Connections   ← Wayai auto-created; non-OAuth via MCP (using org credentials); OAuth via UI
-        └── Agents        ← Full MCP control
-            └── Tools     ← Full MCP control
+    └── Hub           ← Files + CLI for config; MCP for lifecycle
+        ├── Connections   ← non-OAuth via MCP; OAuth via UI
+        └── Agents        ← Files + CLI (wayai.yaml + agents/*.md)
+            └── Tools     ← Files + CLI (wayai.yaml)
 ```
 
-Setup order: Organization (signup) → Org Credentials (UI) → Project → Hub → Connections (MCP for non-OAuth, UI for OAuth) → Agents → Tools
+Setup order: Organization (signup) → Org Credentials (UI) → Project → Hub → Connections (MCP for non-OAuth, UI for OAuth) → Agents + Tools (files + push)
 
-**Note:** Wayai connection (native tools) is auto-created when a hub is created. Non-OAuth connections (Agent, STT, TTS, Custom Tool) can be created via MCP using organization credentials. OAuth connections (WhatsApp, Instagram, Gmail, Google Calendar) require UI setup.
+**Notes:**
+- **Wayai connection** (native tools) is auto-created when a hub is created — no setup needed
+- Non-OAuth connections (Agent, STT, TTS, Custom Tool) can be created via MCP using organization credentials
+- OAuth connections (WhatsApp, Instagram, Gmail, Google Calendar) require UI setup
 
-### ⚠️ Connection Prerequisites
+### Connection Prerequisites
 
 **Organization credentials (one-time setup in UI):**
 - Store API keys at the organization level: UI → Settings → Organization → Credentials tab
@@ -96,51 +106,45 @@ When `get_hub` returns hub info, check the `Environment` field (`[PREVIEW]` or `
 
 ### MCP Access Modes
 
-Each hub has an `mcp_access` setting. The two main contexts:
+Each hub has an `mcp_access` setting that controls what MCP tools can do:
 
-- **`read_write`** — For non-repo users (ChatGPT, Claude.ai, UI). Agent writes directly via MCP tools. No git needed.
-- **`read_only`** — For repo users (Claude Code, Cursor). Agent edits local files + uses CLI (`wayai push`). MCP is read-only for discovery/inspection. MCP operations that don't conflict with files still work: `publish_hub`, `sync_hub`, `replicate_preview`.
-- **`disabled`** — No MCP access. Hub managed via UI only.
+| Mode | Behavior | Who uses it |
+|------|----------|-------------|
+| `read_write` | MCP can read and write hub config | Non-repo clients (Claude.ai, ChatGPT) — use MCP as the write path |
+| `read_only` | MCP can read but not write hub config. Lifecycle operations still work: `publish_hub`, `sync_hub`, `replicate_preview`, `add_connection` | Repo users (Claude Code, Cursor) — edit files + `wayai push` for config |
+| `disabled` | MCP tools are blocked entirely | UI-only hubs |
 
-### GitOps Workflow (preview-first)
-
-Preview hub files are the source of truth in the repo. Production is a downstream artifact.
-
-1. **`wayai pull --all`** — sync before working
-2. **Edit files** — modify `wayai.yaml` and `agents/*.md` in `workspace/<project>/<hub>/`
-3. **`wayai push`** (optional) — apply changes to preview hub immediately for testing
-4. **Create a PR** — CI pushes to preview hub (idempotent safety net)
-5. **Merge the PR** — CI pushes final state + syncs preview to production (if linked)
+The files + CLI workflow described in this skill assumes `read_only` or `read_write` hubs accessed from a repo. For non-repo clients with `read_write`, use MCP tools as the write path directly.
 
 ## Core Workflow
 
 ```
 BEFORE changes:
-1. get_workspace()     → discover hub_id
-2. Read workspace/<hub_folder>/CONTEXT.md (create if missing — see CLAUDE.md)
-3. get_hub(hub_id)     → current state (JSON) — check environment (preview/production)
+1. wayai pull --all              → sync local files from platform
+2. Read workspace/<hub>/CONTEXT.md → understand hub context (create if missing)
 
 MAKING changes:
-4. Use MCP tools OR edit local YAML/Markdown files (only on preview hubs)
-5. Apply changes via MCP tools
+3. Edit wayai.yaml and/or agents/*.md
+4. wayai push                    → apply changes to preview hub
+   If the task requires MCP-only operations (connections, publish/sync, analytics, evals):
+   → Use MCP tools, then wayai pull --all -y to sync back to local files
 
 AFTER changes:
-6. Update workspace/<hub_folder>/CONTEXT.md if decisions or context changed
-7. Sync local files: `wayai pull --all -y` (or `wayai pull <org/project/hub>` for one hub)
-8. Commit to Git
-9. If ready for production: publish_hub(hub_id) or sync_hub(hub_id)
+5. Update CONTEXT.md if decisions or context changed
+6. Commit to Git
+7. If ready for production: publish_hub(hub_id) or sync_hub(hub_id) via MCP
 ```
 
-### CLI Sync
+**Finding `hub_id`:** After the first `wayai pull`, each hub's `hub_id` is in `workspace/<project>/<hub>/wayai.yaml`. For a fresh repo (no workspace yet), use `get_workspace()` to discover hub IDs, then pull.
 
-The WayAI CLI provides direct file-based sync with diff confirmation at each step:
+### CLI Commands
 
 ```bash
 # From repo root (workspace-aware):
 wayai pull --all                 # Pull all hubs in workspace
-wayai pull support/hub      # Pull a specific hub → resolves to workspace/ folder
+wayai pull support/customer-hub  # Pull a specific hub → resolves to workspace/ folder
 wayai push                       # Auto-detect changed hubs via git status, push each
-wayai push support/hub      # Push a specific hub
+wayai push support/customer-hub  # Push a specific hub
 
 # From a hub folder (has wayai.yaml):
 wayai pull                       # Pull current hub
@@ -151,7 +155,7 @@ wayai push                       # Push current hub
 #   --all        Pull all hubs in workspace (pull only)
 ```
 
-The CLI is workspace-aware — from the repo root it resolves hub paths to `workspace/project/hub/` folders automatically. It shows a diff before applying changes in either direction, so you can review what will change before confirming.
+Both `pull` and `push` show a diff before applying changes and wait for confirmation. Use `-y` to skip prompts.
 
 Install: `npm install -g @wayai/cli` — authenticate: `wayai login` — link to org: `wayai init`
 
@@ -166,69 +170,58 @@ Install: `npm install -g @wayai/cli` — authenticate: `wayai login` — link to
 | **Connection** | `list_organization_credentials`, `add_connection`, `update_connection`, `enable_connection`, `disable_connection`, `sync_mcp_connection` |
 | **Analytics** | `get_analytics_variables`, `get_analytics_data`, `get_conversations_list`, `get_conversation_messages`, `pin_analytics_variable` |
 | **Evals** | `get_evals`, `create_eval`, `update_eval`, `delete_eval`, `create_eval_session`, `run_eval_session`, `get_eval_session_details`, `get_eval_session_runs`, `get_eval_analytics` |
-| **CLI** | `wayai login`, `wayai init [org]`, `wayai pull [path] [--all] [--yes]`, `wayai push [path] [--yes]`, `wayai status`, `wayai logout` |
+| **Skills** | `list_skills`, `get_skill`, `create_skill`, `update_skill`, `delete_skill`, `link_skill_to_agent`, `unlink_skill_from_agent`, `update_skill_agent_link` |
 
 See [references/mcp-operations.md](references/mcp-operations.md) for detailed usage.
 
 ## Editing Agent Instructions
 
-When working with agent instructions, always follow this workflow to keep files in sync:
+Agent instructions live as `.md` files in `agents/` — edit them directly and push.
 
-### Download Workflow
+### Default: Edit + Push
+
 ```
-1. DOWNLOAD: download_agent_instructions(hub_id, agent_id)
-   → Returns signed URL (valid 1 hour)
-
-2. SAVE: curl to workspace file
-   curl -L "{url}" -o workspace/{project}/{hub}/agents/{agentname}.md
-   → Saves instructions to the workspace directory
-
-3. READ: Read the workspace file when needed
-   → User reviews and edits in their editor
+1. Read the current file: workspace/{project}/{hub}/agents/{agent-name}.md
+2. Edit the file with proposed changes
+3. Show diff to user, wait for approval
+4. wayai push → applies instructions (and any other changes) to the preview hub
 ```
 
-### Upload Workflow
+### Syncing from platform (if instructions were changed outside the repo)
+
 ```
-1. REVIEW: Show proposed changes (before/after)
-   → Wait for user approval before uploading
+# Recommended: pull all
+wayai pull --all
 
-2. GET URL: upload_agent_instructions(hub_id, agent_id)
-   → Returns upload URL, headers, and curl command
-
-3. UPLOAD: Run the returned curl command with the workspace file
-   curl -X POST '{upload_url}' ... --data-binary @workspace/{project}/{hub}/agents/{agentname}.md
-   → File stored in R2 and synced to database
+# Alternative: download a single agent's instructions via MCP
+1. download_agent_instructions(hub_id, agent_id) → signed URL
+2. curl -L "{url}" -o workspace/{project}/{hub}/agents/{agent-name}.md
 ```
 
-**File Naming Convention:**
-- Pattern: `agents/{agentname}.md`
-- Slugify agent name: lowercase, spaces→hyphens, remove special chars
+**File naming convention:**
+- Pattern: `agents/{slugified-agent-name}.md`
+- Slugify: lowercase, spaces→hyphens, remove special chars
 - Examples:
   - Agent "Atendente" → `agents/atendente.md`
   - Agent "Order Taker" → `agents/order-taker.md`
   - Agent "Suporte Nível 2" → `agents/suporte-nvel-2.md`
 
 **Important:**
-- `get_agent` excludes instructions (use `download_agent_instructions` instead)
-- `update_agent` cannot modify instructions (use upload workflow)
-- Always fetch current instructions before editing to avoid overwriting changes
-- Always prefer upload workflow over direct update (token-efficient, works with files)
-- Always save and edit instruction files in the `workspace/` directory under `agents/` (never use `/tmp` or other locations) so the repo stays in sync with the platform without requiring an extra `download_workspace` step
+- Always save instruction files in `workspace/` under `agents/` (never `/tmp` or other locations)
 - Instructions support dynamic placeholders like `{{now()}}`, `{{user_name()}}`, `{{state()}}`, etc. — see [agent-placeholders.md](references/agent-placeholders.md)
+- `get_agent` excludes instructions to save context — use file reads or `download_agent_instructions`
+- Always fetch current instructions before editing to avoid overwriting changes made outside the repo
 
 **Example:**
 ```
 User: "Update the Pilot agent instructions to be more friendly"
 
-Claude:
-1. download_agent_instructions(hub_id, agent_id) → signed_url
-2. curl -L "{signed_url}" -o workspace/{org}/{project}/{hub}/agents/atendente.md
-3. Read the workspace file → show current instructions
-4. Show user: "Here are the current instructions. I'll make them more friendly..."
-5. Edit the workspace file with proposed changes
-6. Show diff to user, wait for approval
-7. upload_agent_instructions(hub_id, agent_id) → upload URL + curl command
-8. Run curl to upload workspace/{org}/{project}/{hub}/agents/atendente.md
+Agent:
+1. Read workspace/{project}/{hub}/agents/pilot.md
+2. Show current instructions to user
+3. Edit the file with proposed changes
+4. Show diff, wait for approval
+5. wayai push → applies to preview hub
 ```
 
 ## Using Templates
@@ -238,17 +231,16 @@ Templates are bundled in this skill. See [templates.md](references/templates.md)
 ```
 User: "Preciso de um hub para pizzaria"
 
-Claude:
+Agent:
 1. Find matching template in references/templates.md
 2. Read the hub config and agent instructions from template paths
-3. Copy to workspace: workspace/{project}/{hub-name}/
-4. Customize placeholders ({NOME_EMPRESA}, etc.)
-5. Create hub via MCP: create_hub(...)
-6. list_organization_credentials(org_id) → check for matching credential
-7a. If org credential exists: add_connection(hub_id, connector_id, org_credential_id) → create connection via MCP
-7b. If no org credential: ⚠️ STOP — direct user to UI: Organization → Credentials tab to create one, then retry
-8. Create agent via MCP: create_agent(...)
-9. Add tools to agent as needed
+3. create_hub(project_id, hub_name, hub_type) → get hub_id (MCP — only way to create hubs)
+4. list_organization_credentials(org_id) → check for matching credential
+5a. If org credential exists: add_connection(hub_id, connector_id, org_credential_id) via MCP
+5b. If no org credential: STOP — direct user to UI to create one, then retry
+6. Copy template files to workspace/{project}/{hub}/, set hub_id in wayai.yaml
+7. Customize placeholders ({NOME_EMPRESA}, etc.)
+8. wayai push → creates agents, tools, states on the hub from the files
 ```
 
 ## Reference Documentation

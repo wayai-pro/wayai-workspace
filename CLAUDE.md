@@ -1,111 +1,161 @@
 # WayAI Configuration
 
-WayAI is a platform for building AI-powered communication hubs that connect AI Assistants with human teams across channels like WhatsApp, Email, Instagram, and a native app. You can configure agents, tools, and connections to automate and augment conversations — all managed from a single hub.
+## Platform Overview
 
-This repository is a version-controlled workspace for the WayAI platform configuration. It gives you full context about the hubs, agents, and tools — and lets you make changes directly on the platform through MCP. The local workspace stays in sync with the remote platform, so every configuration change is reviewable, trackable, and reversible through git.
+WayAI is a SaaS platform for AI-powered communication hubs. Each hub connects AI agents with human teams across channels (WhatsApp, Email, Instagram, native App).
 
-All platform operations (creating hubs, configuring agents, managing tools, etc.) are done through the **WayAI MCP server** configured in `.mcp.json`. Non-OAuth connections (LLM providers, custom tools, STT/TTS) can be created via MCP using **organization credentials** — pre-stored API keys at the org level. OAuth connections (WhatsApp, Instagram, Gmail) still require UI setup. Detailed instructions, workflows, and reference docs are in the skill at `.claude/skills/wayai/` — **read `SKILL.md` before making any changes**.
+**Entity hierarchy:** Organization → Project → Hub → Agents, Connections, Tools, Channels, States
+
+**Hub types:**
+- `user` — one conversation per end user, all channels (support, sales, helpdesk)
+- `workflow` — multiple conversations per user, App channel only (tasks, approvals)
+
+**AI modes:** `Pilot` (AI autonomous) | `Copilot` (AI assists humans) | `Pilot+Copilot` (AI handles until human takes over) | `Turned Off`
+
+**Agent roles:**
+- **Pilot** / **Copilot** — primary agents for each track
+- **Specialist** (for Pilot or Copilot) — delegation targets for specific tasks
+- **Consultant** (for Pilot or Copilot) — advisory input, then returns control
+- **Monitor** — background observer
+- **Evaluator** (of Conversations or Messages) — async quality assessment
+
+**Connections** link hubs to external services: LLM providers (required for agents), messaging channels, tool APIs, speech services. OAuth connections (WhatsApp, Instagram, Gmail) require UI setup; non-OAuth can be created via MCP using org-level credentials.
+
+**Tools** give agents capabilities: native (platform built-ins like web_search, send_email, transfer_to_human), custom (HTTP API endpoints), MCP (from MCP servers), and delegation (agent-to-agent/team handoff).
+
+**Hub environments:** Hubs start as `preview` (editable) and can be published to `production` (read-only, serves live traffic). All config changes flow through preview → sync → production.
+
+## This Repository
+
+This is a version-controlled workspace for WayAI hub configuration. Hub settings, agents, tools, and states are stored as local files (`wayai.yaml` + `agents/*.md`) that sync bidirectionally with the platform via the WayAI CLI.
+
+Every configuration change is reviewable, trackable, and reversible through git. Local files are the edit surface — changes flow through files → `wayai push` → platform. Always `wayai pull` before editing to catch out-of-band changes.
+
+Detailed instructions, workflows, and reference docs are in `.claude/skills/wayai/SKILL.md` — **read it before making changes**.
+
+## How to Make Changes
+
+**Default: edit files + CLI push** — for all config managed in `wayai.yaml` and `agents/*.md`:
+- Hub settings (name, ai_mode, timezone, permissions, SLA, kanban, etc.)
+- Agents (name, role, model, temperature, tools)
+- Agent instructions (edit `.md` files in `agents/`)
+- States (conversation/user state schemas)
+- Custom tools (name, path, method, body)
+
+**MCP — for operations without file equivalents:**
+- Create new hubs → `create_hub` (then populate via files + push)
+- Manage connections → `add_connection`, `enable_connection`, `disable_connection`
+- Publish/sync environments → `publish_hub`, `sync_hub`, `replicate_preview`
+- Analytics → `get_analytics_data`, `get_conversations_list`, `get_conversation_messages`
+- Evals → `create_eval`, `run_eval_session`, `get_eval_session_details`
+- Skills → `create_skill`, `link_skill_to_agent`
+
+**MCP reads (discovery/inspection):**
+- `get_workspace` — discover orgs, projects, hubs
+- `get_hub` — inspect current hub state
+- `get_agent`, `download_agent_instructions` — inspect agent config
+- `list_organization_credentials` — check available API credentials
+
+**UI only:**
+- OAuth connections (WhatsApp, Instagram, Gmail)
+- Delete hubs
+- Organization/user management
+
+## Workflow
+
+1. **Pull** — `wayai pull --all` to sync local files from platform (catches out-of-band changes)
+2. **Edit** — modify `wayai.yaml` and `agents/*.md` in `workspace/<project>/<hub>/`
+3. **Push** — `wayai push` to apply changes to the preview hub
+4. **PR** — create a PR for review; CI pushes to preview hub (idempotent safety net)
+5. **Merge** — CI pushes final state and syncs preview to production (if linked)
+
+For operations without file equivalents (connections, publish/sync, analytics, evals), use MCP tools directly. After MCP changes, run `wayai pull --all -y` to sync back to local files, then commit.
 
 ## Hub Environments
 
-Hubs use a **preview/production branching** model. New hubs start as `preview` (editable). Use `publish_hub` for first-time promotion, `sync_hub` to push subsequent changes, and `replicate_preview` to create experimental previews from production. Production hubs are **read-only** — all config changes must flow through a preview hub. See SKILL.md for details.
+Hubs use a **preview/production branching** model:
 
-### MCP Access Modes
-
-Each hub has an `mcp_access` setting. The two main contexts:
-
-- **`read_write`** — For non-repo users (ChatGPT, Claude.ai, UI). Agent writes directly via MCP tools. No git needed. Best for rapid iteration.
-- **`read_only`** — For repo users (Claude Code, Cursor). Agent edits local files + uses CLI (`wayai push`). MCP is read-only for discovery/inspection (`get_workspace`, `get_hub`, `get_analytics_data`, `download_agent_instructions`). MCP operations that don't conflict with files still work: `publish_hub`, `sync_hub`, `replicate_preview`.
-- **`disabled`** — No MCP access. Hub managed via UI only.
-
-### GitOps Workflow (preview-first)
-
-Preview hub files are the source of truth in the repo. Production is a downstream artifact, never directly edited.
-
-1. **`wayai pull --all`** — sync before working (catch changes made outside the agent)
-2. **Edit files** — modify `wayai.yaml` and `agents/*.md` in `workspace/<project>/<hub>/`
-3. **`wayai push`** (optional) — apply changes to preview hub immediately for testing
-4. **Create a PR** — CI pushes to preview hub (idempotent safety net, with or without prior push)
-5. **Merge the PR** — CI pushes final state + syncs preview to production (if linked via `production_hub_fk`)
+- **New hubs** start as `preview` — edit freely
+- **`publish_hub`** — first-time promotion creates a `production` hub cloned from preview
+- **`sync_hub`** — pushes subsequent preview changes to the linked production hub
+- **`replicate_preview`** — creates a new preview from production for experimentation
+- **Production is read-only** — all config changes must flow through a preview hub
 
 CI handles both hub environments:
-- **Preview hubs**: CI pushes config directly. On merge, also syncs to production if the preview has a linked production hub.
+- **Preview hubs**: CI pushes config directly. On merge, also syncs to production if linked.
 - **Production hubs** (legacy): CI creates/updates ephemeral branch previews. On merge, publishes and cleans up.
 
 ## Agent Goal
 
-Your primary role is to manage hub settings for the user through the WayAI MCP server. When the user asks you to do anything hub-related:
+Your primary role is to help the user manage hub configuration through this repository. When the user asks you to do anything hub-related:
 
-1. **Identify the hub** — determine which hub the request applies to. If it's not clear from context, **ask the user before proceeding**. Never guess or assume.
-2. **Read CONTEXT.md** — before starting work on a hub, read `workspace/<hub_folder>/CONTEXT.md` for background on that hub's purpose, configuration decisions, and ongoing work.
-3. **Create CONTEXT.md if missing** — if the file doesn't exist after downloading the workspace, create it with what you know about the hub (name, description, purpose, key agents and tools, any relevant decisions). If you're uncertain about any details, ask the user to confirm or enrich it.
-4. **Update CONTEXT.md when relevant** — after making significant changes or learning new context about a hub (purpose clarifications, design decisions, configuration rationale), update the file so future sessions start with accurate context.
-5. **Create a `references/` folder for supporting files** — if the hub needs additional reference material (e.g., business rules, example flows, tone guides, API specs), create a `references/` folder inside the hub folder and place files there. Reference them from `CONTEXT.md` so future sessions know what's available.
+1. **Identify the hub** — determine which hub the request applies to. If unclear, **ask the user**. Never guess or assume.
+2. **Read CONTEXT.md** — check `workspace/<hub_folder>/CONTEXT.md` for background on the hub's purpose, decisions, and ongoing work.
+3. **Create CONTEXT.md if missing** — after syncing the workspace, create it with what you know about the hub. Ask the user to confirm or enrich.
+4. **Make changes via files** — edit `wayai.yaml` and `agents/*.md`, then `wayai push`. Use MCP only for operations without file equivalents (see [How to Make Changes](#how-to-make-changes)).
+5. **Update CONTEXT.md** — after significant changes or new context, update the file for future sessions.
+6. **Use `references/`** for supporting files — business rules, API specs, tone guides. Reference them from `CONTEXT.md`.
 
 The `CONTEXT.md` file is a living document — it ensures continuity across sessions and prevents repeated questions about the same hub.
 
 ## CLI Setup
 
-The WayAI CLI (`@wayai/cli`) is the recommended tool for syncing hub configuration between local files and the platform. Install and authenticate once:
+Install and authenticate the WayAI CLI (`@wayai/cli`):
 
 ```bash
 npm install -g @wayai/cli
-wayai login          # Opens browser for OAuth — or use `wayai login --token` for headless/CI
+wayai login          # Opens browser for OAuth — or `wayai login --token` for headless/CI
 ```
 
-Then create `.wayai.yaml` at the repo root with your organization ID (and optional project ID):
+Link to your organization (creates `.wayai.yaml` at repo root):
 
+```bash
+wayai init              # Interactive — picks org/project
+wayai init <org-name>   # Direct — creates .wayai.yaml with org ID
+```
+
+The generated file looks like:
 ```yaml
 organization_id: your-org-uuid-here
 project_id: your-project-uuid-here  # optional — enables 1-part hub paths
 ```
 
-## Workflow
+### CLI Commands
 
-For `read_write` hubs (MCP as write path):
-1. **Sync before working**: `wayai pull --all` to fetch all hub configs from platform to local files
-2. **Make changes**: Use WayAI MCP tools to apply changes on the platform (follow SKILL.md workflows)
-3. **Sync after changes**: `wayai pull --all` again so local files reflect the new state
-4. **Commit**: Git commit the updated workspace as a versioned snapshot
-
-For `read_only` hubs (CLI as write path):
-1. **Sync before working**: `wayai pull --all` to fetch all hub configs
-2. **Edit files**: Modify `wayai.yaml` and `agents/*.md` directly
-3. **Push for testing** (optional): `wayai push` to apply changes to preview hub immediately
-4. **Create PR**: CI pushes to preview hub automatically (idempotent if already pushed)
-5. **Merge**: CI pushes final state and syncs preview to production
+```bash
+wayai pull --all                 # Pull all hubs from platform to local files
+wayai pull support/customer-hub  # Pull a specific hub
+wayai push                       # Auto-detect changed hubs via git, push each
+wayai push support/customer-hub  # Push a specific hub
+wayai status                     # Show workspace status
+# Add -y to skip confirmation prompts
+```
 
 ## Sync
 
-There are two types of sync — keep them distinct:
-
-### Workspace sync (platform → local)
-
-Syncs your hub configuration from the platform into the local `workspace/` directory. The platform is the source of truth — the local files are a Markdown mirror for agent context, user review, and git history.
+### Workspace operations
 
 ```bash
-# Recommended: WayAI CLI (from repo root)
-wayai pull --all                 # Pull all hubs in workspace
-wayai pull --all -y              # Same, skip confirmation prompts
-wayai pull support/customer-hub  # Pull a specific hub (resolves to workspace/ folder)
-wayai push                       # Auto-detect changed hubs via git, push each
-wayai push -y                    # Same, skip confirmation prompts
+# Pull: platform → local (before working)
+wayai pull --all                 # Fetch all hubs, shows diff, asks for confirmation
+wayai pull support/customer-hub  # Fetch a specific hub
+
+# Push: local → platform (after editing)
+wayai push                       # Detect changed hubs via git, shows diff, asks for confirmation
 wayai push support/customer-hub  # Push a specific hub
 
-# Alternative (MCP): download_workspace
-download_workspace(organization="<org-name>")  # Returns a download URL (expires in 5 min)
+# Alternative: MCP download (read-only snapshot)
+download_workspace(organization="<org-name>")  # Returns download URL (5 min expiry)
 curl -L "<url>" -o workspace.zip && unzip -o workspace.zip -d ./
 ```
 
-The CLI is workspace-aware — from the repo root it resolves hub paths to `workspace/project/hub/` folders automatically. Use `--yes` / `-y` to skip confirmation prompts (useful for scripting and CI).
+Both `pull` and `push` show a diff before applying changes and wait for confirmation. Use `-y` to skip prompts (useful for scripting/CI).
 
-When to sync:
-- **Before working** — catch changes made outside the agent (UI, other users)
-- **After changes** — reflect what was just applied via MCP tools
+When to use:
+- **Pull before working** — catch changes made outside the repo (UI, other users, MCP)
+- **Push after editing** — apply local file changes to the preview hub
 
-### Repository sync (template → local)
-
-Syncs the repo with the upstream template to get the latest skill files, instructions, and templates.
+### Repository sync (template -> local)
 
 ```bash
 git fetch template && git merge template/main
@@ -128,39 +178,39 @@ workspace/<project>/<hub>/
 ├── agents/
 │   ├── pilot.md            # Instructions for "Pilot Agent" (slugified name)
 │   └── specialist-billing.md
-├── CONTEXT.md              # Living notes — purpose, decisions, ongoing work (NOT synced to backend)
-└── references/             # Supporting files (NOT synced to backend)
+├── CONTEXT.md              # Living notes — purpose, decisions, ongoing work (NOT synced)
+└── references/             # Supporting files (NOT synced)
 ```
 
 ### `wayai.yaml` key fields
 
-- **`hub_id`** and **`hub_environment`** — read-only metadata at top level. Do not edit these.
+- **`hub_id`** and **`hub_environment`** — read-only metadata. Do not edit.
 - **`hub`** — hub settings (name, ai_mode, timezone, permissions, SLA, kanban, etc.)
-- **`agents`** — list of agents with `id` (stable UUID, set by pull), `name`, `role`, `connection` (display name), `settings`, `tools`. Instructions are resolved by convention from `agents/{slugified-name}.md` (no explicit path needed in YAML)
+- **`agents`** — list with `id` (stable UUID, set by pull), `name`, `role`, `connection` (display name), `settings`, `tools`. Instructions resolved by convention from `agents/{slugified-name}.md`
 - **`states`** — conversation/user state schemas
-- **`connections`** — read-only reference showing available connections (managed via UI/MCP, not synced back)
+- **`connections`** — read-only reference (managed via MCP/UI, not synced back)
 
-Agents reference connections by display name. Tools are grouped as `native` (platform built-ins), `delegation` (agent-to-agent/team), and `custom` (HTTP endpoints).
+Agents reference connections by display name. Tools are grouped as `native` (platform built-ins), `delegation` (agent-to-agent/team), and `custom` (HTTP endpoints). Renaming: change the `name` field — the `id` ensures it's detected as rename, not delete+create.
 
 ## Repository Structure
 
 ```
 CLAUDE.md                     # This file — agent instructions
 .wayai.yaml                   # Repo config — organization_id (and optional project_id)
-.claude/skills/wayai/         # WayAI skill - START HERE
-├── SKILL.md                  # Workflows and prerequisites
-├── references/               # Detailed reference docs
+.claude/skills/wayai/         # WayAI skill — workflows, references, templates
+├── SKILL.md                  # Start here for detailed workflows
+├── references/               # Platform reference docs
 └── assets/templates/         # Hub templates
 .github/
 ├── actions/wayai-sync/       # GitOps action (sync, publish, cleanup)
-└── workflows/wayai-hub-sync.yml  # PR/merge workflow for hub changes
-workspace/                    # Local copy of remote workspace (org-scoped)
+└── workflows/wayai-hub-sync.yml
+workspace/                    # Local copy of remote workspace
 ├── <project>/<hub>/
-│   ├── wayai.yaml            # Hub configuration (synced from platform)
-│   ├── agents/               # Agent instruction files
-│   ├── CONTEXT.md            # Hub context — purpose, decisions, ongoing work
-│   └── references/           # Supporting files referenced by CONTEXT.md
-.mcp.json                     # MCP server configuration
+│   ├── wayai.yaml
+│   ├── agents/
+│   ├── CONTEXT.md
+│   └── references/
+.mcp.json                     # MCP server connection
 ```
 
 Preview hubs use disambiguated folder names: `hub-slug-<preview_label>`, `hub-slug-<branch_name>`, or `hub-slug-<hub_id_prefix>`. Production hubs use plain `hub-slug`.
