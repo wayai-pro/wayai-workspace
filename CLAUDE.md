@@ -48,7 +48,13 @@ The WayAI CLI (`@wayai/cli`) is the recommended tool for syncing hub configurati
 ```bash
 npm install -g @wayai/cli
 wayai login          # Opens browser for OAuth — or use `wayai login --token` for headless/CI
-wayai init           # Link repo to your organization (creates .wayai.yaml)
+```
+
+Then create `.wayai.yaml` at the repo root with your organization ID (and optional project ID):
+
+```yaml
+organization_id: your-org-uuid-here
+project_id: your-project-uuid-here  # optional — enables 1-part hub paths
 ```
 
 ## Workflow
@@ -78,7 +84,7 @@ wayai push -y                    # Same, skip confirmation prompts
 wayai push support/customer-hub  # Push a specific hub
 
 # Alternative (MCP): download_workspace
-download_workspace(organization="My Org")  # Returns a download URL (expires in 5 min)
+download_workspace(organization="<org-name>")  # Returns a download URL (expires in 5 min)
 curl -L "<url>" -o workspace.zip && unzip -o workspace.zip -d ./
 ```
 
@@ -131,7 +137,7 @@ Agents reference connections by display name. Tools are grouped as `native` (pla
 
 ```
 CLAUDE.md                     # This file — agent instructions
-.wayai.yaml                   # Repo config — organization scope (created by `wayai init`)
+.wayai.yaml                   # Repo config — organization_id (and optional project_id)
 .claude/skills/wayai/         # WayAI skill - START HERE
 ├── SKILL.md                  # Workflows and prerequisites
 ├── references/               # Detailed reference docs
