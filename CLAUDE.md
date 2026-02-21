@@ -81,9 +81,9 @@ Hubs use a **preview/production branching** model:
 - **`replicate_preview`** — creates a new preview from production for experimentation
 - **Production is read-only** — all config changes must flow through a preview hub
 
-CI handles both hub environments:
-- **Preview hubs**: CI pushes config directly. On merge, also syncs to production if linked.
-- **Production hubs** (legacy): CI creates/updates ephemeral branch previews. On merge, publishes and cleans up.
+CI only acts on preview hubs:
+- **Preview hubs**: CI pushes config directly on PR. On merge, syncs to production if linked.
+- **Production hubs**: read-only in git — tracked for agent reference, never pushed by CI. All changes flow through the linked preview hub.
 
 ## Agent Goal
 

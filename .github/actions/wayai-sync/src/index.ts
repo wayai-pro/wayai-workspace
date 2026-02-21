@@ -74,33 +74,10 @@ async function run(): Promise<void> {
         core.info(`Preview hub ${hub.hubId} pushed successfully.`);
       }
 
-      // Production hubs: create/update branch preview (existing behavior)
+      // Production hubs: read-only in git (for agent reference). CI does not push to them —
+      // all config changes flow through preview hubs. Edit the linked preview hub instead.
       for (const hub of productionHubs) {
-        core.info(`Syncing production hub ${hub.hubId} from ${hub.hubFolder}...`);
-
-        const config = parseHubFolder(hub.hubFolder);
-
-        try {
-          const diffResult = await client.diff({
-            hub_id: hub.hubId,
-            config,
-          });
-
-          if (diffResult.has_changes) {
-            diffSummaries.push({ hubId: hub.hubId, summary: diffResult.summary });
-          }
-        } catch (err) {
-          core.warning(`Could not compute diff for hub ${hub.hubId}: ${err instanceof Error ? err.message : String(err)}`);
-        }
-
-        await client.sync({
-          hub_id: hub.hubId,
-          branch_name: branchName,
-          config,
-          commit_sha: commitSha,
-        });
-
-        core.info(`Production hub ${hub.hubId} synced successfully.`);
+        core.warning(`Skipping production hub ${hub.hubId} — production hubs are read-only. Edit the linked preview hub to make changes.`);
       }
 
       // Post diff summary as PR comment
@@ -131,16 +108,9 @@ async function run(): Promise<void> {
         }
       }
 
-      // Production hubs: publish branch preview to production (existing behavior)
+      // Production hubs: publish is handled via preview hub → sync. Nothing to do here.
       for (const hub of productionHubs) {
-        core.info(`Publishing production hub ${hub.hubId}...`);
-
-        await client.publish({
-          hub_id: hub.hubId,
-          branch_name: branchName,
-        });
-
-        core.info(`Production hub ${hub.hubId} published successfully.`);
+        core.warning(`Skipping production hub ${hub.hubId} — publish flows through the linked preview hub.`);
       }
     } else if (action === 'cleanup') {
       // Preview hubs: skip (permanent hubs, no ephemeral branch preview to clean up)
@@ -148,16 +118,9 @@ async function run(): Promise<void> {
         core.info(`Skipping cleanup for preview hub ${hub.hubId} (permanent hub).`);
       }
 
-      // Production hubs: clean up ephemeral branch preview (existing behavior)
+      // Production hubs: no branch previews are created, nothing to clean up.
       for (const hub of productionHubs) {
-        core.info(`Cleaning up branch preview for production hub ${hub.hubId}...`);
-
-        await client.cleanup({
-          hub_id: hub.hubId,
-          branch_name: branchName,
-        });
-
-        core.info(`Branch preview for production hub ${hub.hubId} cleaned up.`);
+        core.warning(`Skipping cleanup for production hub ${hub.hubId} — no branch previews created.`);
       }
     }
 
