@@ -131,13 +131,13 @@ MAKING changes (edit + push = single action):
 3. Edit wayai.yaml and/or agents/*.md
 4. wayai push -y                 → apply changes to preview hub immediately
    Editing and pushing are a single action — always complete both together.
-   If the task requires MCP-only operations (connections, publish/sync, analytics, evals):
+   If the task requires MCP-only operations (connections, analytics, evals):
    → Use MCP tools, then wayai pull --all -y to sync back to local files
 
 AFTER changes:
 5. Update CONTEXT.md if decisions or context changed
-6. Commit to Git
-7. If ready for production: publish_hub(hub_id) or sync_hub(hub_id) via MCP
+6. Commit and push to main — CI syncs changes to the preview hub automatically
+7. If ready for production: sync_hub(hub_id) via MCP or platform UI
 ```
 
 **Finding `hub_id`:** After the first `wayai pull`, each hub's `hub_id` is in `workspace/<project>/<hub>/wayai.yaml`. For a fresh repo (no workspace yet), use `get_workspace()` to discover hub IDs, then pull.

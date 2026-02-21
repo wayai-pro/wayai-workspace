@@ -12,29 +12,19 @@ export interface ChangedHub {
 /**
  * Detect which hub folders have changed by comparing git diffs.
  *
- * - For pull requests: diffs against origin/main
- * - For push events: diffs against the previous commit (HEAD~1)
+ * Diffs against the previous commit (HEAD~1) — triggered only on push to main.
  *
  * Filters to files matching workspace/** /wayai.yaml and workspace/** /agents/*.md,
  * extracts unique hub folder paths, and reads each wayai.yaml to get hub_id and
- * hub_environment. Returns all hub environments (preview and production).
+ * hub_environment. Only returns preview hubs — production hubs are not tracked in
+ * the repository.
  */
 export function getChangedHubs(): ChangedHub[] {
-  const isPullRequest = !!process.env.GITHUB_HEAD_REF;
-
   let diffOutput: string;
   try {
-    if (isPullRequest) {
-      // PR: compare against the base branch
-      diffOutput = execSync('git diff --name-only origin/main...HEAD', {
-        encoding: 'utf-8',
-      }).trim();
-    } else {
-      // Push to main: compare against previous commit
-      diffOutput = execSync('git diff --name-only HEAD~1..HEAD', {
-        encoding: 'utf-8',
-      }).trim();
-    }
+    diffOutput = execSync('git diff --name-only HEAD~1..HEAD', {
+      encoding: 'utf-8',
+    }).trim();
   } catch {
     // If diff fails (e.g., first commit), return empty
     return [];
@@ -90,6 +80,11 @@ export function getChangedHubs(): ChangedHub[] {
       };
 
       if (!config || !config.hub_id || !config.hub_environment) {
+        continue;
+      }
+
+      // Production hubs are not tracked in the repository — skip them.
+      if (config.hub_environment === 'production') {
         continue;
       }
 

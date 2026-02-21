@@ -66,8 +66,8 @@ Detailed instructions, workflows, and reference docs are in `.claude/skills/waya
 1. **Pull** — `wayai pull --all` to sync local files from platform (catches out-of-band changes)
 2. **Edit** — modify `wayai.yaml` and `agents/*.md` in `workspace/<project>/<hub>/`
 3. **Push** — `wayai push` to apply changes to the preview hub
-4. **PR** — create a PR for review; CI pushes to preview hub (idempotent safety net)
-5. **Merge** — CI pushes final state and syncs preview to production (if linked)
+4. **Commit** — `git commit` and push to `main`; CI syncs changes to the preview hub automatically
+5. **Go live** — when ready, sync to production via the platform UI (`sync_hub`)
 
 For operations without file equivalents (connections, publish/sync, analytics, evals), use MCP tools directly. After MCP changes, run `wayai pull --all -y` to sync back to local files, then commit.
 
@@ -81,9 +81,10 @@ Hubs use a **preview/production branching** model:
 - **`replicate_preview`** — creates a new preview from production for experimentation
 - **Production is read-only** — all config changes must flow through a preview hub
 
-CI only acts on preview hubs:
-- **Preview hubs**: CI pushes config directly on PR. On merge, syncs to production if linked.
-- **Production hubs**: read-only in git — tracked for agent reference, never pushed by CI. All changes flow through the linked preview hub.
+Only preview hubs are tracked in this repository. Production hubs are not stored in git — their state lives in the platform database.
+
+- **Preview hubs**: CI syncs automatically on every push to `main`. No branching or PRs required.
+- **Production hubs**: not tracked in git. Sync to production explicitly via the platform UI (`sync_hub`) when ready to go live.
 
 ## Agent Goal
 
@@ -216,4 +217,4 @@ workspace/                    # Local copy of remote workspace
 .mcp.json                     # MCP server connection
 ```
 
-Preview hubs use disambiguated folder names: `hub-slug-<preview_label>`, `hub-slug-<branch_name>`, or `hub-slug-<hub_id_prefix>`. Production hubs use plain `hub-slug`.
+Only preview hubs are stored under `workspace/`. Preview hub folders use disambiguated names: `hub-slug-<preview_label>`, `hub-slug-<branch_name>`, or `hub-slug-<hub_id_prefix>`.

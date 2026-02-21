@@ -19,26 +19,22 @@ workspace/                                # Workspace folder (from download_work
 ├── workspace.md                          # Workspace overview (projects/hubs index)
 ├── last-sync.md                          # Sync metadata
 └── {project-slug}/                       # Project folder
-    ├── {hub-slug}/                       # Production hub folder
-    │   ├── wayai.yaml                    # Hub config + agents + tools + states
-    │   ├── agents/                       # Agent instruction files
-    │   │   ├── pilot.md                  # Instructions for "Pilot Agent"
-    │   │   └── specialist-billing.md     # Instructions for "Specialist - Billing"
-    │   ├── CONTEXT.md                    # Living notes (NOT synced to backend)
-    │   └── references/                   # Supporting files (NOT synced to backend)
-    └── {hub-slug}-{label}/               # Preview hub folder (disambiguated)
-        ├── wayai.yaml
-        └── agents/
+    └── {hub-slug}-{label}/               # Preview hub folder
+        ├── wayai.yaml                    # Hub config + agents + tools + states
+        ├── agents/                       # Agent instruction files
+        │   ├── pilot.md                  # Instructions for "Pilot Agent"
+        │   └── specialist-billing.md     # Instructions for "Specialist - Billing"
+        ├── CONTEXT.md                    # Living notes (NOT synced to backend)
+        └── references/                   # Supporting files (NOT synced to backend)
 ```
+
+Only preview hubs are stored in the repository. Production hubs are not tracked in git — their state lives in the platform database and is synced explicitly via the UI.
 
 ### Preview Hub Folder Naming
 
-Preview hubs get a suffix to avoid colliding with their production counterpart:
+Preview hub folders use a suffix for disambiguation:
 - **With `preview_label`:** `hub-slug-my-label`
-- **With `branch_name`:** `hub-slug-feat-new-flow`
 - **Fallback (hub_id prefix):** `hub-slug-abc12345`
-
-Production hubs use the plain `hub-slug` name.
 
 ## Slugification Rules
 
@@ -67,9 +63,9 @@ Hub configuration is stored as structured YAML. The file has these top-level sec
 ```yaml
 version: 1
 
-# Read-only metadata (set by download_workspace, do not edit)
+# Read-only metadata (set by wayai pull, do not edit)
 hub_id: "abc-123-def"
-hub_environment: production    # preview | production
+hub_environment: preview
 
 hub:
   name: Customer Support
@@ -275,16 +271,17 @@ After pushing:
 
 ## Sync via GitOps
 
-For production hubs with `mcp_access: read_only`, configuration changes flow through git:
+Push to `main` → CI automatically syncs changed preview hubs to the platform:
 
 ```
 1. Edit wayai.yaml and/or agents/*.md locally
-2. Create a PR → GitHub Action creates branch preview per changed production hub
-3. Test the preview hub(s)
-4. Merge the PR → GitHub Action syncs and publishes to production
+2. wayai push -y                  → apply to preview hub immediately (optional but recommended)
+3. git commit + push to main      → CI syncs any changed hubs to their preview hub
+4. Test the preview hub
+5. Ready to go live? sync_hub(hub_id) via MCP or platform UI → syncs to production
 ```
 
-The GitHub Action (`.github/actions/wayai-sync/`) parses `wayai.yaml`, reads `agents/*.md` contents, and calls the CI API endpoints to apply changes.
+The GitHub Action (`.github/actions/wayai-sync/`) parses `wayai.yaml`, reads `agents/*.md` contents, and calls the CI API endpoints to apply changes. No PRs or branching required — commit directly to `main`.
 
 ## Key Principle
 

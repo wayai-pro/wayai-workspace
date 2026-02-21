@@ -8,9 +8,6 @@ inputs:
   api-token:
     description: 'WayAI MCP token (way_...) for authentication'
     required: true
-  action:
-    description: 'Action to perform: sync, publish, or cleanup'
-    required: true
 
 runs:
   using: 'node20'
