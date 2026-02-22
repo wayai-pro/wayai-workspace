@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__wayai__*",
+      "Bash(wayai *)",
+      "Bash(npm install -g @wayai/cli*)"
+    ]
+  }
+}
