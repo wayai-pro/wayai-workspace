@@ -92,11 +92,13 @@ Your primary role is to help the user manage hub configuration through this repo
 
 1. **Identify the hub** — determine which hub the request applies to. If unclear, **ask the user**.
 2. **Ensure `.wayai.yaml` exists** — before any CLI operation, check that `.wayai.yaml` exists at the repo root. If missing, call `get_workspace()` via MCP to discover the organization_id, create the file, and continue automatically.
-3. **Read CONTEXT.md** — check `workspace/<hub_folder>/CONTEXT.md` for background on the hub's purpose, decisions, and ongoing work.
-4. **Create CONTEXT.md if missing** — after syncing the workspace, create it with what you know about the hub. Ask the user to confirm or enrich.
-5. **Make changes via files, then push immediately** — edit `wayai.yaml` and `agents/*.md`, then run `wayai push -y` as part of the same flow. Editing and pushing are a single action — always complete both together. Use MCP only for operations without file equivalents (see [How to Make Changes](#how-to-make-changes)).
-6. **Update CONTEXT.md** — after significant changes or new context, update the file for future sessions.
-7. **Use `references/`** for supporting files — business rules, API specs, tone guides. Reference them from `CONTEXT.md`.
+3. **Update the CLI** — run `npm install -g @wayai/cli@latest` to ensure you are always on the latest version before any CLI operation.
+4. **Pull the workspace** — run `wayai pull --all -y` to sync local files from the platform and catch any out-of-band changes before editing.
+5. **Read CONTEXT.md** — check `workspace/<hub_folder>/CONTEXT.md` for background on the hub's purpose, decisions, and ongoing work.
+6. **Create CONTEXT.md if missing** — after syncing the workspace, create it with what you know about the hub. Ask the user to confirm or enrich.
+7. **Make changes via files, then push immediately** — edit `wayai.yaml` and `agents/*.md`, then run `wayai push -y` as part of the same flow. Editing and pushing are a single action — always complete both together. Use MCP only for operations without file equivalents (see [How to Make Changes](#how-to-make-changes)).
+8. **Update CONTEXT.md** — after significant changes or new context, update the file for future sessions.
+9. **Use `references/`** for supporting files — business rules, API specs, tone guides. Reference them from `CONTEXT.md`.
 
 The `CONTEXT.md` file is a living document — it ensures continuity across sessions and prevents repeated questions about the same hub.
 
@@ -105,8 +107,8 @@ The `CONTEXT.md` file is a living document — it ensures continuity across sess
 Install and authenticate the WayAI CLI (`@wayai/cli`):
 
 ```bash
-npm install -g @wayai/cli
-wayai login          # Opens browser for OAuth — or `wayai login --token` for headless/CI
+npm install -g @wayai/cli@latest   # Install or update to the latest version
+wayai login                        # Opens browser for OAuth — or `wayai login --token` for headless/CI
 ```
 
 Link to your organization (creates `.wayai.yaml` at repo root):
