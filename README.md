@@ -26,7 +26,7 @@ Pull updates from the template repository to get the latest skill files, instruc
 
 ```bash
 # First time
-git remote add template https://github.com/wayai-resources/wayai.git
+git remote add template https://github.com/wayai-pro/wayai-workspace.git
 git fetch template && git merge template/main --allow-unrelated-histories
 # Future updates
 git fetch template && git merge template/main

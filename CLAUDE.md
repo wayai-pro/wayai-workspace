@@ -174,7 +174,7 @@ git fetch template && git merge template/main
 If the `template` remote isn't set up yet:
 
 ```bash
-git remote add template https://github.com/wayai-resources/wayai.git
+git remote add template https://github.com/wayai-pro/wayai-workspace.git
 git fetch template && git merge template/main --allow-unrelated-histories
 ```
 
