@@ -25,6 +25,10 @@ WayAI is a SaaS platform for AI-powered communication hubs. Each hub connects AI
 
 **Hub environments:** Hubs start as `preview` (editable) and can be published to `production` (read-only, serves live traffic). All config changes flow through preview → sync → production.
 
+## Security
+
+This repo syncs to a public template — never include internal implementation details in any file: backend/database schema, RLS policies, authentication internals, secret management, or source code structure. User-facing platform concepts (hub types, agent roles, MCP operations) are fine.
+
 ## This Repository
 
 This is a version-controlled workspace for WayAI hub configuration. Hub settings, agents, tools, and states are stored as local files (`wayai.yaml` + `agents/*.md`) that sync bidirectionally with the platform via the WayAI CLI.
