@@ -2,7 +2,7 @@
 name: "{NOME_EMPRESA}"
 description: "Atendimento de pedidos para pizzaria"
 ai_mode: Pilot+Copilot
-hub_type: user
+hub_type: chat
 followup_message: "Oi! Ainda está aí? Posso ajudar com mais alguma coisa?"
 inactivity_interval: 5
 connections:

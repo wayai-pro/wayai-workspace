@@ -2,7 +2,7 @@
 name: "{NOME_CLINICA}"
 description: "Agendamento de consultas odontológicas"
 ai_mode: Pilot+Copilot
-hub_type: user
+hub_type: chat
 followup_message: "Oi! Vi que você estava agendando uma consulta. Posso ajudar?"
 inactivity_interval: 10
 connections:

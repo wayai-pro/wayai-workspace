@@ -7,7 +7,7 @@ When the user's WayAI app is open in Chrome and Chrome DevTools MCP is connected
 ### Navigation
 | Tool | Description |
 |------|-------------|
-| `navigate_to_view` | Switch main view: `support`, `user_chat`, `workflow`, `settings` |
+| `navigate_to_view` | Switch main view: `support`, `chat`, `task`, `settings` |
 | `select_conversation` | Open a conversation by `conversation_key` |
 | `open_panel` | Open right-side panel: `analytics`, `evals`, `resource`, `outbound`, `user` |
 | `close_panels` | Close all right-side panels |

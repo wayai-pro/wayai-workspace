@@ -7,8 +7,8 @@ WayAI is a SaaS platform for AI-powered communication hubs. Each hub connects AI
 **Entity hierarchy:** Organization → Project → Hub → Agents, Connections, Tools, Channels, States
 
 **Hub types:**
-- `user` — one conversation per end user, all channels (support, sales, helpdesk)
-- `workflow` — multiple conversations per user, App channel only (tasks, approvals)
+- `chat` — one conversation per end user, all channels (support, sales, helpdesk)
+- `task` — multiple conversations per user, App channel only (tasks, approvals)
 
 **AI modes:** `Pilot` (AI autonomous) | `Copilot` (AI assists humans) | `Pilot+Copilot` (AI handles until human takes over) | `Turned Off`
 

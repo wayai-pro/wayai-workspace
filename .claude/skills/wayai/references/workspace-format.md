@@ -70,7 +70,7 @@ hub_environment: preview
 hub:
   name: Customer Support
   description: AI-powered support hub
-  hub_type: user               # user | workflow
+  hub_type: chat               # chat | task
   ai_mode: Pilot+Copilot      # Pilot | Copilot | Pilot+Copilot | Turned Off
   timezone: America/New_York
   app_permission: require_permission

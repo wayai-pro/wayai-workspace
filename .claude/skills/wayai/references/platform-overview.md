@@ -18,12 +18,12 @@ WayAI is a SaaS platform for AI-powered omnichannel communication hubs. It integ
 
 | Type | Description | Channels | Use Case |
 |------|-------------|----------|----------|
-| `user` | ONE conversation per end user | All (WhatsApp, Instagram, Email, App) | Person-centered: support, sales, helpdesk |
-| `workflow` | MULTIPLE conversations per user | App only | Task-centered: invoices, inventory, approvals |
+| `chat` | ONE conversation per end user | All (WhatsApp, Instagram, Email, App) | Person-centered: support, sales, helpdesk |
+| `task` | MULTIPLE conversations per user | App only | Task-centered: invoices, inventory, approvals |
 
 **Decision guide:**
-- Need WhatsApp/Instagram/Email? → Use `user`
-- Processing objects/tasks (not people)? → Use `workflow`
+- Need WhatsApp/Instagram/Email? → Use `chat`
+- Processing objects/tasks (not people)? → Use `task`
 
 ## Hub Environments
 

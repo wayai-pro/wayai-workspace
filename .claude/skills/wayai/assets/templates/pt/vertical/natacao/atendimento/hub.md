@@ -2,7 +2,7 @@
 name: "{NOME_ACADEMIA}"
 description: "Agendamento de visitas para academia de natação"
 ai_mode: Pilot+Copilot
-hub_type: user
+hub_type: chat
 followup_message: "Oi! Ainda está interessado em conhecer a academia? Posso agendar uma visita gratuita para você!"
 inactivity_interval: 10
 connections:

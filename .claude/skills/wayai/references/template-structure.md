@@ -56,7 +56,7 @@ YAML frontmatter with hub settings and agents config, plus Markdown body.
 | `name` | string | Hub name (use `{NOME_EMPRESA}` placeholder) |
 | `description` | string | Brief description |
 | `ai_mode` | string | `Pilot+Copilot`, `Pilot`, `Copilot`, `Turned Off` |
-| `hub_type` | string | `user` or `workflow` |
+| `hub_type` | string | `chat` or `task` |
 | `followup_message` | string | Message sent after inactivity |
 | `inactivity_interval` | number | Minutes before followup |
 | `agents` | array | Agent configurations (see below) |
@@ -81,7 +81,7 @@ Each agent in the `agents` array:
 name: "{NOME_EMPRESA}"
 description: "Atendimento de pedidos para pizzaria"
 ai_mode: Pilot+Copilot
-hub_type: user
+hub_type: chat
 followup_message: "Oi! Ainda está aí?"
 inactivity_interval: 5
 connections:

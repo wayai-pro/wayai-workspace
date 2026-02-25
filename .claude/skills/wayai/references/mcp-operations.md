@@ -128,7 +128,7 @@ Create a new hub in a project.
 create_hub(
   project_id,                   # Required
   hub_name,                     # Required
-  hub_type,                     # Required: "user" | "workflow"
+  hub_type,                     # Required: "chat" | "task"
   hub_description,              # Optional
   ai_mode,                      # Optional: "Pilot+Copilot" | "Pilot" | "Copilot" | "Turned Off"
   mcp_access,                   # Optional: "read_write" (default) | "read_only" | "disabled"
@@ -144,8 +144,8 @@ create_hub(
 ```
 
 **Hub type guidance:**
-- `user`: Person-centered, works with ALL channels (WhatsApp, Instagram, Email, App)
-- `workflow`: Task-centered, App channel only
+- `chat`: Person-centered, works with ALL channels (WhatsApp, Instagram, Email, App)
+- `task`: Task-centered, App channel only
 
 ### get_hub
 Get complete hub schema including agents, tools, and connections.
