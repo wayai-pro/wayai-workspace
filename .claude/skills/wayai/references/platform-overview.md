@@ -8,7 +8,6 @@
 - [Agent Roles](#agent-roles)
 - [Connection Types](#connection-types)
 - [Tool Types](#tool-types)
-- [MCP Access Levels](#mcp-access-levels)
 
 ## What is WayAI
 
@@ -72,7 +71,7 @@ Hubs use a **preview/production branching** model for safe configuration managem
 
 ## Connection Types
 
-Connections enable hub functionality. Created via UI (Settings → Organization → Project → Hub → Connections).
+Connections enable hub functionality. Non-OAuth connections are auto-created by `wayai push` from organization credentials. OAuth connections require UI setup.
 
 | Category | Examples |
 |----------|----------|
@@ -87,9 +86,9 @@ See [connections.md](connections.md) for setup instructions.
 
 | Type | Description | How to Add |
 |------|-------------|------------|
-| Native | Built-in platform tools (web_search, send_email) | `add_native_tool()` |
-| MCP | Tools from connected MCP servers | `add_mcp_tool()` |
-| Custom | API endpoints you define | `add_custom_tool()` |
+| Native | Built-in platform tools (web_search, send_email) | `wayai.yaml` → `wayai push` |
+| MCP | Tools from connected MCP servers | `wayai.yaml` → `wayai push` |
+| Custom | API endpoints you define | `wayai.yaml` → `wayai push` |
 
 ### Common Native Tools
 
@@ -101,14 +100,3 @@ See [connections.md](connections.md) for setup instructions.
 | `transfer_to_human` | Transfer to human agent |
 | `end_conversation` | End the conversation |
 
-## MCP Access Levels
-
-Hubs can be configured with different MCP access:
-
-| Level | Description | Environments |
-|-------|-------------|-------------|
-| `read_write` | Full read/write access | Preview only |
-| `read_only` | Read-only access | Preview and Production |
-| `disabled` | MCP disabled | Preview and Production |
-
-**Note:** Production hubs cannot have `read_write` MCP access. If a preview hub has `read_write`, it is automatically clamped to `read_only` when published or synced to production.

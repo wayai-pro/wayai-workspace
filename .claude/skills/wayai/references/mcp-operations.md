@@ -104,50 +104,16 @@ create_project(
 
 ## Hub Operations
 
-**Repo users:** Use files + `wayai push` for hub config changes. MCP writes require `read_write` access and are for non-repo clients only.
+**Config changes:** Use files + `wayai push`. MCP is read-only for hub config.
 
-**MCP capabilities:** Create, Read, Update (delete, publish/sync via UI)
-
-| Operation | MCP | UI |
-|-----------|-----|----|
-| List | `get_workspace` | - |
-| View | `get_hub(hub_id)` | - |
-| Create | `create_hub(...)` | platform.wayai.pro |
-| Update | `update_hub(...)` | platform.wayai.pro |
-| Publish | - | platform.wayai.pro |
-| Sync | - | platform.wayai.pro |
-| Replicate | - | platform.wayai.pro |
-| Delete | - | platform.wayai.pro settings |
-| MCP access | - | platform.wayai.pro hub settings |
-
-### create_hub
-Create a new hub in a project.
-
-**Before calling this tool:**
-1. Use `get_workspace()` to list organizations/projects and confirm with the user which project to create the hub in
-2. If wayai skill is available, see references/templates.md for available hub templates and ask the user which template to use
-
-```
-create_hub(
-  project_id,                   # Required
-  hub_name,                     # Required
-  hub_type,                     # Required: "chat" | "task"
-  hub_description,              # Optional
-  ai_mode,                      # Optional: "Pilot+Copilot" | "Pilot" | "Copilot" | "Turned Off"
-  timezone,                     # Optional: default "America/Sao_Paulo"
-  app_permission,               # Optional: "require_permission" (default) | "everyone"
-  non_app_permission,           # Optional: "not_allowed" (default) | "require_permission" | "everyone"
-  followup_message,             # Optional: message sent after inactivity
-  inactivity_interval,          # Optional: minutes before followup message
-  file_handling_mode,           # Optional: "metadata_only" (default) | "always_attach"
-  max_file_size_for_attachment, # Optional: max file size in bytes
-  hub_sla                       # Optional: {time_threshold1, time_threshold2, time_threshold3} in seconds
-)
-```
-
-**Hub type guidance:**
-- `chat`: Person-centered, works with ALL channels (WhatsApp, Instagram, Email, App)
-- `task`: Task-centered, App channel only
+| Operation | Method |
+|-----------|--------|
+| List | MCP: `get_workspace` |
+| View | MCP: `get_hub(hub_id)` |
+| Create | Platform UI |
+| Update | Files + `wayai push` |
+| Publish/Sync/Replicate | Platform UI |
+| Delete | Platform UI |
 
 ### get_hub
 Get complete hub schema including agents, tools, and connections.
@@ -155,31 +121,12 @@ Get complete hub schema including agents, tools, and connections.
 get_hub(hub_id)
 ```
 
-### update_hub
-Update hub settings. Only works on preview hubs — production hubs are read-only.
-```
-update_hub(
-  hub_id,                       # Required
-  hub_name,                     # Optional
-  hub_description,              # Optional
-  ai_mode,                      # Optional
-  followup_message,             # Optional
-  inactivity_interval,          # Optional: minutes
-  timezone,                     # Optional
-  app_permission,               # Optional: "require_permission" | "everyone"
-  non_app_permission,           # Optional: "not_allowed" | "require_permission" | "everyone"
-  file_handling_mode,           # Optional: "metadata_only" | "always_attach"
-  max_file_size_for_attachment, # Optional: max file size in bytes
-  hub_sla                       # Optional: {time_threshold1, time_threshold2, time_threshold3} in seconds
-)
-```
-
 ### Hub Environment Workflow
 
 Hubs use a preview/production branching model. New hubs start as `preview`. Publish, sync, and replicate operations are managed via the platform UI.
 
 ```
-1. Create hub              → starts as preview
+1. Create hub (UI)         → starts as preview
 2. Configure freely        → agents, tools, connections, etc. (files + wayai push)
 3. Publish (UI)            → creates production clone (first time only)
 4. Make more changes       → edit the preview hub (files + wayai push)
@@ -191,28 +138,14 @@ Hubs use a preview/production branching model. New hubs start as `preview`. Publ
 
 ## Agent Operations
 
-**Repo users:** Use files + `wayai push` for agent config changes. MCP writes require `read_write` access and are for non-repo clients only.
+**Config changes:** Use files + `wayai push`. MCP is read-only for agent config.
 
-**MCP capabilities:** Full CRUD
-
-### ⚠️ Prerequisite: Agent Connection Required
-
-Creating agents requires an **Agent connection** (LLM provider):
-- **OpenAI** or **OpenRouter**
-- Created via UI: Settings → Organization → Project → Hub → Connections → **Agent** group
-- If missing, `create_agent` will fail
-
-Direct user to create Agent connection first, then proceed with agent creation.
-
-| Operation | MCP |
-|-----------|-----|
-| List | `get_hub(hub_id)` |
-| View | `get_agent(hub_id, agent_id)` |
-| Download instructions | `download_agent_instructions(hub_id, agent_id)` |
-| Create | `create_agent(...)` |
-| Update settings | `update_agent(...)` |
-| Upload instructions | `upload_agent_instructions(hub_id, agent_id)` → URL + curl |
-| Delete | `delete_agent(...)` |
+| Operation | Method |
+|-----------|--------|
+| List | MCP: `get_hub(hub_id)` |
+| View | MCP: `get_agent(hub_id, agent_id)` |
+| Download instructions | MCP: `download_agent_instructions(hub_id, agent_id)` |
+| Create/Update/Delete | Files + `wayai push` |
 
 ### get_agent
 Get agent details including tools. Instructions are excluded to save context.
@@ -237,111 +170,17 @@ curl -L "{download_url}" -o workspace/{project}/{hub}/{agentname}-instructions.m
 
 Note: The file is recreated from `agent.instructions` on each call to ensure sync with the database. Always save to the `workspace/` directory so the repo stays in sync, then Read when needed (avoids context bloat).
 
-### create_agent
-Create a new agent. Use `get_hub` first to find available Agent connections and their supported models. After creation, upload instructions using `upload_agent_instructions`.
-```
-create_agent(
-  hub_id,            # Required
-  agent_name,        # Required
-  agent_role,        # Required: Pilot, Copilot, Specialist for Pilot, etc.
-  connection_id,     # Required: LLM connection ID (use get_hub to find)
-  model,             # Required: e.g., gpt-4o, claude-sonnet-4-5, gemini-2.5-flash
-  # Optional settings (validated against connector schema):
-  temperature,       # Controls randomness (0=focused, 2=creative)
-  max_tokens,        # Maximum tokens to generate
-  top_p,             # Nucleus sampling (OpenAI, OpenRouter)
-  reasoning_effort,  # OpenAI gpt-5 family: minimal, low, medium, high, none
-  verbosity,         # OpenAI gpt-5 family: low, medium, high
-  service_tier       # OpenAI gpt-5 family: auto, flex, default, priority
-)
-```
-**Note:** Settings are validated against the connector's `agent_settings_schema`. Invalid settings return an error with details.
-
-### update_agent
-Update an existing agent. To update instructions, use `upload_agent_instructions`.
-```
-update_agent(
-  hub_id,            # Required
-  agent_id,          # Required
-  agent_name,        # Optional
-  agent_role,        # Optional
-  # Optional settings (validated against connector schema):
-  model,             # LLM model
-  temperature,       # Controls randomness (0=focused, 2=creative)
-  max_tokens,        # Maximum tokens to generate
-  top_p,             # Nucleus sampling (OpenAI, OpenRouter)
-  reasoning_effort,  # OpenAI gpt-5 family: minimal, low, medium, high, none
-  verbosity,         # OpenAI gpt-5 family: low, medium, high
-  service_tier       # OpenAI gpt-5 family: auto, flex, default, priority
-)
-```
-
-### upload_agent_instructions
-Get an upload URL and auth headers for uploading agent instructions. The file is stored in R2 and synced to the agent instructions column.
-```
-upload_agent_instructions(
-  hub_id,        # Required
-  agent_id       # Required
-)
-```
-Returns: upload URL, required headers, and a ready-to-use curl command.
-
-**Upload using the returned curl command:**
-```bash
-curl -X POST '{upload_url}' \
-  -H 'Content-Type: text/markdown' \
-  -H 'Authorization: Bearer {token}' \
-  --data-binary @workspace/{project}/{hub}/{agentname}-instructions.md
-```
-
-Always upload from the `workspace/` directory so the repo stays in sync with the platform.
-
-### delete_agent
-Remove an agent from the hub.
-```
-delete_agent(
-  hub_id,        # Required
-  agent_id,      # Required
-  confirm=true   # Required: must be true
-)
-```
-
 ---
 
 ## Tool Operations
 
-**Repo users:** Use files + `wayai push` for tool config changes. MCP writes require `read_write` access and are for non-repo clients only.
+**Config changes:** Use files + `wayai push`. MCP is read-only for tool config.
 
-**MCP capabilities:** Full CRUD
-
-### ⚠️ Prerequisite: Tool Connections Required
-
-Enabling or creating tools requires a **Tool connection** for the tool's connector:
-
-**Auto-enabled (no connection needed):**
-- Wayai Conversation, Wayai Meta Tools, Wayai Resource
-
-**Tool - Native group (via UI):**
-- **Google Calendar, Drive, YouTube** → OAuth
-- **Wayai External Storage** → API Key
-
-**Tool - Custom group (via UI):**
-- **Custom API tools** → API Key or Basic Auth
-
-**MCP - External group (via UI):**
-- **MCP Server tools** → Token or OAuth
-
-| Operation | MCP |
-|-----------|-----|
-| List | `get_hub(hub_id)` |
-| View | `get_tool(hub_id, tool_id)` |
-| Add native | `add_native_tool(...)` |
-| Add MCP | `add_mcp_tool(...)` |
-| Add custom | `add_custom_tool(...)` |
-| Update custom | `update_custom_tool(...)` |
-| Enable/Disable | `enable_tool(...)` / `disable_tool(...)` |
-| Remove | `remove_tool(...)` |
-| Delete custom | `remove_custom_tool(...)` |
+| Operation | Method |
+|-----------|--------|
+| List | MCP: `get_hub(hub_id)` |
+| View | MCP: `get_tool(hub_id, tool_id)` |
+| Create/Update/Delete | Files + `wayai push` |
 
 ### get_tool
 Get tool details and configuration.
@@ -349,113 +188,19 @@ Get tool details and configuration.
 get_tool(hub_id, tool_id)
 ```
 
-### add_native_tool
-Add a built-in platform tool to an agent.
-```
-add_native_tool(
-  hub_id,          # Required
-  agent_id,        # Required
-  tool_native_id   # Required: e.g., "web_search", "send_email"
-)
-```
-
-### add_mcp_tool
-Add a tool from a connected MCP server.
-```
-add_mcp_tool(
-  hub_id,       # Required
-  agent_id,     # Required
-  mcp_tool_id   # Required: from MCP connection tools list
-)
-```
-
-### add_custom_tool
-Create a custom API tool. Requires a Tool - Custom connection.
-```
-add_custom_tool(
-  hub_id,                      # Required
-  agent_id,                    # Required
-  connection_id,               # Required: ID of a Tool - Custom connection
-  tool_name,                   # Required
-  tool_description,            # Optional: description for AI
-  tool_instructions,           # Optional: usage instructions
-  tool_path,                    # Optional: URL endpoint (e.g., "/orders/{{order_id}}")
-  tool_method,                 # Optional: get, post, put, delete, patch
-  tool_headers,                # Optional: HTTP headers as [{key, value}] array
-  tool_body,                   # Optional: default body parameters
-  tool_body_format,            # Optional: 'json' (default) or 'form' (x-www-form-urlencoded)
-  include_history_in_context   # Optional: include tool messages in conversation context (default: false)
-)
-```
-
-### update_custom_tool
-Update an existing custom tool.
-```
-update_custom_tool(
-  hub_id,                      # Required
-  tool_id,                     # Required
-  connection_id,               # Optional: new Tool - Custom connection
-  tool_name,                   # Optional
-  tool_description,            # Optional
-  tool_instructions,           # Optional
-  tool_path,                    # Optional
-  tool_method,                 # Optional
-  tool_headers,                # Optional
-  tool_body,                   # Optional
-  tool_body_format,            # Optional: 'json' (default) or 'form' (x-www-form-urlencoded)
-  enabled,                     # Optional: true/false
-  include_history_in_context   # Optional: include tool messages in conversation context
-)
-```
-
-### enable_tool / disable_tool
-Toggle tool status (works for all tool types).
-```
-enable_tool(hub_id, agent_id, tool_id)
-disable_tool(hub_id, agent_id, tool_id)
-```
-
-### remove_tool
-Remove a tool from an agent (keeps custom tool definition).
-```
-remove_tool(hub_id, agent_id, tool_id)
-```
-
-### remove_custom_tool
-Delete a custom tool completely.
-```
-remove_custom_tool(hub_id, tool_id)
-```
-
 ---
 
 ## Connection Operations
 
-**Repo users:** Use files + `wayai push` for non-OAuth connections. MCP writes require `read_write` access and are for non-repo clients only.
+**Config changes:** Non-OAuth connections are auto-created by `wayai push` from organization credentials. OAuth connections require UI setup.
 
-**MCP capabilities:** Create (non-OAuth), Update, Enable, Disable, Sync (delete via UI, OAuth via UI)
-
-| Operation | MCP | UI |
-|-----------|-----|----|
-| List | `get_hub(hub_id)` | - |
-| Create | `add_connection(...)` (non-OAuth) | platform.wayai.pro (OAuth/credentials) |
-| Update | `update_connection(...)` | platform.wayai.pro |
-| Delete | - | platform.wayai.pro settings |
-| Enable | `enable_connection(...)` | platform.wayai.pro |
-| Disable | `disable_connection(...)` | platform.wayai.pro |
-| Sync MCP | `sync_mcp_connection(...)` | - |
-
-### enable_connection
-Activate a disabled connection.
-```
-enable_connection(hub_id, connection_id)
-```
-
-### disable_connection
-Temporarily disable a connection (keeps credentials).
-```
-disable_connection(hub_id, connection_id)
-```
+| Operation | Method |
+|-----------|--------|
+| List | MCP: `get_hub(hub_id)` |
+| Create (non-OAuth) | Files + `wayai push` (auto-created from org credentials) |
+| Create (OAuth) | Platform UI |
+| Delete | Platform UI |
+| Sync MCP server | MCP: `sync_mcp_connection(hub_id, connection_id)` |
 
 ### sync_mcp_connection
 Refresh available tools from an MCP server connection.
@@ -668,18 +413,16 @@ Returns: Total counts, success rates, top-performing agents, and recent trends.
 
 ## Quick Reference Table
 
-| Entity | List | View | Create | Update | Delete | Notes |
-|--------|------|------|--------|--------|--------|-------|
-| Organization | `get_workspace` | - | UI | UI | UI | - |
-| Project | `get_workspace` | `get_project` | MCP | UI | UI | - |
-| Hub | `get_workspace` | `get_hub` | MCP | MCP | UI | Publish/sync/replicate via UI |
-| Agent | `get_hub` | `get_agent` | MCP | MCP | MCP | Repo users: files + CLI |
-| Tool | `get_hub` | `get_tool` | MCP | MCP* | MCP | Repo users: files + CLI |
-| Connection | `get_hub` | - | MCP (non-OAuth) | MCP | UI | OAuth via UI |
-| Analytics | `get_analytics_variables` | `get_analytics_data` | - | `pin_analytics_variable` | - | - |
-| Conversations | `get_conversations_list` | `get_conversation_messages` | - | - | - | - |
-| Eval Scenario | `get_evals` | - | MCP | MCP | MCP | - |
-| Eval Session | `get_eval_session_details` | `get_eval_session_runs` | MCP | `run_eval_session` | - | - |
-| Eval Analytics | - | `get_eval_analytics` | - | - | - | - |
-
-*Only custom tools can be updated via MCP
+| Entity | List | View | Create/Update/Delete | Notes |
+|--------|------|------|---------------------|-------|
+| Organization | `get_workspace` | - | UI | - |
+| Project | `get_workspace` | `get_project` | UI (or MCP `create_project`) | - |
+| Hub | `get_workspace` | `get_hub` | UI to create; files + `wayai push` for config | Publish/sync via UI |
+| Agent | `get_hub` | `get_agent` | Files + `wayai push` | - |
+| Tool | `get_hub` | `get_tool` | Files + `wayai push` | - |
+| Connection | `get_hub` | - | `wayai push` (non-OAuth); UI (OAuth) | Auto-created from org credentials |
+| Analytics | `get_analytics_variables` | `get_analytics_data` | `pin_analytics_variable` | - |
+| Conversations | `get_conversations_list` | `get_conversation_messages` | - | - |
+| Eval Scenario | `get_evals` | - | MCP (create, update, delete) | - |
+| Eval Session | `get_eval_session_details` | `get_eval_session_runs` | MCP (create, run) | - |
+| Eval Analytics | - | `get_eval_analytics` | - | - |

@@ -1,10 +1,10 @@
 # Connections
 
-Setup guide for WayAI hub connections. Non-OAuth connections can be created via **MCP** (using organization credentials) or via **UI**. OAuth connections require **UI** setup.
+Setup guide for WayAI hub connections. Non-OAuth connections are **auto-created by `wayai push`** from organization credentials. OAuth connections require **UI** setup.
 
 ## Table of Contents
 - [Organization Credentials](#organization-credentials)
-- [Creating Connections via MCP](#creating-connections-via-mcp)
+- [Creating Connections via CLI](#creating-connections-via-cli)
 - [Connector Types](#connector-types)
 - [Agent](#agent)
 - [Channel](#channel)
@@ -29,15 +29,22 @@ Organization credentials store API keys, tokens, and passwords at the organizati
 3. Enter name, description, auth type, and credential fields
 4. Save — credentials are stored securely in vault
 
-**Using with MCP:**
-```
-1. list_organization_credentials(organization_id)  → discover available credentials
-2. add_connection(hub_id, connector_id, organization_credential_id)  → create connection
+**Using with CLI (`wayai push`):**
+
+Add connections to `wayai.yaml` and push — `wayai push` auto-creates them using matching org credentials:
+```yaml
+connections:
+  - name: anthropic
+    type: Agent
+    service: Anthropic
+  - name: my-api
+    type: Tool - Custom
+    service: User Tool - API Key
 ```
 
 **Benefits:**
 - **No duplication** — same API key used across multiple hubs
-- **MCP-compatible** — agents can create connections autonomously (no raw secrets needed)
+- **CLI-compatible** — agents can create connections via files + push (no raw secrets needed)
 - **Easy rotation** — update one credential, all connections use the new value
 
 **Supported connectors (non-OAuth):**
@@ -55,43 +62,46 @@ Organization credentials store API keys, tokens, and passwords at the organizati
 
 ---
 
-## Creating Connections via MCP
+## Creating Connections via CLI
 
-Non-OAuth connections can be created directly through MCP tools using organization credentials:
+Non-OAuth connections are auto-created by `wayai push` using matching organization credentials. Add them to the `connections` section of `wayai.yaml`:
 
-### MCP Tools
+### YAML Format
 
-| Tool | Description |
-|------|-------------|
-| `list_organization_credentials(organization_id)` | List available org credentials (ID, name, auth type) |
-| `add_connection(hub_id, connector_id, ...)` | Create a new connection on a hub |
-| `update_connection(hub_id, connection_id, ...)` | Update connection settings or credential reference |
-| `enable_connection(hub_id, connection_id)` | Enable a disabled connection |
-| `disable_connection(hub_id, connection_id)` | Disable an enabled connection |
-| `sync_mcp_connection(hub_id, connection_id)` | Refresh tools from an MCP server connection |
+```yaml
+connections:
+  - name: anthropic           # Display name for the connection
+    type: Agent               # Connector type (see Quick Reference)
+    service: Anthropic        # Connector service name
+  - name: my-custom-api
+    type: Tool - Custom
+    service: User Tool - API Key
+  - name: mcp-server
+    type: Tool - MCP
+    service: MCP Server - Token
+```
 
-### `add_connection` Parameters
+### How Auto-Creation Works
 
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `hub_id` | Yes | Hub to add the connection to |
-| `connector_id` | Yes | Connector type (see Quick Reference for IDs) |
-| `organization_credential_id` | For non-OAuth, non-NoAuth | Org credential providing authentication |
-| `connection_display_name` | No | Display name for the connection |
-| `base_url` | No | Base URL for API connections |
-| `connection_headers` | No | Custom headers (key-value pairs) |
-| `settings` | No | Connection settings (model, voice, etc.) |
+1. `wayai push` reads the `connections` section from `wayai.yaml`
+2. For each connection not yet on the hub, it finds a matching connector by `type` + `service`
+3. It looks up a matching organization credential (by auth type)
+4. Creates the connection automatically — no secrets needed in the repo
 
-### Example: Full Hub Setup via MCP
+### Requirements
+
+- Organization credential must exist (create in UI: Settings → Organization → Credentials)
+- The credential's auth type must match the connector's auth type (e.g., API Key for OpenAI)
+- OAuth connections (WhatsApp, Instagram, Gmail, Google Calendar) cannot be auto-created — use UI
+
+### Example: Full Hub Setup via CLI
 
 ```
-1. get_workspace()                              → find org_id, project_id
-2. create_hub(project_id, "Customer Support")   → hub_id
-3. list_organization_credentials(org_id)        → find OpenAI credential ID
-4. add_connection(hub_id, "0cd6a292-...",        → create OpenAI connection
-     organization_credential_id: "cred-id")
-5. create_agent(hub_id, "Pilot", ...)           → agent_id
-6. add_native_tool(hub_id, agent_id, tool_id)   → enable tools
+1. User creates hub in platform UI
+2. wayai init --hub <hub-id>                    → scope repo to the hub
+3. wayai pull -y                                → sync local files
+4. Edit wayai.yaml — add connections, agents, tools
+5. wayai push -y                                → auto-creates connections, agents, tools
 ```
 
 ---

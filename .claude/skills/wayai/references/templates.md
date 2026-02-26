@@ -26,7 +26,8 @@ For file formats and structure details, see [template-structure.md](template-str
 **Workflow:**
 1. Find matching template in the table above
 2. Read template files using the paths shown in the table
-3. Copy to workspace: `organizations/{org}/{project}/{hub-name}/`
+3. Copy to workspace: `workspace/{project}/{hub}/`
 4. Replace placeholders (`{NOME_EMPRESA}`, etc.) - see [template-structure.md](template-structure.md#placeholders)
 5. Customize `{CUSTOMIZE: ...}` sections in instructions
-6. Create hub and agent via MCP tools
+6. Add connections to `wayai.yaml` (auto-created from org credentials during push)
+7. `wayai push` → creates agents, tools, states, and connections on the hub

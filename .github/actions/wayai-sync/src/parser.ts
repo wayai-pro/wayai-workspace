@@ -77,6 +77,12 @@ export interface HubAsCodePayload {
     json_schema?: Record<string, unknown>;
     initial_value?: Record<string, unknown>;
   }>;
+  connections?: Array<{
+    name: string;
+    type: string;
+    service?: string;
+    credential?: string;
+  }>;
 }
 
 /**
@@ -89,6 +95,7 @@ interface WayaiYaml {
   hub: Record<string, unknown>;
   agents?: Array<Record<string, unknown>>;
   states?: Array<Record<string, unknown>>;
+  connections?: Array<{ name: string; type: string; service?: string; credential?: string }>;
 }
 
 /**
@@ -162,6 +169,10 @@ export function parseHubFolder(hubFolder: string): HubAsCodePayload {
 
   if (config.states && config.states.length > 0) {
     payload.states = config.states as HubAsCodePayload['states'];
+  }
+
+  if (config.connections && config.connections.length > 0) {
+    payload.connections = config.connections;
   }
 
   return payload;

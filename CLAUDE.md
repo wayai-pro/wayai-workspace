@@ -19,7 +19,7 @@ WayAI is a SaaS platform for AI-powered communication hubs. Each hub connects AI
 - **Monitor** — background observer
 - **Evaluator** (of Conversations or Messages) — async quality assessment
 
-**Connections** link hubs to external services: LLM providers (required for agents), messaging channels, tool APIs, speech services. OAuth connections (WhatsApp, Instagram, Gmail) require UI setup; non-OAuth can be created via MCP using org-level credentials.
+**Connections** link hubs to external services: LLM providers (required for agents), messaging channels, tool APIs, speech services. OAuth connections (WhatsApp, Instagram, Gmail) require UI setup; non-OAuth connections are auto-created by `wayai push` from organization credentials.
 
 **Tools** give agents capabilities: native (platform built-ins like web_search, send_email, transfer_to_human), custom (HTTP API endpoints), MCP (from MCP servers), and delegation (agent-to-agent/team handoff).
 
@@ -41,33 +41,28 @@ Detailed instructions, workflows, and reference docs are in `.claude/skills/waya
 
 ## How to Make Changes
 
-**Default: edit files + CLI push** — for all config managed in `wayai.yaml` and `agents/*.md`:
+**Files + CLI (`wayai push`)** — for all hub config:
 - Hub settings (name, ai_mode, timezone, permissions, SLA, kanban, etc.)
 - Agents (name, role, model, temperature, tools)
 - Agent instructions (edit `.md` files in `agents/`)
 - States (conversation/user state schemas)
 - Custom tools (name, path, method, body)
-- Connections (non-OAuth)
-- Publish/sync environments → `wayai push` to preview, sync to production via UI
+- Connections (non-OAuth — auto-created from org credentials during push)
 
-**MCP — read operations and discovery:**
+**MCP (read-only + runtime):**
 - `get_workspace` — discover orgs, projects, hubs
 - `get_hub` — inspect current hub state
 - `get_agent`, `download_agent_instructions` — inspect agent config
-- `list_organization_credentials` — check available API credentials
 - Analytics → `get_analytics_data`, `get_conversations_list`, `get_conversation_messages`
-- Evals (read) → `get_evals`, `get_eval_session_details`, `get_eval_session_runs`, `get_eval_analytics`
+- Evals → `get_evals`, `get_eval_session_details`, `get_eval_session_runs`, `get_eval_analytics`
+- Evals (write) → `create_eval`, `run_eval_session`
 
-**MCP — writes (only when CLI is not available AND hub has `read_write` access):**
-- Non-repo clients (Claude.ai, ChatGPT) that can't run CLI commands may use MCP write tools
-- Requires `read_write` MCP access (set in platform UI)
-
-**UI only:**
-- MCP access mode
+**UI only (one-time setup):**
+- Organization, org credentials, project, hub creation
 - OAuth connections (WhatsApp, Instagram, Gmail)
 - Delete hubs
 - Publish/sync to production
-- Organization/user management
+- User management, MCP access mode
 
 ## Workflow
 
@@ -199,7 +194,7 @@ workspace/<project>/<hub>/
 - **`hub`** — hub settings (name, ai_mode, timezone, permissions, SLA, kanban, etc.)
 - **`agents`** — list with `id` (stable UUID, set by pull), `name`, `role`, `connection` (display name), `settings`, `tools`. Instructions resolved by convention from `agents/{slugified-name}.md`
 - **`states`** — conversation/user state schemas
-- **`connections`** — read-only reference (managed via MCP/UI, not synced back)
+- **`connections`** — connection definitions (non-OAuth auto-created from org credentials during push)
 
 Agents reference connections by display name. Tools are grouped as `native` (platform built-ins), `delegation` (agent-to-agent/team), and `custom` (HTTP endpoints). Renaming: change the `name` field — the `id` ensures it's detected as rename, not delete+create.
 

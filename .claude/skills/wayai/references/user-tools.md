@@ -14,30 +14,43 @@ Create custom API integrations for agents using Tool - Custom connections.
 ## Overview
 
 Custom tools allow agents to call external APIs. They require:
-1. A **Tool - Custom connection** (API Key or Basic Auth) - created via UI
-2. A **custom tool** attached to an agent - created via MCP or UI. Each custom tool **must** reference a connection for authentication
+1. A **Tool - Custom connection** (API Key or Basic Auth) — defined in `wayai.yaml` connections section (auto-created from org credentials during push) or created via UI
+2. A **custom tool** attached to an agent — defined in `wayai.yaml` under the agent's `tools.custom` section
 
 ---
 
 ## Creating a Custom Tool
 
-### Via MCP
+### Via Files + CLI (Recommended)
 
+Add custom tools to `wayai.yaml` under the agent's `tools.custom` section:
+
+```yaml
+agents:
+  - name: Order Agent
+    role: Pilot
+    connection: anthropic
+    tools:
+      custom:
+        - name: get_order_status
+          description: Retrieve the current status of a customer order
+          method: get
+          path: /orders/{{order_id}}
+          connection: my-api-connection    # Must match a connection name
+        - name: create_ticket
+          description: Create a new support ticket
+          method: post
+          path: /tickets
+          body_format: json
+          connection: my-api-connection
+
+connections:
+  - name: my-api-connection
+    type: Tool - Custom
+    service: User Tool - API Key
 ```
-add_custom_tool(
-  hub_id,                  # Required
-  agent_id,                # Required
-  connection_id,           # Required: ID of a Tool - Custom connection
-  tool_name,               # Required: display name
-  tool_description,        # Optional: description for AI
-  tool_instructions,       # Optional: usage guidance for AI
-  tool_path,                # Optional: URL endpoint (e.g., "/orders/{{order_id}}")
-  tool_method,             # Optional: get, post, put, delete, patch
-  tool_headers,            # Optional: HTTP headers as [{key, value}] array
-  tool_body,               # Optional: default body parameters
-  tool_body_format         # Optional: 'json' (default) or 'form' (x-www-form-urlencoded)
-)
-```
+
+Then run `wayai push` to create the tools on the hub.
 
 ### Via UI
 
@@ -109,20 +122,26 @@ Placeholders are replaced at runtime in URLs, headers, query params, and body.
 
 **Use case:** Fetch order status from an e-commerce API.
 
-```
-add_custom_tool(
-  hub_id: "hub-123",
-  agent_id: "agent-456",
-  connection_id: "conn-789",
-  tool_name: "Get Order Status",
-  tool_description: "Retrieve the current status of a customer order by order ID",
-  tool_path: "/orders/{{order_id}}",
-  tool_method: "get"
-)
+```yaml
+# In wayai.yaml
+agents:
+  - name: Support Agent
+    tools:
+      custom:
+        - name: get_order_status
+          description: Retrieve the current status of a customer order by order ID
+          path: /orders/{{order_id}}
+          method: get
+          connection: my-api
+
+connections:
+  - name: my-api
+    type: Tool - Custom
+    service: User Tool - API Key
 ```
 
-**Connection setup (UI):**
-- Type: User Tool - API Key
+**Connection setup (UI — org credential):**
+- Auth type: API Key
 - Base URL: `https://api.example.com/v1`
 - API Key: `sk-xxx`
 
@@ -141,43 +160,18 @@ Authorization: Bearer sk-xxx
 
 **Use case:** Create a support ticket in an external system.
 
-```
-add_custom_tool(
-  hub_id: "hub-123",
-  agent_id: "agent-456",
-  connection_id: "conn-789",
-  tool_name: "Create Ticket",
-  tool_description: "Create a new support ticket with customer issue details",
-  tool_path: "/tickets",
-  tool_method: "post"
-)
-```
-
-**tool_config (set via UI):**
-```json
-{
-  "name": "create_ticket",
-  "description": "Create a new support ticket",
-  "parameters": {
-    "type": "object",
-    "properties": {
-      "subject": {
-        "type": "string",
-        "description": "Ticket subject line"
-      },
-      "description": {
-        "type": "string",
-        "description": "Detailed issue description"
-      },
-      "priority": {
-        "type": "string",
-        "enum": ["low", "medium", "high"],
-        "description": "Ticket priority level"
-      }
-    },
-    "required": ["subject", "description"]
-  }
-}
+```yaml
+# In wayai.yaml
+agents:
+  - name: Support Agent
+    tools:
+      custom:
+        - name: create_ticket
+          description: Create a new support ticket with customer issue details
+          path: /tickets
+          method: post
+          body_format: json
+          connection: my-api
 ```
 
 **AI call generates:**
@@ -215,10 +209,9 @@ Authorization: Bearer sk-xxx
 
 ## Quick Reference
 
-| Operation | MCP Tool |
-|-----------|----------|
-| Create | `add_custom_tool(hub_id, agent_id, connection_id, tool_name, ...)` |
-| Update | `update_custom_tool(hub_id, tool_id, connection_id?, ...)` |
-| Enable/Disable | `enable_tool()` / `disable_tool()` |
-| Remove from agent | `remove_tool(hub_id, agent_id, tool_id)` |
-| Delete completely | `remove_custom_tool(hub_id, tool_id)` |
+| Operation | Method |
+|-----------|--------|
+| Create | Edit `wayai.yaml` → `wayai push` |
+| Update | Edit `wayai.yaml` → `wayai push` |
+| Delete | Remove from `wayai.yaml` → `wayai push` |
+| View | MCP: `get_tool(hub_id, tool_id)` |
