@@ -8,7 +8,13 @@ By creating a repository from this template, you get a version-controlled worksp
 
 1. **Create repo from template** — Click "Use this template" on GitHub
 2. **Clone your repo** — `git clone https://github.com/<you>/wayai.git`
-3. **Start your AI tool** — Run `claude` or `codex` in the repo directory (you'll be prompted to authenticate with your WayAI account via OAuth)
+3. **Install the WayAI CLI** — `npm install -g @wayai/cli@latest`
+4. **Authenticate the CLI** — `wayai login` (opens browser for OAuth)
+5. **Link your organization** — `wayai init` (creates `.wayai.yaml` with your org ID)
+6. **Start your AI tool** — Run `claude` or `codex` in the repo directory
+7. **Authenticate MCP** — On first run, you'll be prompted to authorize the WayAI MCP connection via OAuth (this gives the AI tool access to manage your hubs)
+
+The **CLI** syncs hub configuration between local files and the platform (`wayai pull` / `wayai push`). The **MCP connection** lets AI tools manage hubs, connections, analytics, and other operations that don't have file equivalents.
 
 ## AI Tool Setup
 
