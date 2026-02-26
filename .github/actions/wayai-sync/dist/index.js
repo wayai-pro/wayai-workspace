@@ -29889,139 +29889,6 @@ async function createApiClient(apiUrl, apiToken) {
 
 /***/ }),
 
-/***/ 1672:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getChangedHubs = getChangedHubs;
-const child_process_1 = __nccwpck_require__(5317);
-const fs = __importStar(__nccwpck_require__(9896));
-const path = __importStar(__nccwpck_require__(6928));
-const yaml = __importStar(__nccwpck_require__(4281));
-/**
- * Detect which hub folders have changed by comparing git diffs.
- *
- * - For pull requests: diffs against origin/main
- * - For push events: diffs against the previous commit (HEAD~1)
- *
- * Filters to files matching workspace/** /wayai.yaml and workspace/** /agents/*.md,
- * extracts unique hub folder paths, and reads each wayai.yaml to get hub_id and
- * hub_environment. Returns all hub environments (preview and production).
- */
-function getChangedHubs() {
-    const isPullRequest = !!process.env.GITHUB_HEAD_REF;
-    let diffOutput;
-    try {
-        if (isPullRequest) {
-            // PR: compare against the base branch
-            diffOutput = (0, child_process_1.execSync)('git diff --name-only origin/main...HEAD', {
-                encoding: 'utf-8',
-            }).trim();
-        }
-        else {
-            // Push to main: compare against previous commit
-            diffOutput = (0, child_process_1.execSync)('git diff --name-only HEAD~1..HEAD', {
-                encoding: 'utf-8',
-            }).trim();
-        }
-    }
-    catch {
-        // If diff fails (e.g., first commit), return empty
-        return [];
-    }
-    if (!diffOutput) {
-        return [];
-    }
-    const changedFiles = diffOutput.split('\n').filter(Boolean);
-    // Filter to workspace hub config files
-    const hubFiles = changedFiles.filter((file) => {
-        if (!file.startsWith('workspace/'))
-            return false;
-        // Match wayai.yaml or agents/*.md within a hub folder
-        return file.endsWith('/wayai.yaml') || /\/agents\/[^/]+\.md$/.test(file);
-    });
-    if (hubFiles.length === 0) {
-        return [];
-    }
-    // Extract unique hub folder paths
-    // Hub folder is the directory containing wayai.yaml
-    // For agents/*.md files, the hub folder is the parent of agents/
-    const hubFolders = new Set();
-    for (const file of hubFiles) {
-        if (file.endsWith('/wayai.yaml')) {
-            hubFolders.add(path.dirname(file));
-        }
-        else if (file.includes('/agents/')) {
-            // Go up from agents/ to the hub folder
-            const agentsIndex = file.lastIndexOf('/agents/');
-            hubFolders.add(file.substring(0, agentsIndex));
-        }
-    }
-    // Read each hub folder's wayai.yaml and collect changed hubs
-    const changedHubs = [];
-    for (const hubFolder of hubFolders) {
-        const yamlPath = path.join(hubFolder, 'wayai.yaml');
-        if (!fs.existsSync(yamlPath)) {
-            continue;
-        }
-        try {
-            const yamlContent = fs.readFileSync(yamlPath, 'utf-8');
-            const config = yaml.load(yamlContent);
-            if (!config || !config.hub_id || !config.hub_environment) {
-                continue;
-            }
-            changedHubs.push({
-                hubFolder,
-                hubId: config.hub_id,
-                hubEnvironment: config.hub_environment,
-            });
-        }
-        catch {
-            // Skip hubs with invalid YAML
-            continue;
-        }
-    }
-    return changedHubs;
-}
-
-
-/***/ }),
-
 /***/ 9407:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -30062,111 +29929,116 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(7484));
-const changed_hubs_1 = __nccwpck_require__(1672);
+const fs = __importStar(__nccwpck_require__(9896));
+const path = __importStar(__nccwpck_require__(6928));
+const yaml = __importStar(__nccwpck_require__(4281));
 const parser_1 = __nccwpck_require__(7196);
 const api_client_1 = __nccwpck_require__(7475);
-const DIFF_COMMENT_MARKER = '<!-- wayai-diff -->';
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+/**
+ * Read .wayai.yaml from the repo root and extract hub_id.
+ */
+function readRepoConfig() {
+    const configPath = path.join(process.cwd(), '.wayai.yaml');
+    if (!fs.existsSync(configPath))
+        return null;
+    try {
+        const content = fs.readFileSync(configPath, 'utf-8');
+        const config = yaml.load(content);
+        if (!config?.organization_id || typeof config.organization_id !== 'string' || !UUID_RE.test(config.organization_id) ||
+            !config?.project_id || typeof config.project_id !== 'string' || !UUID_RE.test(config.project_id) ||
+            !config?.hub_id || typeof config.hub_id !== 'string' || !UUID_RE.test(config.hub_id)) {
+            return null;
+        }
+        return {
+            organization_id: config.organization_id,
+            project_id: config.project_id,
+            hub_id: config.hub_id,
+        };
+    }
+    catch {
+        return null;
+    }
+}
+/**
+ * Scan workspace/ for the hub folder matching the given hub_id.
+ * Returns the hub folder path or null if not found.
+ */
+function findHubFolder(hubId) {
+    const workspaceDir = path.join(process.cwd(), 'workspace');
+    if (!fs.existsSync(workspaceDir))
+        return null;
+    // Scan 2 levels: workspace/<project>/<hub>/wayai.yaml
+    for (const project of safeReaddir(workspaceDir)) {
+        const projectDir = path.join(workspaceDir, project);
+        if (!isDirectory(projectDir))
+            continue;
+        for (const hub of safeReaddir(projectDir)) {
+            const hubFolder = path.join(projectDir, hub);
+            if (!isDirectory(hubFolder))
+                continue;
+            const yamlPath = path.join(hubFolder, 'wayai.yaml');
+            if (!fs.existsSync(yamlPath))
+                continue;
+            try {
+                const content = fs.readFileSync(yamlPath, 'utf-8');
+                const config = yaml.load(content);
+                if (config?.hub_id === hubId) {
+                    return hubFolder;
+                }
+            }
+            catch {
+                continue;
+            }
+        }
+    }
+    return null;
+}
+function isDirectory(p) {
+    try {
+        return fs.statSync(p).isDirectory();
+    }
+    catch {
+        return false;
+    }
+}
+function safeReaddir(dir) {
+    try {
+        return fs.readdirSync(dir).filter((entry) => !entry.startsWith('.'));
+    }
+    catch {
+        return [];
+    }
+}
 async function run() {
     try {
         const apiUrl = core.getInput('api-url', { required: true });
         const apiToken = core.getInput('api-token', { required: true });
-        const action = core.getInput('action', { required: true });
-        if (!['sync', 'publish', 'cleanup'].includes(action)) {
-            core.setFailed(`Invalid action: ${action}. Must be one of: sync, publish, cleanup`);
+        // Read hub_id from .wayai.yaml
+        const repoConfig = readRepoConfig();
+        if (!repoConfig) {
+            core.setFailed('Missing or invalid .wayai.yaml — must contain organization_id, project_id, and hub_id.');
             return;
         }
+        const { hub_id: hubId } = repoConfig;
+        core.info(`Hub ID from .wayai.yaml: ${hubId}`);
+        // Find the hub folder in workspace/
+        const hubFolder = findHubFolder(hubId);
+        if (!hubFolder) {
+            core.setFailed(`Hub folder for ${hubId} not found in workspace/. Run \`wayai pull\` to create it.`);
+            return;
+        }
+        core.info(`Found hub folder: ${hubFolder}`);
         const client = await (0, api_client_1.createApiClient)(apiUrl, apiToken);
-        const changedHubs = (0, changed_hubs_1.getChangedHubs)();
-        if (changedHubs.length === 0) {
-            core.info('No hub changes detected. Nothing to do.');
-            return;
-        }
-        const previewHubs = changedHubs.filter((h) => h.hubEnvironment === 'preview');
-        const productionHubs = changedHubs.filter((h) => h.hubEnvironment === 'production');
-        core.info(`Found ${changedHubs.length} changed hub(s): ${previewHubs.length} preview, ${productionHubs.length} production`);
-        const commitSha = process.env.GITHUB_SHA;
-        if (!commitSha) {
-            core.setFailed('GITHUB_SHA is not set. This action must run in a GitHub Actions environment.');
-            return;
-        }
-        const branchName = process.env.GITHUB_HEAD_REF || // PR source branch
-            (process.env.GITHUB_REF || '').replace('refs/heads/', ''); // Push branch
-        if (!branchName) {
-            core.setFailed('Could not determine branch name from GITHUB_HEAD_REF or GITHUB_REF.');
-            return;
-        }
-        if (action === 'sync') {
-            const diffSummaries = [];
-            // Preview hubs: push config directly (same as CLI push)
-            for (const hub of previewHubs) {
-                core.info(`Pushing preview hub ${hub.hubId} from ${hub.hubFolder}...`);
-                const config = (0, parser_1.parseHubFolder)(hub.hubFolder);
-                try {
-                    const diffResult = await client.diff({
-                        hub_id: hub.hubId,
-                        config,
-                    });
-                    if (diffResult.has_changes) {
-                        diffSummaries.push({ hubId: hub.hubId, summary: diffResult.summary });
-                    }
-                }
-                catch (err) {
-                    core.warning(`Could not compute diff for hub ${hub.hubId}: ${err instanceof Error ? err.message : String(err)}`);
-                }
-                await client.push({
-                    hub_id: hub.hubId,
-                    config,
-                });
-                core.info(`Preview hub ${hub.hubId} pushed successfully.`);
-            }
-            // Production hubs: read-only in git (for agent reference). CI does not push to them —
-            // all config changes flow through preview hubs. Edit the linked preview hub instead.
-            for (const hub of productionHubs) {
-                core.warning(`Skipping production hub ${hub.hubId} — production hubs are read-only. Edit the linked preview hub to make changes.`);
-            }
-            // Post diff summary as PR comment
-            const prNumber = getPrNumber();
-            if (prNumber && diffSummaries.length > 0) {
-                await postDiffComment(prNumber, diffSummaries, 'synced');
-            }
-        }
-        else if (action === 'publish') {
-            // Preview hubs: push final state + sync to production (if linked)
-            for (const hub of previewHubs) {
-                const config = (0, parser_1.parseHubFolder)(hub.hubFolder);
-                core.info(`Pushing preview hub ${hub.hubId} (final state)...`);
-                await client.push({
-                    hub_id: hub.hubId,
-                    config,
-                });
-                core.info(`Publishing preview hub ${hub.hubId} to production...`);
-                const result = await client.publishPreview({
-                    hub_id: hub.hubId,
-                });
-                if (result.synced) {
-                    core.info(`Preview hub ${hub.hubId} synced to production ${result.production_hub_id}.`);
-                }
-                else {
-                    core.warning(`Preview hub ${hub.hubId} has no linked production hub — nothing published. Run publish_hub() first to link it.`);
-                }
-            }
-            // Production hubs: publish is handled via preview hub → sync. Nothing to do here.
-            for (const hub of productionHubs) {
-                core.warning(`Skipping production hub ${hub.hubId} — publish flows through the linked preview hub.`);
-            }
-        }
-        else if (action === 'cleanup') {
-            // Preview hubs: skip (permanent hubs, no ephemeral branch preview to clean up)
-            for (const hub of previewHubs) {
-                core.info(`Skipping cleanup for preview hub ${hub.hubId} (permanent hub).`);
-            }
-            // Production hubs: no branch previews are created, nothing to clean up.
-            for (const hub of productionHubs) {
-                core.warning(`Skipping cleanup for production hub ${hub.hubId} — no branch previews created.`);
-            }
-        }
-        core.setOutput('synced-hubs', changedHubs.map((h) => h.hubId).join(','));
-        core.setOutput('hub-count', changedHubs.length.toString());
+        const config = (0, parser_1.parseHubFolder)(hubFolder);
+        core.info(`Pushing hub ${hubId}...`);
+        await client.push({
+            hub_id: hubId,
+            config,
+        });
+        core.info(`Hub ${hubId} pushed successfully.`);
+        core.setOutput('synced-hubs', hubId);
+        core.setOutput('hub-count', '1');
     }
     catch (error) {
         if (error instanceof Error) {
@@ -30175,77 +30047,6 @@ async function run() {
         else {
             core.setFailed(String(error));
         }
-    }
-}
-function getPrNumber() {
-    // GitHub event payload for pull_request events
-    const eventPath = process.env.GITHUB_EVENT_PATH;
-    if (!eventPath)
-        return null;
-    try {
-        const fs = __nccwpck_require__(9896);
-        const event = JSON.parse(fs.readFileSync(eventPath, 'utf-8'));
-        return event?.pull_request?.number || null;
-    }
-    catch {
-        return null;
-    }
-}
-async function postDiffComment(prNumber, summaries, status) {
-    const githubToken = process.env.GITHUB_TOKEN;
-    const repo = process.env.GITHUB_REPOSITORY;
-    if (!githubToken || !repo) {
-        core.info('Skipping PR comment — GITHUB_TOKEN or GITHUB_REPOSITORY not set.');
-        return;
-    }
-    const statusEmoji = status === 'synced' ? '\u2705' : '\u274c';
-    const statusText = status === 'synced' ? 'Synced to preview' : 'Sync failed';
-    let body = `${DIFF_COMMENT_MARKER}\n## WayAI Hub Sync — ${statusEmoji} ${statusText}\n\n`;
-    for (const { hubId, summary } of summaries) {
-        body += `### Hub: \`${hubId}\`\n\n`;
-        body += `\`\`\`\n${summary}\n\`\`\`\n\n`;
-    }
-    body += `---\n*Generated by WayAI Hub Sync*`;
-    try {
-        // Find existing comment to update (upsert)
-        const listResponse = await fetch(`https://api.github.com/repos/${repo}/issues/${prNumber}/comments?per_page=100`, {
-            headers: {
-                Authorization: `Bearer ${githubToken}`,
-                Accept: 'application/vnd.github.v3+json',
-            },
-        });
-        if (listResponse.ok) {
-            const comments = (await listResponse.json());
-            const existing = comments.find((c) => c.body.includes(DIFF_COMMENT_MARKER));
-            if (existing) {
-                // Update existing comment
-                await fetch(`https://api.github.com/repos/${repo}/issues/comments/${existing.id}`, {
-                    method: 'PATCH',
-                    headers: {
-                        Authorization: `Bearer ${githubToken}`,
-                        'Content-Type': 'application/json',
-                        Accept: 'application/vnd.github.v3+json',
-                    },
-                    body: JSON.stringify({ body }),
-                });
-                core.info('Updated existing diff comment on PR.');
-                return;
-            }
-        }
-        // Create new comment
-        await fetch(`https://api.github.com/repos/${repo}/issues/${prNumber}/comments`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${githubToken}`,
-                'Content-Type': 'application/json',
-                Accept: 'application/vnd.github.v3+json',
-            },
-            body: JSON.stringify({ body }),
-        });
-        core.info('Posted diff comment on PR.');
-    }
-    catch (err) {
-        core.warning(`Failed to post PR comment: ${err instanceof Error ? err.message : String(err)}`);
     }
 }
 run();

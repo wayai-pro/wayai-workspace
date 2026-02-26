@@ -23,5 +23,5 @@ jobs:
         run: cd .github/actions/wayai-sync && npm ci && npm run build
       - uses: ./.github/actions/wayai-sync
         with:
-          api-url: ${{ vars.WAYAI_API_URL }}
           api-token: ${{ secrets.WAYAI_API_TOKEN }}
+          # api-url defaults to https://api.wayai.pro — pass `api-url:` explicitly for self-hosted or staging

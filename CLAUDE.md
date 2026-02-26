@@ -31,7 +31,9 @@ This repo syncs to a public template — never include internal implementation d
 
 ## This Repository
 
-This is a version-controlled workspace for WayAI hub configuration. Hub settings, agents, tools, and states are stored as local files (`wayai.yaml` + `agents/*.md`) that sync bidirectionally with the platform via the WayAI CLI.
+This is a version-controlled workspace for a **single WayAI hub**. Hub settings, agents, tools, and states are stored as local files (`wayai.yaml` + `agents/*.md`) that sync bidirectionally with the platform via the WayAI CLI.
+
+The repository is scoped to one hub via `.wayai.yaml` at the repo root. All CLI commands (`pull`, `push`) operate on that hub only.
 
 Every configuration change is reviewable, trackable, and reversible through git. Local files are the edit surface — changes flow through files → `wayai push` → platform. Always `wayai pull` before editing to catch out-of-band changes.
 
@@ -67,13 +69,13 @@ Detailed instructions, workflows, and reference docs are in `.claude/skills/waya
 
 ## Workflow
 
-1. **Pull** — `wayai pull --all` to sync local files from platform (catches out-of-band changes)
+1. **Pull** — `wayai pull -y` to sync local files from platform (catches out-of-band changes)
 2. **Edit** — modify `wayai.yaml` and `agents/*.md` in `workspace/<project>/<hub>/`
 3. **Push** — `wayai push` to apply changes to the preview hub
 4. **Commit** — `git commit` and push to `main`; CI syncs changes to the preview hub automatically
 5. **Go live** — when ready, sync to production via the platform UI (`sync_hub`)
 
-For operations without file equivalents (connections, publish/sync, analytics, evals), use MCP tools directly. After MCP changes, run `wayai pull --all -y` to sync back to local files, then commit.
+For operations without file equivalents (connections, publish/sync, analytics, evals), use MCP tools directly. After MCP changes, run `wayai pull -y` to sync back to local files, then commit.
 
 ## Hub Environments
 
@@ -94,15 +96,14 @@ Only preview hubs are tracked in this repository. Production hubs are not stored
 
 Your primary role is to help the user manage hub configuration through this repository. When the user asks you to do anything hub-related:
 
-1. **Identify the hub** — determine which hub the request applies to. If unclear, **ask the user**.
-2. **Ensure `.wayai.yaml` exists** — before any CLI operation, check that `.wayai.yaml` exists at the repo root. If missing, call `get_workspace()` via MCP to discover the organization_id, create the file, and continue automatically.
-3. **Update the CLI** — run `npm install -g @wayai/cli@latest` to ensure you are always on the latest version before any CLI operation.
-4. **Pull the workspace** — run `wayai pull --all -y` to sync local files from the platform and catch any out-of-band changes before editing.
-5. **Read CONTEXT.md** — check `workspace/<hub_folder>/CONTEXT.md` for background on the hub's purpose, decisions, and ongoing work.
-6. **Create CONTEXT.md if missing** — after syncing the workspace, create it with what you know about the hub. Ask the user to confirm or enrich.
-7. **Make changes via files, then push immediately** — edit `wayai.yaml` and `agents/*.md`, then run `wayai push -y` as part of the same flow. Editing and pushing are a single action — always complete both together. Use MCP only for operations without file equivalents (see [How to Make Changes](#how-to-make-changes)).
-8. **Update CONTEXT.md** — after significant changes or new context, update the file for future sessions.
-9. **Use `references/`** for supporting files — business rules, API specs, tone guides. Reference them from `CONTEXT.md`.
+1. **Check `.wayai.yaml`** — if `hub_id` is set, use it. If not, ask which hub to work on, call `get_workspace()` via MCP to list hubs, then run `wayai init --hub <hub-id>` to scope the repo.
+2. **Update the CLI** — run `npm install -g @wayai/cli@latest` to ensure you are always on the latest version before any CLI operation.
+3. **Pull the hub** — run `wayai pull -y` to sync local files from the platform and catch any out-of-band changes before editing.
+4. **Read CONTEXT.md** — check `workspace/<hub_folder>/CONTEXT.md` for background on the hub's purpose, decisions, and ongoing work.
+5. **Create CONTEXT.md if missing** — after syncing, create it with what you know about the hub. Ask the user to confirm or enrich.
+6. **Make changes via files, then push immediately** — edit `wayai.yaml` and `agents/*.md`, then run `wayai push -y` as part of the same flow. Editing and pushing are a single action — always complete both together. Use MCP only for operations without file equivalents (see [How to Make Changes](#how-to-make-changes)).
+7. **Update CONTEXT.md** — after significant changes or new context, update the file for future sessions.
+8. **Use `references/`** for supporting files — business rules, API specs, tone guides. Reference them from `CONTEXT.md`.
 
 The `CONTEXT.md` file is a living document — it ensures continuity across sessions and prevents repeated questions about the same hub.
 
@@ -115,29 +116,29 @@ npm install -g @wayai/cli@latest   # Install or update to the latest version
 wayai login                        # Opens browser for OAuth — or `wayai login --token` for headless/CI
 ```
 
-Link to your organization (creates `.wayai.yaml` at repo root):
+Scope the repo to a hub (creates `.wayai.yaml` at repo root):
 
 ```bash
-wayai init              # Interactive — picks org/project
-wayai init <org-name>   # Direct — creates .wayai.yaml with org ID
+wayai init              # Interactive — picks org/project/hub
+wayai init --hub <uuid> # Direct — sets hub_id, fetches org/project info
 ```
 
 The generated file looks like:
 ```yaml
-organization_id: your-org-uuid-here
+organization_id: your-org-uuid
 organization_name: Your Org          # optional — for readability
-project_id: your-project-uuid-here   # optional — enables 1-part hub paths
+project_id: your-project-uuid
 project_name: Your Project           # optional — for readability
+hub_id: your-hub-uuid
+hub_name: Your Hub                   # optional — for readability
 ```
 
 ### CLI Commands
 
 ```bash
-wayai pull --all                 # Pull all hubs from platform to local files
-wayai pull support/customer-hub  # Pull a specific hub
-wayai push                       # Auto-detect changed hubs via git, push each
-wayai push support/customer-hub  # Push a specific hub
-wayai status                     # Show workspace status
+wayai pull              # Pull hub config from platform to local files
+wayai push              # Push local changes to the platform
+wayai status            # Show workspace status (org, project, hub)
 # Add -y to skip confirmation prompts
 ```
 
@@ -147,12 +148,10 @@ wayai status                     # Show workspace status
 
 ```bash
 # Pull: platform → local (before working)
-wayai pull --all                 # Fetch all hubs, shows diff, asks for confirmation
-wayai pull support/customer-hub  # Fetch a specific hub
+wayai pull              # Fetch hub config, shows diff, asks for confirmation
 
 # Push: local → platform (after editing)
-wayai push                       # Detect changed hubs via git, shows diff, asks for confirmation
-wayai push support/customer-hub  # Push a specific hub
+wayai push              # Shows diff, asks for confirmation
 
 # Alternative: MCP download (read-only snapshot)
 download_workspace(organization="<org-name>")  # Returns download URL (5 min expiry)
@@ -180,7 +179,7 @@ git fetch template && git merge template/main --allow-unrelated-histories
 
 ## Workspace Format (HubAsCode)
 
-Each hub folder in `workspace/` contains structured YAML config plus separate `.md` files for agent instructions:
+The hub folder in `workspace/` contains structured YAML config plus separate `.md` files for agent instructions:
 
 ```
 workspace/<project>/<hub>/
@@ -206,15 +205,15 @@ Agents reference connections by display name. Tools are grouped as `native` (pla
 
 ```
 CLAUDE.md                     # This file — agent instructions
-.wayai.yaml                   # Repo config — organization_id (and optional project_id)
+.wayai.yaml                   # Repo config — organization_id, project_id, hub_id
 .claude/skills/wayai/         # WayAI skill — workflows, references, templates
 ├── SKILL.md                  # Start here for detailed workflows
 ├── references/               # Platform reference docs
 └── assets/templates/         # Hub templates
 .github/
-├── actions/wayai-sync/       # GitOps action (sync, publish, cleanup)
+├── actions/wayai-sync/       # GitOps action (sync hub on push to main)
 └── workflows/wayai-hub-sync.yml
-workspace/                    # Local copy of remote workspace
+workspace/                    # Local copy of hub configuration
 ├── <project>/<hub>/
 │   ├── wayai.yaml
 │   ├── agents/

@@ -120,11 +120,12 @@ The files + CLI workflow described in this skill assumes `read_only` or `read_wr
 
 ```
 PREREQUISITES (resolve automatically):
-0. Ensure .wayai.yaml exists at repo root — if missing, call get_workspace() via MCP
-   to discover organization_id, create the file, and continue.
+0. Check .wayai.yaml at repo root — if hub_id is set, use it.
+   If missing, call get_workspace() via MCP to discover hubs,
+   then run `wayai init --hub <hub-id>` to scope the repo.
 
 BEFORE changes:
-1. wayai pull --all              → sync local files from platform
+1. wayai pull -y                 → sync local files from platform
 2. Read workspace/<hub>/CONTEXT.md → understand hub context (create if missing)
 
 MAKING changes (edit + push = single action):
@@ -132,7 +133,7 @@ MAKING changes (edit + push = single action):
 4. wayai push -y                 → apply changes to preview hub immediately
    Editing and pushing are a single action — always complete both together.
    If the task requires MCP-only operations (connections, analytics, evals):
-   → Use MCP tools, then wayai pull --all -y to sync back to local files
+   → Use MCP tools, then wayai pull -y to sync back to local files
 
 AFTER changes:
 5. Update CONTEXT.md if decisions or context changed
@@ -140,29 +141,24 @@ AFTER changes:
 7. If ready for production: sync_hub(hub_id) via MCP or platform UI
 ```
 
-**Finding `hub_id`:** After the first `wayai pull`, each hub's `hub_id` is in `workspace/<project>/<hub>/wayai.yaml`. For a fresh repo (no workspace yet), use `get_workspace()` to discover hub IDs, then pull.
+**Hub scope:** Each repo is scoped to a single hub via `.wayai.yaml`. The `hub_id` is set during `wayai init`. All CLI commands operate on that hub only.
 
 ### CLI Commands
 
 ```bash
-# From repo root (workspace-aware):
-wayai pull --all                 # Pull all hubs in workspace
-wayai pull support/customer-hub  # Pull a specific hub → resolves to workspace/ folder
-wayai push                       # Auto-detect changed hubs via git status, push each
-wayai push support/customer-hub  # Push a specific hub
-
-# From a hub folder (has wayai.yaml):
-wayai pull                       # Pull current hub
-wayai push                       # Push current hub
+wayai init                       # Interactive — pick org/project/hub
+wayai init --hub <uuid>          # Direct — set hub_id (for agents/scripting)
+wayai pull                       # Pull hub config from platform to local files
+wayai push                       # Push local changes to the platform
+wayai status                     # Show workspace status (org, project, hub)
 
 # Flags:
 #   --yes, -y    Skip confirmation prompts (useful for scripting/CI)
-#   --all        Pull all hubs in workspace (pull only)
 ```
 
 Both `pull` and `push` show a diff before applying changes and wait for confirmation. Use `-y` to skip prompts.
 
-Install: `npm install -g @wayai/cli` — authenticate: `wayai login` — link to org: `wayai init`
+Install: `npm install -g @wayai/cli` — authenticate: `wayai login` — scope to hub: `wayai init`
 
 ## MCP Tools Quick Reference
 
@@ -195,8 +191,8 @@ Agent instructions live as `.md` files in `agents/` — edit them directly and p
 ### Syncing from platform (if instructions were changed outside the repo)
 
 ```
-# Recommended: pull all
-wayai pull --all
+# Recommended: pull hub
+wayai pull
 
 # Alternative: download a single agent's instructions via MCP
 1. download_agent_instructions(hub_id, agent_id) → signed URL

@@ -3,8 +3,9 @@ description: 'Sync hub configuration from Git to WayAI platform via CI endpoints
 
 inputs:
   api-url:
-    description: 'WayAI API base URL (e.g., https://api.wayai.pro)'
-    required: true
+    description: 'WayAI API base URL'
+    required: false
+    default: 'https://api.wayai.pro'
   api-token:
     description: 'WayAI MCP token (way_...) for authentication'
     required: true

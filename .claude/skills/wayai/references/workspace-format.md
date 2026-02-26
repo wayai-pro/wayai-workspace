@@ -216,18 +216,11 @@ agents:
 ### Using WayAI CLI (Recommended)
 
 ```bash
-# From repo root — pull all hubs:
-wayai pull --all
-wayai pull --all -y              # Skip confirmation prompts
-
-# From repo root — pull a specific hub:
-wayai pull support/hub      # Resolves to workspace/acme/support/hub/
-
-# From a hub folder:
-wayai pull                       # Uses wayai.yaml in current directory
+wayai pull                       # Pull the hub specified in .wayai.yaml
+wayai pull -y                    # Skip confirmation prompts
 ```
 
-Each pull fetches hub config from the platform, shows a diff against local files (if they exist), and writes `wayai.yaml` + `agents/*.md` on confirmation.
+Each pull fetches the hub config from the platform, shows a diff against local files (if they exist), and writes `wayai.yaml` + `agents/*.md` on confirmation.
 
 ### Alternative: Using download_workspace (MCP)
 
@@ -252,18 +245,11 @@ Each pull fetches hub config from the platform, shows a diff against local files
 Push local changes to the platform using the WayAI CLI:
 
 ```bash
-# From repo root — auto-detect changed hubs:
-wayai push                       # Detects changed hub files via git status
+wayai push                       # Push the hub specified in .wayai.yaml
 wayai push -y                    # Skip confirmation prompts
-
-# From repo root — push a specific hub:
-wayai push support/hub      # Resolves to workspace/acme/support/hub/
-
-# From a hub folder:
-wayai push                       # Uses wayai.yaml in current directory
 ```
 
-Each push parses local files, computes a diff against the current platform state, shows changes, and syncs to a preview hub on confirmation.
+Each push parses local files, computes a diff against the current platform state, shows changes, and syncs the hub to the platform on confirmation.
 
 After pushing:
 1. Test the preview hub
@@ -271,17 +257,17 @@ After pushing:
 
 ## Sync via GitOps
 
-Push to `main` → CI automatically syncs changed preview hubs to the platform:
+Push to `main` → CI automatically syncs the hub to the platform:
 
 ```
 1. Edit wayai.yaml and/or agents/*.md locally
 2. wayai push -y                  → apply to preview hub immediately (optional but recommended)
-3. git commit + push to main      → CI syncs any changed hubs to their preview hub
+3. git commit + push to main      → CI syncs the hub to the preview hub
 4. Test the preview hub
 5. Ready to go live? sync_hub(hub_id) via MCP or platform UI → syncs to production
 ```
 
-The GitHub Action (`.github/actions/wayai-sync/`) parses `wayai.yaml`, reads `agents/*.md` contents, and calls the CI API endpoints to apply changes. No PRs or branching required — commit directly to `main`.
+The GitHub Action (`.github/actions/wayai-sync/`) reads `hub_id` from `.wayai.yaml`, finds the hub folder in `workspace/`, parses it, and calls the CI API to push changes. No PRs or branching required — commit directly to `main`.
 
 ## Key Principle
 
