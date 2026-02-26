@@ -28,31 +28,32 @@ description: |
 - Only provide information from this skill, MCP tool descriptions, or MCP resources
 - Do not invent URLs, paths, or steps
 - **Edit local files + `wayai push` for config changes** — use MCP only for operations without file equivalents
+- **Never use MCP to write hub config** (agents, tools, hub settings, instructions) when the CLI is available. MCP config writes require `read_write` MCP access and are only for clients without CLI (e.g., Claude.ai, ChatGPT).
 - When editing agent instructions, see [Editing Agent Instructions](#editing-agent-instructions)
 
 ## Write Path Priority
 
-1. **Files + CLI (`wayai push`)** — for all config in `wayai.yaml` and `agents/*.md`: hub settings, agents, tools, states, instructions
-2. **WayAI MCP Server** — for operations without file equivalents: `create_hub`, connections, `publish_hub`/`sync_hub`, analytics, evals, skills
-3. **UI (platform.wayai.pro)** — for OAuth connections, delete hub, user management
+1. **Files + CLI (`wayai push`)** — for ALL config: hub settings, agents, tools, states, instructions, connections
+2. **MCP reads** — for discovery and inspection: `get_workspace`, `get_hub`, `get_agent`, analytics, evals (read)
+3. **MCP writes** — **only** when CLI is not available AND hub has `read_write` access (non-repo clients)
+4. **UI** — OAuth connections, MCP access mode, delete hubs, publish/sync to production, user management
 
 ## Quick Decision: Files, MCP, or UI?
 
-| Entity | Files + CLI | MCP | UI Only |
-|--------|------------|-----|---------|
-| **Hub settings** | Edit `wayai.yaml` → push | `create_hub` (new hubs only) | Delete |
-| **Agent config** | Edit `wayai.yaml` → push | `create_agent` (fallback) | — |
-| **Agent instructions** | Edit `agents/*.md` → push | `upload_agent_instructions` (fallback) | — |
-| **Tools (native/custom)** | Edit `wayai.yaml` → push | `add_native_tool`, `add_custom_tool` (fallback) | — |
-| **States** | Edit `wayai.yaml` → push | — | — |
-| **Project** | — | Read, Create (`get_workspace`) | Update, delete |
-| **Connection** | — (read-only in YAML) | Create (non-OAuth), enable, disable, sync MCP | Delete, OAuth setup |
-| **Publish/Sync** | — | `publish_hub`, `sync_hub`, `replicate_preview` | — |
-| **Analytics** | — | `get_analytics_data`, conversations, messages | — |
-| **Evals** | — | Full CRUD (scenarios, sessions, analytics) | — |
-| **Skills** | — | Full CRUD, link/unlink agents | — |
-| **Organization** | — | Read (`get_workspace`) | Create, update, delete, users |
-| **Org Credential** | — | List | Create, update, delete |
+| Entity | CLI (`wayai push`) | MCP (read) | MCP (write — `read_write` only, no CLI) | UI Only |
+|--------|-------------------|------------|----------------------------------------|---------|
+| **Hub settings** | Edit `wayai.yaml` → push | `get_hub` | `create_hub`, `update_hub` | Delete, MCP access mode |
+| **Agents** | Edit `wayai.yaml` → push | `get_agent` | `create_agent`, `update_agent` | — |
+| **Agent instructions** | Edit `agents/*.md` → push | `download_agent_instructions` | `upload_agent_instructions` | — |
+| **Tools** | Edit `wayai.yaml` → push | `get_tool` | `add_native_tool`, `add_custom_tool` | — |
+| **States** | Edit `wayai.yaml` → push | — | — | — |
+| **Connections** | Edit `wayai.yaml` → push | `get_hub` | `add_connection` | OAuth setup, delete |
+| **Publish/Sync** | — | — | — | Platform UI |
+| **Analytics** | — | Full read access | — | — |
+| **Evals** | — | Read results | Write (create, run) | — |
+| **Skills** | — | Read | Write (create, link) | — |
+| **Organization** | — | Read (`get_workspace`) | — | Create, update, delete, users |
+| **Org Credential** | — | List | — | Create, update, delete |
 
 ## Entity Hierarchy
 
@@ -60,8 +61,8 @@ description: |
 Organization          ← UI only
 ├── Org Credentials   ← UI to create; MCP to list
 └── Project           ← MCP to create
-    └── Hub           ← Files + CLI for config; MCP for lifecycle
-        ├── Connections   ← non-OAuth via MCP; OAuth via UI
+    └── Hub           ← Files + CLI for config; publish/sync via UI
+        ├── Connections   ← Files + CLI (non-OAuth); OAuth via UI
         └── Agents        ← Files + CLI (wayai.yaml + agents/*.md)
             └── Tools     ← Files + CLI (wayai.yaml)
 ```
@@ -97,24 +98,27 @@ Setup order: Organization (signup) → Org Credentials (UI) → Project → Hub 
 Hubs use a **preview/production branching** model:
 
 - **New hubs** start as `preview` — fully editable
-- **`publish_hub(hub_id)`** — first-time promotion to production (clones all config)
-- **`sync_hub(hub_id)`** — pushes subsequent preview changes to production
-- **`replicate_preview(hub_id)`** — creates a new preview from production for experimentation
+- **Publish** — first-time promotion to production (clones all config) — via platform UI
+- **Sync** — pushes subsequent preview changes to production — via platform UI
+- **Replicate Preview** — creates a new preview from production for experimentation — via platform UI
 - **Production hubs are read-only** — all config changes must flow through preview → sync
 
 When `get_hub` returns hub info, check the `Environment` field (`[PREVIEW]` or `[PRODUCTION]`) and available operations. See [platform-overview.md](references/platform-overview.md) for details.
 
 ### MCP Access Modes
 
-Each hub has an `mcp_access` setting that controls what MCP tools can do:
+Each hub has an `mcp_access` setting (managed in the platform UI only):
 
-| Mode | Behavior | Who uses it |
-|------|----------|-------------|
-| `read_write` | MCP can read and write hub config | Non-repo clients (Claude.ai, ChatGPT) — use MCP as the write path |
-| `read_only` | MCP can read but not write hub config. Lifecycle operations still work: `publish_hub`, `sync_hub`, `replicate_preview`, `add_connection` | Repo users (Claude Code, Cursor) — edit files + `wayai push` for config |
-| `disabled` | MCP tools are blocked entirely | UI-only hubs |
+| Mode | Behavior | Default |
+|------|----------|---------|
+| `read_only` | MCP can read hub config. All writes blocked. | Default |
+| `read_write` | MCP can read and write. For non-repo clients without CLI. | — |
+| `disabled` | MCP access blocked entirely. | — |
 
-The files + CLI workflow described in this skill assumes `read_only` or `read_write` hubs accessed from a repo. For non-repo clients with `read_write`, use MCP tools as the write path directly.
+**Important:**
+- `mcp_access` can only be changed in the platform UI (not via MCP or CLI)
+- Repo users (Claude Code, Cursor): keep `read_only` — use files + `wayai push` for all changes
+- Non-repo clients (Claude.ai, ChatGPT): set `read_write` to allow MCP as the write path
 
 ## Core Workflow
 
@@ -138,7 +142,7 @@ MAKING changes (edit + push = single action):
 AFTER changes:
 5. Update CONTEXT.md if decisions or context changed
 6. Commit and push to main — CI syncs changes to the preview hub automatically
-7. If ready for production: sync_hub(hub_id) via MCP or platform UI
+7. If ready for production: sync to production via the platform UI
 ```
 
 **Hub scope:** Each repo is scoped to a single hub via `.wayai.yaml`. The `hub_id` is set during `wayai init`. All CLI commands operate on that hub only.
@@ -162,16 +166,30 @@ Install: `npm install -g @wayai/cli` — authenticate: `wayai login` — scope t
 
 ## MCP Tools Quick Reference
 
+### Read operations (work in `read_only` and `read_write`)
+
 | Category | Tools |
 |----------|-------|
 | **Workspace** | `get_workspace`, `download_workspace`, `download_skill` |
-| **Hub** | `get_hub`, `create_hub`, `update_hub`, `publish_hub`, `sync_hub`, `replicate_preview` |
-| **Agent** | `get_agent`, `download_agent_instructions`, `create_agent`, `update_agent`, `upload_agent_instructions`, `delete_agent` |
-| **Tool** | `get_tool`, `add_native_tool`, `add_mcp_tool`, `add_custom_tool`, `update_custom_tool`, `enable_tool`, `disable_tool`, `remove_tool`, `remove_custom_tool` |
-| **Connection** | `list_organization_credentials`, `add_connection`, `update_connection`, `enable_connection`, `disable_connection`, `sync_mcp_connection` |
-| **Analytics** | `get_analytics_variables`, `get_analytics_data`, `get_conversations_list`, `get_conversation_messages`, `pin_analytics_variable` |
-| **Evals** | `get_evals`, `create_eval`, `update_eval`, `delete_eval`, `create_eval_session`, `run_eval_session`, `get_eval_session_details`, `get_eval_session_runs`, `get_eval_analytics` |
-| **Skills** | `list_skills`, `get_skill`, `create_skill`, `update_skill`, `delete_skill`, `link_skill_to_agent`, `unlink_skill_from_agent`, `update_skill_agent_link` |
+| **Hub** | `get_hub` |
+| **Agent** | `get_agent`, `download_agent_instructions` |
+| **Tool** | `get_tool` |
+| **Connection** | `list_organization_credentials` |
+| **Analytics** | `get_analytics_variables`, `get_analytics_data`, `get_conversations_list`, `get_conversation_messages` |
+| **Evals** | `get_evals`, `get_eval_session_details`, `get_eval_session_runs`, `get_eval_analytics` |
+| **Skills** | `list_skills`, `get_skill` |
+
+### Write operations (require `read_write` access — only for clients without CLI)
+
+| Category | Tools |
+|----------|-------|
+| **Hub** | `create_hub`, `update_hub` |
+| **Agent** | `create_agent`, `update_agent`, `upload_agent_instructions`, `delete_agent` |
+| **Tool** | `add_native_tool`, `add_mcp_tool`, `add_custom_tool`, `update_custom_tool`, `enable_tool`, `disable_tool`, `remove_tool`, `remove_custom_tool` |
+| **Connection** | `add_connection`, `update_connection`, `enable_connection`, `disable_connection`, `sync_mcp_connection` |
+| **Analytics** | `pin_analytics_variable` |
+| **Evals** | `create_eval`, `update_eval`, `delete_eval`, `create_eval_session`, `run_eval_session` |
+| **Skills** | `create_skill`, `update_skill`, `delete_skill`, `link_skill_to_agent`, `unlink_skill_from_agent`, `update_skill_agent_link` |
 
 See [references/mcp-operations.md](references/mcp-operations.md) for detailed usage.
 

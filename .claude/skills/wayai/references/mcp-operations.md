@@ -104,7 +104,9 @@ create_project(
 
 ## Hub Operations
 
-**MCP capabilities:** Create, Read, Update, Publish, Sync, Replicate (delete via UI)
+**Repo users:** Use files + `wayai push` for hub config changes. MCP writes require `read_write` access and are for non-repo clients only.
+
+**MCP capabilities:** Create, Read, Update (delete, publish/sync via UI)
 
 | Operation | MCP | UI |
 |-----------|-----|----|
@@ -112,10 +114,11 @@ create_project(
 | View | `get_hub(hub_id)` | - |
 | Create | `create_hub(...)` | platform.wayai.pro |
 | Update | `update_hub(...)` | platform.wayai.pro |
-| Publish | `publish_hub(hub_id)` | platform.wayai.pro |
-| Sync | `sync_hub(hub_id)` | platform.wayai.pro |
-| Replicate | `replicate_preview(hub_id)` | platform.wayai.pro |
+| Publish | - | platform.wayai.pro |
+| Sync | - | platform.wayai.pro |
+| Replicate | - | platform.wayai.pro |
 | Delete | - | platform.wayai.pro settings |
+| MCP access | - | platform.wayai.pro hub settings |
 
 ### create_hub
 Create a new hub in a project.
@@ -131,7 +134,6 @@ create_hub(
   hub_type,                     # Required: "chat" | "task"
   hub_description,              # Optional
   ai_mode,                      # Optional: "Pilot+Copilot" | "Pilot" | "Copilot" | "Turned Off"
-  mcp_access,                   # Optional: "read_write" (default) | "read_only" | "disabled"
   timezone,                     # Optional: default "America/Sao_Paulo"
   app_permission,               # Optional: "require_permission" (default) | "everyone"
   non_app_permission,           # Optional: "not_allowed" (default) | "require_permission" | "everyone"
@@ -172,56 +174,24 @@ update_hub(
 )
 ```
 
-### Hub Environment Operations
+### Hub Environment Workflow
 
-Hubs use a preview/production branching model. New hubs start as `preview`. Use these operations to promote and manage environments.
+Hubs use a preview/production branching model. New hubs start as `preview`. Publish, sync, and replicate operations are managed via the platform UI.
 
-#### publish_hub
-Publish a preview hub to production for the first time. Creates a production hub cloned from the preview with all config (agents, tools, connections, channels, etc.).
-```
-publish_hub(hub_id)   # Must be a preview hub with no existing production link
-```
-Returns: `production_hub_id`
-
-**Requirements:**
-- Hub must be `preview` environment
-- Hub must not already have a linked production hub (use `sync_hub` instead)
-
-#### sync_hub
-Push changes from a preview hub to its linked production hub. Updates, creates, and deletes production entities to match the preview.
-```
-sync_hub(hub_id)   # Must be a preview hub linked to production
-```
-
-**Requirements:**
-- Hub must be `preview` environment
-- Hub must have a linked production hub (published at least once)
-
-**Note:** `mcp_access = 'read_write'` on preview is clamped to `'read_only'` on production.
-
-#### replicate_preview
-Create a new preview hub cloned from a production hub for experimentation. Multiple previews can link to the same production hub.
-```
-replicate_preview(hub_id)   # Must be a production hub
-```
-Returns: `preview_hub_id`
-
-**Requirements:**
-- Hub must be `production` environment
-
-#### Hub Environment Workflow
 ```
 1. Create hub              → starts as preview
-2. Configure freely        → agents, tools, connections, etc.
-3. publish_hub(hub_id)     → creates production clone (first time only)
-4. Make more changes       → edit the preview hub
-5. sync_hub(hub_id)        → push changes to production
-6. replicate_preview(prod_hub_id) → create new preview for experimentation
+2. Configure freely        → agents, tools, connections, etc. (files + wayai push)
+3. Publish (UI)            → creates production clone (first time only)
+4. Make more changes       → edit the preview hub (files + wayai push)
+5. Sync (UI)               → push changes to production
+6. Replicate Preview (UI)  → create new preview for experimentation
 ```
 
 ---
 
 ## Agent Operations
+
+**Repo users:** Use files + `wayai push` for agent config changes. MCP writes require `read_write` access and are for non-repo clients only.
 
 **MCP capabilities:** Full CRUD
 
@@ -339,6 +309,8 @@ delete_agent(
 ---
 
 ## Tool Operations
+
+**Repo users:** Use files + `wayai push` for tool config changes. MCP writes require `read_write` access and are for non-repo clients only.
 
 **MCP capabilities:** Full CRUD
 
@@ -459,12 +431,15 @@ remove_custom_tool(hub_id, tool_id)
 
 ## Connection Operations
 
-**MCP capabilities:** Enable, Disable, Sync (create/delete via UI)
+**Repo users:** Use files + `wayai push` for non-OAuth connections. MCP writes require `read_write` access and are for non-repo clients only.
+
+**MCP capabilities:** Create (non-OAuth), Update, Enable, Disable, Sync (delete via UI, OAuth via UI)
 
 | Operation | MCP | UI |
 |-----------|-----|----|
 | List | `get_hub(hub_id)` | - |
-| Create | - | platform.wayai.pro (OAuth/credentials) |
+| Create | `add_connection(...)` (non-OAuth) | platform.wayai.pro (OAuth/credentials) |
+| Update | `update_connection(...)` | platform.wayai.pro |
 | Delete | - | platform.wayai.pro settings |
 | Enable | `enable_connection(...)` | platform.wayai.pro |
 | Disable | `disable_connection(...)` | platform.wayai.pro |
@@ -693,18 +668,18 @@ Returns: Total counts, success rates, top-performing agents, and recent trends.
 
 ## Quick Reference Table
 
-| Entity | List | View | Create | Update | Delete | Environment |
-|--------|------|------|--------|--------|--------|-------------|
+| Entity | List | View | Create | Update | Delete | Notes |
+|--------|------|------|--------|--------|--------|-------|
 | Organization | `get_workspace` | - | UI | UI | UI | - |
 | Project | `get_workspace` | `get_project` | MCP | UI | UI | - |
-| Hub | `get_workspace` | `get_hub` | MCP | MCP | UI | `publish_hub`, `sync_hub`, `replicate_preview` |
-| Agent | `get_hub` | `get_agent` | MCP | MCP | MCP |
-| Tool | `get_hub` | `get_tool` | MCP | MCP* | MCP |
-| Connection | `get_hub` | - | UI | UI | UI |
-| Analytics | `get_analytics_variables` | `get_analytics_data` | - | `pin_analytics_variable` | - |
-| Conversations | `get_conversations_list` | `get_conversation_messages` | - | - | - |
-| Eval Scenario | `get_evals` | - | MCP | MCP | MCP |
-| Eval Session | `get_eval_session_details` | `get_eval_session_runs` | MCP | `run_eval_session` | - |
-| Eval Analytics | - | `get_eval_analytics` | - | - | - |
+| Hub | `get_workspace` | `get_hub` | MCP | MCP | UI | Publish/sync/replicate via UI |
+| Agent | `get_hub` | `get_agent` | MCP | MCP | MCP | Repo users: files + CLI |
+| Tool | `get_hub` | `get_tool` | MCP | MCP* | MCP | Repo users: files + CLI |
+| Connection | `get_hub` | - | MCP (non-OAuth) | MCP | UI | OAuth via UI |
+| Analytics | `get_analytics_variables` | `get_analytics_data` | - | `pin_analytics_variable` | - | - |
+| Conversations | `get_conversations_list` | `get_conversation_messages` | - | - | - | - |
+| Eval Scenario | `get_evals` | - | MCP | MCP | MCP | - |
+| Eval Session | `get_eval_session_details` | `get_eval_session_runs` | MCP | `run_eval_session` | - | - |
+| Eval Analytics | - | `get_eval_analytics` | - | - | - | - |
 
 *Only custom tools can be updated via MCP

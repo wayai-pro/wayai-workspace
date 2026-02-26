@@ -47,24 +47,26 @@ Detailed instructions, workflows, and reference docs are in `.claude/skills/waya
 - Agent instructions (edit `.md` files in `agents/`)
 - States (conversation/user state schemas)
 - Custom tools (name, path, method, body)
+- Connections (non-OAuth)
+- Publish/sync environments → `wayai push` to preview, sync to production via UI
 
-**MCP — for operations without file equivalents:**
-- Create new hubs → `create_hub` (then populate via files + push)
-- Manage connections → `add_connection`, `enable_connection`, `disable_connection`
-- Publish/sync environments → `publish_hub`, `sync_hub`, `replicate_preview`
-- Analytics → `get_analytics_data`, `get_conversations_list`, `get_conversation_messages`
-- Evals → `create_eval`, `run_eval_session`, `get_eval_session_details`
-- Skills → `create_skill`, `link_skill_to_agent`
-
-**MCP reads (discovery/inspection):**
+**MCP — read operations and discovery:**
 - `get_workspace` — discover orgs, projects, hubs
 - `get_hub` — inspect current hub state
 - `get_agent`, `download_agent_instructions` — inspect agent config
 - `list_organization_credentials` — check available API credentials
+- Analytics → `get_analytics_data`, `get_conversations_list`, `get_conversation_messages`
+- Evals (read) → `get_evals`, `get_eval_session_details`, `get_eval_session_runs`, `get_eval_analytics`
+
+**MCP — writes (only when CLI is not available AND hub has `read_write` access):**
+- Non-repo clients (Claude.ai, ChatGPT) that can't run CLI commands may use MCP write tools
+- Requires `read_write` MCP access (set in platform UI)
 
 **UI only:**
+- MCP access mode
 - OAuth connections (WhatsApp, Instagram, Gmail)
 - Delete hubs
+- Publish/sync to production
 - Organization/user management
 
 ## Workflow
@@ -73,24 +75,24 @@ Detailed instructions, workflows, and reference docs are in `.claude/skills/waya
 2. **Edit** — modify `wayai.yaml` and `agents/*.md` in `workspace/<project>/<hub>/`
 3. **Push** — `wayai push` to apply changes to the preview hub
 4. **Commit** — `git commit` and push to `main`; CI syncs changes to the preview hub automatically
-5. **Go live** — when ready, sync to production via the platform UI (`sync_hub`)
+5. **Go live** — when ready, sync to production via the platform UI
 
-For operations without file equivalents (connections, publish/sync, analytics, evals), use MCP tools directly. After MCP changes, run `wayai pull -y` to sync back to local files, then commit.
+For analytics and evals, use MCP read tools. After any out-of-band changes, run `wayai pull -y` to sync back to local files, then commit.
 
 ## Hub Environments
 
 Hubs use a **preview/production branching** model:
 
 - **New hubs** start as `preview` — edit freely
-- **`publish_hub`** — first-time promotion creates a `production` hub cloned from preview
-- **`sync_hub`** — pushes subsequent preview changes to the linked production hub
-- **`replicate_preview`** — creates a new preview from production for experimentation
+- **Publish** — first-time promotion creates a `production` hub cloned from preview (via platform UI)
+- **Sync** — pushes subsequent preview changes to the linked production hub (via platform UI)
+- **Replicate Preview** — creates a new preview from production for experimentation (via platform UI)
 - **Production is read-only** — all config changes must flow through a preview hub
 
 Only preview hubs are tracked in this repository. Production hubs are not stored in git — their state lives in the platform database.
 
 - **Preview hubs**: CI syncs automatically on every push to `main`. No branching or PRs required.
-- **Production hubs**: not tracked in git. Sync to production explicitly via the platform UI (`sync_hub`) when ready to go live.
+- **Production hubs**: not tracked in git. Sync to production explicitly via the platform UI when ready to go live.
 
 ## Agent Goal
 

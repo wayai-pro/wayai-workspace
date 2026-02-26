@@ -253,7 +253,7 @@ Each push parses local files, computes a diff against the current platform state
 
 After pushing:
 1. Test the preview hub
-2. Publish to production when ready (via MCP: `publish_hub` or `sync_hub`)
+2. Publish to production when ready (via platform UI)
 
 ## Sync via GitOps
 
@@ -264,7 +264,7 @@ Push to `main` → CI automatically syncs the hub to the platform:
 2. wayai push -y                  → apply to preview hub immediately (optional but recommended)
 3. git commit + push to main      → CI syncs the hub to the preview hub
 4. Test the preview hub
-5. Ready to go live? sync_hub(hub_id) via MCP or platform UI → syncs to production
+5. Ready to go live? Sync to production via platform UI
 ```
 
 The GitHub Action (`.github/actions/wayai-sync/`) reads `hub_id` from `.wayai.yaml`, finds the hub folder in `workspace/`, parses it, and calls the CI API to push changes. No PRs or branching required — commit directly to `main`.

@@ -34,11 +34,11 @@ Hubs use a **preview/production branching** model for safe configuration managem
 | `preview` | Default. Editable workspace for configuring and testing changes |
 | `production` | Read-only. Serves live traffic. Changes must flow from preview via sync |
 
-**Lifecycle:**
+**Lifecycle (managed via platform UI):**
 1. **New hubs** start as `preview` — edit freely
-2. **Publish** (`publish_hub`) — first-time promotion creates a `production` hub cloned from preview
-3. **Sync** (`sync_hub`) — pushes subsequent preview changes to the linked production hub
-4. **Replicate** (`replicate_preview`) — creates a new preview hub from production for experimentation
+2. **Publish** — first-time promotion creates a `production` hub cloned from preview
+3. **Sync** — pushes subsequent preview changes to the linked production hub
+4. **Replicate** — creates a new preview hub from production for experimentation
 
 **Rules:**
 - Production hubs are **read-only** — all config mutations (agents, tools, connections, etc.) are blocked
