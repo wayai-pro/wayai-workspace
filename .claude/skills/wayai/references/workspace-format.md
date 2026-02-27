@@ -8,6 +8,7 @@ Conventions for the workspace directory structure and `wayai.yaml` configuration
 - [wayai.yaml Structure](#wayaiyaml-structure)
 - [Agent Instructions](#agent-instructions)
 - [Resources](#resources)
+- [Evals](#evals)
 - [Custom Tool Definition](#custom-tool-definition)
 - [Download Workflow](#download-workflow)
 - [Sync via GitOps](#sync-via-gitops)
@@ -25,6 +26,10 @@ workspace/                                # Workspace folder (from download_work
         ├── agents/                       # Agent instruction files
         │   ├── pilot.md                  # Instructions for "Pilot Agent"
         │   └── specialist-billing.md     # Instructions for "Specialist - Billing"
+        ├── evals/                        # Evaluation scenario files (synced to backend)
+        │   ├── greeting.yaml             # eval_name = "greeting", eval_path = null
+        │   └── order-issues/             # Subfolder = eval_path
+        │       └── cancellation.yaml     # eval_name = "cancellation", eval_path = "order-issues"
         ├── resources/                    # Resource files (synced to backend)
         │   ├── product-catalog/          # Knowledge resource
         │   │   ├── pricing.md
@@ -199,8 +204,9 @@ Entities are matched by **`id` first** (stable UUID), then by name as fallback. 
 | Custom tool | `id` | `name` (per agent) |
 | Delegation tool | `target` name (per agent) | — |
 | Agent-resource link | `(agent_id, resource_id)` | — |
+| Eval | `id` | `name` + `path` (composite) |
 
-The `id` field is set automatically by `wayai pull` and should not be edited manually. Agents, custom tools, and states without an `id` fall back to name-based matching (backwards-compatible).
+The `id` field is set automatically by `wayai pull` and should not be edited manually. Agents, custom tools, states, and evals without an `id` fall back to name-based matching (backwards-compatible).
 
 ## Agent Instructions
 
@@ -282,6 +288,68 @@ agents:
 - Detection uses a deny-list of known binary extensions — unknown extensions are treated as text
 - **Size limit:** 10MB per file. Files exceeding this are skipped with a warning.
 - **Change detection:** SHA-256 hash comparison. Only changed files are uploaded on push.
+
+## Evals
+
+Evals are test scenarios for verifying agent behavior. Each eval is stored as a separate YAML file in the `evals/` directory, making them easy to review and version in git.
+
+### Directory Structure
+
+```
+evals/
+├── greeting.yaml                    # eval_name = "greeting", eval_path = null
+├── order-issues/                    # Subfolder = eval_path
+│   ├── cancellation.yaml            # eval_name = "cancellation", eval_path = "order-issues"
+│   └── refund.yaml                  # eval_name = "refund", eval_path = "order-issues"
+└── a/b/c/                           # Arbitrary nesting depth supported
+    └── deep-test.yaml               # eval_name = "deep-test", eval_path = "a/b/c"
+```
+
+### File Format
+
+```yaml
+# evals/order-issues/cancellation.yaml
+id: "eval-uuid-123"                  # stable ID (set by pull, do not edit)
+name: Order Cancellation             # original name (only when it differs from filename slug)
+agent: Pilot                         # resolved to responder_agent_fk
+agent_id: "agent-uuid-456"           # stable ref (set by pull)
+runs: 3                              # default 1, omitted if 1
+enabled: false                       # default true, omitted if true
+
+history:                             # message_history (omitted if empty)
+  - role: user
+    content: "I placed order #12345"
+  - role: assistant
+    content: "I can see order #12345."
+
+input:                               # message_text (required)
+  role: user
+  content: "Cancel it please"
+
+expected:                            # message_expected_response (required)
+  role: assistant
+  tool_calls:
+    - function:
+        name: cancel_order
+        arguments: '{"order_id": "12345"}'
+
+evaluator_instructions: |
+  The agent MUST call cancel_order with the correct order_id.
+```
+
+### Key Rules
+
+- **Filename = eval name:** The filename without extension becomes `eval_name` (e.g., `cancellation.yaml` → `eval_name = "cancellation"`). If the original name differs from its slug (e.g., `"Order Cancellation"` → `order-cancellation.yaml`), an explicit `name` field is included in the YAML and takes precedence over the filename.
+- **Subfolder = eval path:** Subfolder hierarchy maps to `eval_path` (e.g., `order-issues/cancellation.yaml` → `eval_path = "order-issues"`)
+- **Agent reference:** `agent` is the agent display name; `agent_id` is the stable UUID (set by pull)
+- **Default omission:** `runs: 1` and `enabled: true` are defaults and omitted when matching
+- **Entity matching:** Matched by `id` first (stable UUID), then by `name:path` composite key as fallback
+
+### Entity Matching (for sync/diff)
+
+| Entity | Primary match | Fallback match |
+|--------|--------------|----------------|
+| Eval | `id` | `name` + `path` (composite) |
 
 ## Custom Tool Definition
 

@@ -79,6 +79,21 @@ interface HubAsCodeAgentResource {
   use_native_integration?: boolean;
 }
 
+/** Keep in sync with workers/backend/src/routes/api/ci/types.ts HubAsCodeEval — cannot import due to separate deployment bundle. */
+interface HubAsCodeEval {
+  id?: string;
+  name: string;
+  path?: string | null;
+  agent: string;
+  agent_id?: string;
+  runs?: number;
+  enabled?: boolean;
+  history?: Array<{ role: string; content?: string | null; tool_calls?: unknown }>;
+  input: { role: string; content?: string | null; tool_calls?: unknown };
+  expected: { role: string; content?: string | null; tool_calls?: unknown };
+  evaluator_instructions?: string;
+}
+
 /**
  * HubAsCodePayload - the JSON representation of a hub folder's configuration.
  * Parsed from wayai.yaml + agents/*.md files.
@@ -134,6 +149,7 @@ export interface HubAsCodePayload {
     resources?: HubAsCodeAgentResource[];
   }>;
   resources?: HubAsCodeResource[];
+  evals?: HubAsCodeEval[];
   states?: Array<{
     id?: string;
     name: string;
@@ -226,6 +242,9 @@ export function parseHubFolder(hubFolder: string): HubAsCodePayload {
   // Resolve resource files from disk
   const resources = parseResources(hubFolder, (config.resources || []) as Array<Record<string, unknown>>);
 
+  // Resolve eval files from evals/ directory
+  const evals = parseEvals(hubFolder);
+
   const payload: HubAsCodePayload = {
     version: config.version || 1,
     hub_id: config.hub_id,
@@ -239,6 +258,10 @@ export function parseHubFolder(hubFolder: string): HubAsCodePayload {
 
   if (resources.length > 0) {
     payload.resources = resources;
+  }
+
+  if (evals.length > 0) {
+    payload.evals = evals;
   }
 
   if (config.states && config.states.length > 0) {
@@ -333,4 +356,74 @@ function scanResourceFiles(dir: string, prefix: string): HubAsCodeResourceFile[]
   }
 
   return files;
+}
+
+/**
+ * Recursively scan the evals/ directory for YAML eval files.
+ * Each .yaml file becomes one eval entry. Subfolder paths map to eval_path.
+ *
+ * Examples:
+ *   evals/greeting.yaml               → name="greeting", path=null
+ *   evals/order-issues/cancellation.yaml → name="cancellation", path="order-issues"
+ *   evals/a/b/c/test.yaml             → name="test", path="a/b/c"
+ */
+function parseEvals(hubFolder: string): HubAsCodeEval[] {
+  const evalsDir = path.join(hubFolder, 'evals');
+  if (!fs.existsSync(evalsDir)) return [];
+
+  return scanEvalFiles(evalsDir, '');
+}
+
+function scanEvalFiles(dir: string, prefix: string): HubAsCodeEval[] {
+  const results: HubAsCodeEval[] = [];
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      const subPrefix = prefix ? `${prefix}/${entry.name}` : entry.name;
+      results.push(...scanEvalFiles(path.join(dir, entry.name), subPrefix));
+    } else if (entry.isFile() && (entry.name.endsWith('.yaml') || entry.name.endsWith('.yml'))) {
+      const fullPath = path.join(dir, entry.name);
+      const content = fs.readFileSync(fullPath, 'utf-8');
+      const parsed = yaml.load(content) as Record<string, unknown> | null;
+
+      if (!parsed || typeof parsed !== 'object') {
+        console.warn(`  Warning: skipping invalid eval file ${fullPath}`);
+        continue;
+      }
+
+      // Validate required fields
+      if (!parsed.agent || !parsed.input || !parsed.expected) {
+        console.warn(`  Warning: skipping eval file ${fullPath} — missing required fields (agent, input, expected)`);
+        continue;
+      }
+
+      // Prefer explicit name field (preserves original casing); fall back to filename
+      const filenameName = entry.name.replace(/\.(yaml|yml)$/, '');
+      const evalName = (typeof parsed.name === 'string' && parsed.name) ? parsed.name : filenameName;
+
+      const evalEntry: HubAsCodeEval = {
+        name: evalName,
+        agent: parsed.agent as string,
+        input: parsed.input as HubAsCodeEval['input'],
+        expected: parsed.expected as HubAsCodeEval['expected'],
+      };
+
+      if (parsed.id) evalEntry.id = parsed.id as string;
+      if (parsed.agent_id) evalEntry.agent_id = parsed.agent_id as string;
+      if (prefix) evalEntry.path = prefix;
+      if (parsed.runs !== undefined) evalEntry.runs = parsed.runs as number;
+      if (parsed.enabled === false) evalEntry.enabled = false;
+      if (Array.isArray(parsed.history) && parsed.history.length > 0) {
+        evalEntry.history = parsed.history as HubAsCodeEval['history'];
+      }
+      if (parsed.evaluator_instructions) {
+        evalEntry.evaluator_instructions = parsed.evaluator_instructions as string;
+      }
+
+      results.push(evalEntry);
+    }
+  }
+
+  return results;
 }
