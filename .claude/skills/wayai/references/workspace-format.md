@@ -7,6 +7,7 @@ Conventions for the workspace directory structure and `wayai.yaml` configuration
 - [Slugification Rules](#slugification-rules)
 - [wayai.yaml Structure](#wayaiyaml-structure)
 - [Agent Instructions](#agent-instructions)
+- [Resources](#resources)
 - [Custom Tool Definition](#custom-tool-definition)
 - [Download Workflow](#download-workflow)
 - [Sync via GitOps](#sync-via-gitops)
@@ -20,10 +21,18 @@ workspace/                                # Workspace folder (from download_work
 ├── last-sync.md                          # Sync metadata
 └── {project-slug}/                       # Project folder
     └── {hub-slug}-{label}/               # Preview hub folder
-        ├── wayai.yaml                    # Hub config + agents + tools + states
+        ├── wayai.yaml                    # Hub config + agents + tools + states + resources
         ├── agents/                       # Agent instruction files
         │   ├── pilot.md                  # Instructions for "Pilot Agent"
         │   └── specialist-billing.md     # Instructions for "Specialist - Billing"
+        ├── resources/                    # Resource files (synced to backend)
+        │   ├── product-catalog/          # Knowledge resource
+        │   │   ├── pricing.md
+        │   │   └── catalog.pdf
+        │   └── order-management/         # Skill resource
+        │       ├── SKILL.md
+        │       └── references/
+        │           └── api-docs.md
         ├── CONTEXT.md                    # Living notes (NOT synced to backend)
         └── references/                   # Supporting files (NOT synced to backend)
 ```
@@ -120,6 +129,29 @@ agents:
           path: /api/orders/status
           body_format: json
           connection: my-api-connection
+    resources:                          # agent-resource linkages
+      - name: Product Catalog
+        resource_id: "resource-uuid-123"
+        priority: 0
+      - name: Order Management
+        resource_id: "skill-uuid-456"
+        priority: 1
+        use_native_integration: false   # skill-only: tool-based (false) vs provider-native (true)
+
+resources:
+  - id: "resource-uuid-123"             # stable ID (set by pull)
+    name: Product Catalog
+    # type: knowledge                   # 'knowledge' (default, omitted) | 'skill'
+    description: Product documentation and pricing
+    # enabled: true                     # default, omitted
+    # user_browsable: false             # default, omitted
+    # Files live on disk at resources/product-catalog/ (scanned automatically)
+
+  - id: "skill-uuid-456"
+    name: Order Management
+    type: skill
+    skill_name: order-management         # auto-derived from name if omitted
+    description: Handles order queries and management
 
 states:
   - id: "state-uuid-789"            # stable ID (set by pull)
@@ -161,9 +193,12 @@ Entities are matched by **`id` first** (stable UUID), then by name as fallback. 
 |--------|--------------|----------------|
 | Agent | `id` | `name` (unique per hub) |
 | State | `id` | `name` + `scope` |
+| Resource | `id` | `name` (unique per hub) |
+| Resource file | `id` | `path` (relative path within resource) |
 | Native tool | `tool_name` (per agent) | — |
 | Custom tool | `id` | `name` (per agent) |
 | Delegation tool | `target` name (per agent) | — |
+| Agent-resource link | `(agent_id, resource_id)` | — |
 
 The `id` field is set automatically by `wayai pull` and should not be edited manually. Agents, custom tools, and states without an `id` fall back to name-based matching (backwards-compatible).
 
@@ -178,6 +213,75 @@ Agent instructions are stored in separate `.md` files under `agents/` for easier
 - Supports dynamic placeholders: `{{now()}}`, `{{user_name()}}`, `{{state()}}`, etc. — see [agent-placeholders.md](agent-placeholders.md)
 
 **Renaming agents:** When you rename an agent (change `name:` in YAML while keeping the same `id:`), `wayai push` automatically renames the `.md` file to match the new slug. No manual file rename needed.
+
+## Resources
+
+Resources are knowledge bases (documents) or skills (versioned agent capability packages) that can be attached to agents. Resource files are stored on the filesystem and synced bidirectionally.
+
+### Directory Structure
+
+```
+resources/
+├── product-catalog/          # Knowledge resource (slugified name)
+│   ├── pricing.md            # Text file — editable, diffable
+│   ├── catalog.pdf           # Binary file — uploaded as asset
+│   └── images/
+│       └── logo.png
+└── order-management/         # Skill resource
+    ├── SKILL.md              # Skill entry point (YAML frontmatter required)
+    └── references/
+        └── api-docs.md
+```
+
+### Resource Types
+
+- **`knowledge`** (default) — document collections (FAQ, product docs, manuals). Files are indexed for AI retrieval.
+- **`skill`** — versioned agent capability packages. Must contain a `SKILL.md` with YAML frontmatter (`name`, `description`). Optional `references/` subfolder for supporting docs.
+
+### YAML Configuration
+
+Resources are declared in `wayai.yaml` under `resources:`. File content lives on disk — the `files` key is **not** included in YAML (filesystem is source of truth).
+
+```yaml
+resources:
+  - id: "resource-uuid"           # stable ID (set by pull)
+    name: Product Catalog
+    # type: knowledge             # default, omitted
+    description: Product docs
+    # enabled: true               # default, omitted
+    # user_browsable: false       # default, omitted
+
+  - id: "skill-uuid"
+    name: Order Management
+    type: skill
+    skill_name: order-management  # auto-derived from name if omitted
+    description: Handles order queries
+```
+
+### Agent-Resource Linkages
+
+Agent `resources` entries link resources to agents (parallel to `tools`):
+
+```yaml
+agents:
+  - name: Sales Agent
+    resources:
+      - name: Product Catalog       # matches resource name
+        resource_id: "resource-uuid" # stable ID
+        priority: 0
+      - name: Order Management
+        resource_id: "skill-uuid"
+        priority: 1
+        use_native_integration: false  # skill-only: tool-based (false) vs provider-native (true)
+```
+
+### Text vs Binary Files
+
+- **Text files** (`.md`, `.txt`, `.json`, `.yaml`, `.html`, `.css`, `.js`, `.ts`, etc.) — content is inlined for push, editable by AI agents, diffable in git
+- **Binary files** (`.pdf`, `.png`, `.jpg`, `.gif`, `.mp4`, `.zip`, `.woff2`, etc.) — base64-encoded for push, downloaded via signed URLs on pull
+- Detection uses a deny-list of known binary extensions — unknown extensions are treated as text
+- **Size limit:** 10MB per file. Files exceeding this are skipped with a warning.
+- **Change detection:** SHA-256 hash comparison. Only changed files are uploaded on push.
 
 ## Custom Tool Definition
 

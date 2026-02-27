@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as crypto from 'crypto';
 import * as yaml from 'js-yaml';
 
 /** Slugify a string: lowercase, normalize accents, replace non-alphanumeric with hyphens.
@@ -13,6 +14,69 @@ function slugify(input: string): string {
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '')
     .slice(0, 50);
+}
+
+const BINARY_EXTENSIONS = new Set([
+  'pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'ico',
+  'mp3', 'mp4', 'wav', 'zip', 'tar', 'gz',
+  'woff', 'woff2', 'ttf', 'eot',
+]);
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+function isBinaryFile(filename: string): boolean {
+  const ext = filename.split('.').pop()?.toLowerCase() || '';
+  return BINARY_EXTENSIONS.has(ext);
+}
+
+function guessMimeType(filename: string): string | undefined {
+  const ext = filename.split('.').pop()?.toLowerCase() || '';
+  const mimeMap: Record<string, string> = {
+    md: 'text/markdown', txt: 'text/plain', json: 'application/json',
+    yaml: 'text/yaml', yml: 'text/yaml', html: 'text/html', css: 'text/css',
+    js: 'text/javascript', ts: 'text/typescript', xml: 'text/xml', csv: 'text/csv',
+    pdf: 'application/pdf', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg',
+    gif: 'image/gif', webp: 'image/webp', svg: 'image/svg+xml', ico: 'image/x-icon',
+    mp3: 'audio/mpeg', mp4: 'video/mp4', wav: 'audio/wav',
+    zip: 'application/zip', tar: 'application/x-tar', gz: 'application/gzip',
+    woff: 'font/woff', woff2: 'font/woff2', ttf: 'font/ttf', eot: 'application/vnd.ms-fontobject',
+  };
+  return mimeMap[ext];
+}
+
+function computeHash(data: Buffer): string {
+  return crypto.createHash('sha256').update(data).digest('hex');
+}
+
+interface HubAsCodeResourceFile {
+  id?: string;
+  path: string;
+  title?: string;
+  content?: string;
+  content_base64?: string;
+  mime_type?: string;
+  file_size?: number;
+  hash?: string;
+}
+
+interface HubAsCodeResource {
+  id?: string;
+  name: string;
+  type?: string;
+  description?: string;
+  enabled?: boolean;
+  user_browsable?: boolean;
+  skill_name?: string;
+  files?: HubAsCodeResourceFile[];
+}
+
+interface HubAsCodeAgentResource {
+  name: string;
+  resource_id?: string;
+  priority?: number;
+  enabled?: boolean;
+  include_structure_in_prompt?: boolean;
+  use_native_integration?: boolean;
 }
 
 /**
@@ -67,7 +131,9 @@ export interface HubAsCodePayload {
         enabled?: boolean;
       }>;
     };
+    resources?: HubAsCodeAgentResource[];
   }>;
+  resources?: HubAsCodeResource[];
   states?: Array<{
     id?: string;
     name: string;
@@ -94,6 +160,7 @@ interface WayaiYaml {
   hub_environment: string;
   hub: Record<string, unknown>;
   agents?: Array<Record<string, unknown>>;
+  resources?: Array<Record<string, unknown>>;
   states?: Array<Record<string, unknown>>;
   connections?: Array<{ name: string; type: string; service?: string; credential?: string }>;
 }
@@ -156,6 +223,9 @@ export function parseHubFolder(hubFolder: string): HubAsCodePayload {
     return resolved;
   });
 
+  // Resolve resource files from disk
+  const resources = parseResources(hubFolder, (config.resources || []) as Array<Record<string, unknown>>);
+
   const payload: HubAsCodePayload = {
     version: config.version || 1,
     hub_id: config.hub_id,
@@ -167,6 +237,10 @@ export function parseHubFolder(hubFolder: string): HubAsCodePayload {
     payload.agents = agents as HubAsCodePayload['agents'];
   }
 
+  if (resources.length > 0) {
+    payload.resources = resources;
+  }
+
   if (config.states && config.states.length > 0) {
     payload.states = config.states as HubAsCodePayload['states'];
   }
@@ -176,4 +250,87 @@ export function parseHubFolder(hubFolder: string): HubAsCodePayload {
   }
 
   return payload;
+}
+
+/**
+ * Scan resource directories and populate file entries with content and hashes.
+ * Synced with cli/src/lib/parser.ts
+ */
+function parseResources(
+  hubFolder: string,
+  configResources: Array<Record<string, unknown>>
+): HubAsCodeResource[] {
+  const resourcesDir = path.join(hubFolder, 'resources');
+  const results: HubAsCodeResource[] = [];
+
+  for (const res of configResources) {
+    const resource: HubAsCodeResource = {
+      name: res.name as string,
+    };
+    if (res.id) resource.id = res.id as string;
+    if (res.type) resource.type = res.type as string;
+    if (res.description) resource.description = res.description as string;
+    if (res.enabled === false) resource.enabled = false;
+    if (res.user_browsable) resource.user_browsable = res.user_browsable as boolean;
+    if (res.skill_name) resource.skill_name = res.skill_name as string;
+
+    // Scan filesystem for files
+    const resSlug = slugify(resource.name);
+    const resDir = path.join(resourcesDir, resSlug);
+
+    if (fs.existsSync(resDir)) {
+      const files = scanResourceFiles(resDir, '');
+      if (files.length > 0) {
+        resource.files = files;
+      }
+    }
+
+    results.push(resource);
+  }
+
+  return results;
+}
+
+/**
+ * Recursively scan a resource directory for files.
+ * Synced with cli/src/lib/parser.ts
+ */
+function scanResourceFiles(dir: string, prefix: string): HubAsCodeResourceFile[] {
+  const files: HubAsCodeResourceFile[] = [];
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const relPath = prefix ? `${prefix}/${entry.name}` : entry.name;
+
+    if (entry.isDirectory()) {
+      files.push(...scanResourceFiles(path.join(dir, entry.name), relPath));
+    } else if (entry.isFile()) {
+      const fullPath = path.join(dir, entry.name);
+      const stat = fs.statSync(fullPath);
+
+      if (stat.size > MAX_FILE_SIZE) {
+        console.warn(`  Warning: skipping ${relPath} (${(stat.size / 1024 / 1024).toFixed(1)}MB exceeds 10MB limit)`);
+        continue;
+      }
+
+      const fileEntry: HubAsCodeResourceFile = {
+        path: relPath,
+        mime_type: guessMimeType(entry.name),
+        file_size: stat.size,
+      };
+
+      const data = fs.readFileSync(fullPath);
+      fileEntry.hash = computeHash(data);
+
+      if (isBinaryFile(entry.name)) {
+        fileEntry.content_base64 = data.toString('base64');
+      } else {
+        fileEntry.content = data.toString('utf-8');
+      }
+
+      files.push(fileEntry);
+    }
+  }
+
+  return files;
 }
