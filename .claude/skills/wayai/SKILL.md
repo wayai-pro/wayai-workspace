@@ -37,6 +37,7 @@ description: |
 | **Agents** | Edit `wayai.yaml` → push | `get_agent` | — |
 | **Agent instructions** | Edit `agents/*.md` → push | `download_agent_instructions` | — |
 | **Tools** | Edit `wayai.yaml` → push | `get_tool` | — |
+| **Kanban statuses** | Edit `wayai.yaml` → push | `get_hub` | — |
 | **States** | Edit `wayai.yaml` → push | — | — |
 | **Connections** | Edit `wayai.yaml` → push (auto-created from org credentials) | `get_hub` | OAuth setup, delete |
 | **Publish/Sync** | — | — | Platform UI |
@@ -138,6 +139,12 @@ wayai status                     # Show workspace status (org, project, hub)
 Both `pull` and `push` show a diff before applying changes and wait for confirmation. Use `-y` to skip prompts.
 
 Install: `npm install -g @wayai/cli` — authenticate: `wayai login` — scope to hub: `wayai init`
+
+### Kanban & States Configuration
+
+**Kanban statuses** define workflow stages for conversations (visible in support/task views). Configured under `hub.kanban_statuses` in `wayai.yaml`. Each status supports behavioral flags (`isInitialStatus`, `triggersAgentResponse`, `isTerminalStatus`, etc.) and time-based followup messages (`inactivity` or `before_event` type). See [workspace-format.md — Kanban Statuses](references/workspace-format.md#kanban-statuses) for the full field reference.
+
+**States** define structured data schemas (JSON Schema) that agents can read/write during conversations. Configured under `states` in `wayai.yaml` with `scope: conversation` or `scope: user`. See the [wayai.yaml Structure](references/workspace-format.md#wayaiyaml-structure) example for the format.
 
 ## MCP Tools Quick Reference
 

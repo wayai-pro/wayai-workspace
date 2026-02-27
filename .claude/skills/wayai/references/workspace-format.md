@@ -6,6 +6,7 @@ Conventions for the workspace directory structure and `wayai.yaml` configuration
 - [Directory Structure](#directory-structure)
 - [Slugification Rules](#slugification-rules)
 - [wayai.yaml Structure](#wayaiyaml-structure)
+- [Kanban Statuses](#kanban-statuses)
 - [Agent Instructions](#agent-instructions)
 - [Resources](#resources)
 - [Evals](#evals)
@@ -100,8 +101,41 @@ hub:
     time_threshold3: 600
   kanban_statuses:
     - name: New
+      order: 0
+      color: "#22c55e"
+      isInitialStatus: true
+      triggersAgentResponse: true
     - name: In Progress
+      order: 1
+      color: "#3b82f6"
+      allowsAgentUpdate: true
+    - name: Waiting for Customer
+      order: 2
+      color: "#f59e0b"
+      followups:
+        - order: 0
+          type: inactivity
+          threshold: 30
+          timeUnit: minutes
+          message: "Hi! Just checking in — do you still need help?"
+    - name: Scheduled
+      order: 3
+      color: "#8b5cf6"
+      isSchedulingStatus: true
+      eventName: appointment
+      followups:
+        - order: 0
+          type: before_event
+          threshold: 1
+          timeUnit: hours
+          message: "Reminder: your appointment is in 1 hour."
+          excludedWeekDays: [0, 6]
+          excludedTimeStart: "22:00"
+          excludedTimeEnd: "08:00"
     - name: Resolved
+      order: 4
+      color: "#ef4444"
+      isTerminalStatus: true
 
 agents:
   - id: "agent-uuid-123"             # stable ID (set by pull, used for rename detection)
@@ -187,7 +221,7 @@ connections:
 - **Agents** reference connections by `connection` display name (must match a connection on the hub or be defined in `connections`)
 - **Tools** are grouped as `native` (by tool name), `delegation` (agent or team), and `custom` (HTTP endpoints)
 - **Renaming:** To rename an agent, custom tool, or state, just change its `name` field in YAML — the `id` field ensures the diff engine detects it as a rename (not delete + create). For agents, `wayai push` also auto-renames the `.md` file.
-- **Default omission:** Fields matching defaults are omitted to keep YAML concise (e.g., `enabled: true` is default, only `enabled: false` appears)
+- **Default omission:** Fields matching defaults are omitted to keep YAML concise (e.g., `enabled: true` is default, only `enabled: false` appears). Kanban statuses follow the same rule: boolean flags default to `false` (only `true` appears), `excludeHolidays` defaults to `true` (only `false` appears), and empty followup arrays are omitted
 - **Connections:** Non-OAuth connections listed here are auto-created by `wayai push` from matching organization credentials. Each entry needs `name`, `type` (connector type), and `service` (connector service name). Optional `credential` field disambiguates when multiple org credentials share the same auth type (e.g., two API Key credentials). OAuth connections must be set up via UI.
 
 ### Entity matching (for sync/diff)
@@ -207,6 +241,78 @@ Entities are matched by **`id` first** (stable UUID), then by name as fallback. 
 | Eval | `id` | `name` + `path` (composite) |
 
 The `id` field is set automatically by `wayai pull` and should not be edited manually. Agents, custom tools, states, and evals without an `id` fall back to name-based matching (backwards-compatible).
+
+## Kanban Statuses
+
+Kanban statuses define workflow stages for conversations in `support` and `task` views. They are configured in `wayai.yaml` under `hub.kanban_statuses`.
+
+### Required Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | string | Status display name (unique per hub) |
+
+### Optional Fields
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `id` | string | — | Stable UUID (set by pull) |
+| `order` | number | — | Display order (0-based) |
+| `color` | string | — | Hex color code (e.g., `"#22c55e"`) |
+| `isInitialStatus` | boolean | `false` | New conversations start in this status |
+| `triggersAgentResponse` | boolean | `false` | Moving to this status triggers an AI response |
+| `allowsAgentUpdate` | boolean | `false` | AI can update conversations in this status |
+| `isTerminalStatus` | boolean | `false` | Moving here ends the conversation |
+| `isSchedulingStatus` | boolean | `false` | Enables time-based event scheduling |
+| `eventName` | string | — | Event name for scheduling (used with `before_event` followups) |
+| `additional_instructions` | string | — | Extra instructions for the AI when conversation is in this status |
+| `label_additional_context` | string | — | Additional context label shown in UI |
+| `followups` | array | — | Time-based followup messages (see below) |
+
+### Followups
+
+Followups are automated messages triggered by time conditions. Two types:
+
+**`inactivity`** — sent after a period of no activity:
+```yaml
+followups:
+  - order: 0
+    type: inactivity
+    threshold: 30
+    timeUnit: minutes
+    message: "Are you still there?"
+```
+
+**`before_event`** — sent before a scheduled event (requires `isSchedulingStatus: true`):
+```yaml
+followups:
+  - order: 0
+    type: before_event
+    threshold: 1
+    timeUnit: hours
+    message: "Your appointment is in 1 hour."
+```
+
+### Followup Fields
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `order` | number | yes | — | Execution order (0-based) |
+| `type` | enum | yes | — | `inactivity` or `before_event` |
+| `threshold` | number | yes | — | Time value |
+| `timeUnit` | enum | yes | — | `seconds`, `minutes`, `hours`, or `days` |
+| `message` | string | yes | — | Message text to send |
+| `excludedWeekDays` | number[] | no | `[]` | Days to skip (0=Sun, 6=Sat) |
+| `excludeHolidays` | boolean | no | `true` | Skip holidays |
+| `excludedTimeStart` | string | no | — | Start of quiet hours (e.g., `"22:00"`) |
+| `excludedTimeEnd` | string | no | — | End of quiet hours (e.g., `"08:00"`) |
+
+### Default Omission
+
+On `wayai pull`, default values are stripped to keep YAML concise:
+- Boolean flags (`isInitialStatus`, `triggersAgentResponse`, etc.) — omitted when `false`
+- `excludeHolidays` — omitted when `true` (platform default)
+- Empty `followups` arrays — omitted entirely
 
 ## Agent Instructions
 

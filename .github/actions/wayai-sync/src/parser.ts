@@ -79,6 +79,37 @@ interface HubAsCodeAgentResource {
   use_native_integration?: boolean;
 }
 
+/** Keep in sync with workers/backend/src/routes/api/ci/types.ts — cannot import due to separate deployment bundle. */
+interface HubAsCodeKanbanFollowup {
+  id?: string;
+  order: number;
+  type: 'inactivity' | 'before_event';
+  threshold: number;
+  timeUnit: 'seconds' | 'minutes' | 'hours' | 'days';
+  message: string;
+  excludedWeekDays?: number[];
+  excludeHolidays?: boolean;
+  excludedTimeStart?: string;
+  excludedTimeEnd?: string;
+}
+
+/** Keep in sync with workers/backend/src/routes/api/ci/types.ts — cannot import due to separate deployment bundle. */
+interface HubAsCodeKanbanStatus {
+  id?: string;
+  name: string;
+  order?: number;
+  color?: string;
+  isInitialStatus?: boolean;
+  triggersAgentResponse?: boolean;
+  allowsAgentUpdate?: boolean;
+  isTerminalStatus?: boolean;
+  isSchedulingStatus?: boolean;
+  eventName?: string;
+  additional_instructions?: string;
+  label_additional_context?: string;
+  followups?: HubAsCodeKanbanFollowup[];
+}
+
 /** Keep in sync with workers/backend/src/routes/api/ci/types.ts HubAsCodeEval — cannot import due to separate deployment bundle. */
 interface HubAsCodeEval {
   id?: string;
@@ -116,7 +147,7 @@ export interface HubAsCodePayload {
     inactivity_interval?: number;
     followup_message?: string;
     hub_sla?: Record<string, number>;
-    kanban_statuses?: Array<{ name: string }>;
+    kanban_statuses?: HubAsCodeKanbanStatus[];
   };
   agents?: Array<{
     id?: string;

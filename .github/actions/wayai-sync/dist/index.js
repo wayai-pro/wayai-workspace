@@ -30096,6 +30096,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.parseHubFolder = parseHubFolder;
 const fs = __importStar(__nccwpck_require__(9896));
 const path = __importStar(__nccwpck_require__(6928));
+const crypto = __importStar(__nccwpck_require__(6982));
 const yaml = __importStar(__nccwpck_require__(4281));
 /** Slugify a string: lowercase, normalize accents, replace non-alphanumeric with hyphens.
  *  Keep in sync with cli/src/lib/utils.ts slugify — cannot import due to separate deployment bundle. */
@@ -30108,6 +30109,33 @@ function slugify(input) {
         .replace(/-+/g, '-')
         .replace(/^-|-$/g, '')
         .slice(0, 50);
+}
+const BINARY_EXTENSIONS = new Set([
+    'pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'ico',
+    'mp3', 'mp4', 'wav', 'zip', 'tar', 'gz',
+    'woff', 'woff2', 'ttf', 'eot',
+]);
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+function isBinaryFile(filename) {
+    const ext = filename.split('.').pop()?.toLowerCase() || '';
+    return BINARY_EXTENSIONS.has(ext);
+}
+function guessMimeType(filename) {
+    const ext = filename.split('.').pop()?.toLowerCase() || '';
+    const mimeMap = {
+        md: 'text/markdown', txt: 'text/plain', json: 'application/json',
+        yaml: 'text/yaml', yml: 'text/yaml', html: 'text/html', css: 'text/css',
+        js: 'text/javascript', ts: 'text/typescript', xml: 'text/xml', csv: 'text/csv',
+        pdf: 'application/pdf', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg',
+        gif: 'image/gif', webp: 'image/webp', svg: 'image/svg+xml', ico: 'image/x-icon',
+        mp3: 'audio/mpeg', mp4: 'video/mp4', wav: 'audio/wav',
+        zip: 'application/zip', tar: 'application/x-tar', gz: 'application/gzip',
+        woff: 'font/woff', woff2: 'font/woff2', ttf: 'font/ttf', eot: 'application/vnd.ms-fontobject',
+    };
+    return mimeMap[ext];
+}
+function computeHash(data) {
+    return crypto.createHash('sha256').update(data).digest('hex');
 }
 /**
  * Parse a hub folder into a HubAsCodePayload.
@@ -30157,6 +30185,10 @@ function parseHubFolder(hubFolder) {
         }
         return resolved;
     });
+    // Resolve resource files from disk
+    const resources = parseResources(hubFolder, (config.resources || []));
+    // Resolve eval files from evals/ directory
+    const evals = parseEvals(hubFolder);
     const payload = {
         version: config.version || 1,
         hub_id: config.hub_id,
@@ -30166,10 +30198,158 @@ function parseHubFolder(hubFolder) {
     if (agents && agents.length > 0) {
         payload.agents = agents;
     }
+    if (resources.length > 0) {
+        payload.resources = resources;
+    }
+    if (evals.length > 0) {
+        payload.evals = evals;
+    }
     if (config.states && config.states.length > 0) {
         payload.states = config.states;
     }
+    if (config.connections && config.connections.length > 0) {
+        payload.connections = config.connections;
+    }
     return payload;
+}
+/**
+ * Scan resource directories and populate file entries with content and hashes.
+ * Synced with cli/src/lib/parser.ts
+ */
+function parseResources(hubFolder, configResources) {
+    const resourcesDir = path.join(hubFolder, 'resources');
+    const results = [];
+    for (const res of configResources) {
+        const resource = {
+            name: res.name,
+        };
+        if (res.id)
+            resource.id = res.id;
+        if (res.type)
+            resource.type = res.type;
+        if (res.description)
+            resource.description = res.description;
+        if (res.enabled === false)
+            resource.enabled = false;
+        if (res.user_browsable)
+            resource.user_browsable = res.user_browsable;
+        if (res.skill_name)
+            resource.skill_name = res.skill_name;
+        // Scan filesystem for files
+        const resSlug = slugify(resource.name);
+        const resDir = path.join(resourcesDir, resSlug);
+        if (fs.existsSync(resDir)) {
+            const files = scanResourceFiles(resDir, '');
+            if (files.length > 0) {
+                resource.files = files;
+            }
+        }
+        results.push(resource);
+    }
+    return results;
+}
+/**
+ * Recursively scan a resource directory for files.
+ * Synced with cli/src/lib/parser.ts
+ */
+function scanResourceFiles(dir, prefix) {
+    const files = [];
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+        const relPath = prefix ? `${prefix}/${entry.name}` : entry.name;
+        if (entry.isDirectory()) {
+            files.push(...scanResourceFiles(path.join(dir, entry.name), relPath));
+        }
+        else if (entry.isFile()) {
+            const fullPath = path.join(dir, entry.name);
+            const stat = fs.statSync(fullPath);
+            if (stat.size > MAX_FILE_SIZE) {
+                console.warn(`  Warning: skipping ${relPath} (${(stat.size / 1024 / 1024).toFixed(1)}MB exceeds 10MB limit)`);
+                continue;
+            }
+            const fileEntry = {
+                path: relPath,
+                mime_type: guessMimeType(entry.name),
+                file_size: stat.size,
+            };
+            const data = fs.readFileSync(fullPath);
+            fileEntry.hash = computeHash(data);
+            if (isBinaryFile(entry.name)) {
+                fileEntry.content_base64 = data.toString('base64');
+            }
+            else {
+                fileEntry.content = data.toString('utf-8');
+            }
+            files.push(fileEntry);
+        }
+    }
+    return files;
+}
+/**
+ * Recursively scan the evals/ directory for YAML eval files.
+ * Each .yaml file becomes one eval entry. Subfolder paths map to eval_path.
+ *
+ * Examples:
+ *   evals/greeting.yaml               → name="greeting", path=null
+ *   evals/order-issues/cancellation.yaml → name="cancellation", path="order-issues"
+ *   evals/a/b/c/test.yaml             → name="test", path="a/b/c"
+ */
+function parseEvals(hubFolder) {
+    const evalsDir = path.join(hubFolder, 'evals');
+    if (!fs.existsSync(evalsDir))
+        return [];
+    return scanEvalFiles(evalsDir, '');
+}
+function scanEvalFiles(dir, prefix) {
+    const results = [];
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+        if (entry.isDirectory()) {
+            const subPrefix = prefix ? `${prefix}/${entry.name}` : entry.name;
+            results.push(...scanEvalFiles(path.join(dir, entry.name), subPrefix));
+        }
+        else if (entry.isFile() && (entry.name.endsWith('.yaml') || entry.name.endsWith('.yml'))) {
+            const fullPath = path.join(dir, entry.name);
+            const content = fs.readFileSync(fullPath, 'utf-8');
+            const parsed = yaml.load(content);
+            if (!parsed || typeof parsed !== 'object') {
+                console.warn(`  Warning: skipping invalid eval file ${fullPath}`);
+                continue;
+            }
+            // Validate required fields
+            if (!parsed.agent || !parsed.input || !parsed.expected) {
+                console.warn(`  Warning: skipping eval file ${fullPath} — missing required fields (agent, input, expected)`);
+                continue;
+            }
+            // Prefer explicit name field (preserves original casing); fall back to filename
+            const filenameName = entry.name.replace(/\.(yaml|yml)$/, '');
+            const evalName = (typeof parsed.name === 'string' && parsed.name) ? parsed.name : filenameName;
+            const evalEntry = {
+                name: evalName,
+                agent: parsed.agent,
+                input: parsed.input,
+                expected: parsed.expected,
+            };
+            if (parsed.id)
+                evalEntry.id = parsed.id;
+            if (parsed.agent_id)
+                evalEntry.agent_id = parsed.agent_id;
+            if (prefix)
+                evalEntry.path = prefix;
+            if (parsed.runs !== undefined)
+                evalEntry.runs = parsed.runs;
+            if (parsed.enabled === false)
+                evalEntry.enabled = false;
+            if (Array.isArray(parsed.history) && parsed.history.length > 0) {
+                evalEntry.history = parsed.history;
+            }
+            if (parsed.evaluator_instructions) {
+                evalEntry.evaluator_instructions = parsed.evaluator_instructions;
+            }
+            results.push(evalEntry);
+        }
+    }
+    return results;
 }
 
 
