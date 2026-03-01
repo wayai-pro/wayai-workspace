@@ -3,8 +3,6 @@ name: "{NOME_CLINICA}"
 description: "Agendamento de consultas odontológicas"
 ai_mode: Pilot+Copilot
 hub_type: chat
-followup_message: "Oi! Vi que você estava agendando uma consulta. Posso ajudar?"
-inactivity_interval: 10
 connections:
   - connector_name: OpenAI
     connector_id: "0cd6a292-895b-4667-b89e-dd298628c272"

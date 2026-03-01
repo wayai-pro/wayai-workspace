@@ -93,8 +93,6 @@ hub:
   mcp_access: read_only        # disabled | read_only | read_write
   file_handling_mode: metadata_only
   max_file_size_for_attachment: 10485760
-  inactivity_interval: 30
-  followup_message: "Is there anything else I can help with?"
   hub_sla:
     time_threshold1: 60
     time_threshold2: 300

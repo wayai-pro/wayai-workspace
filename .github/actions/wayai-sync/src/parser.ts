@@ -144,8 +144,6 @@ export interface HubAsCodePayload {
     mcp_access?: string;
     file_handling_mode?: string;
     max_file_size_for_attachment?: number;
-    inactivity_interval?: number;
-    followup_message?: string;
     hub_sla?: Record<string, number>;
     kanban_statuses?: HubAsCodeKanbanStatus[];
   };

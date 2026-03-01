@@ -3,8 +3,6 @@ name: "{NOME_EMPRESA} - SDR"
 description: "Qualificação de leads inbound"
 ai_mode: Pilot+Copilot
 hub_type: chat
-followup_message: "Oi! Vi que você demonstrou interesse em {NOME_PRODUTO}. Posso te ajudar com alguma dúvida?"
-inactivity_interval: 60
 connections:
   - connector_name: OpenAI
     connector_id: "0cd6a292-895b-4667-b89e-dd298628c272"

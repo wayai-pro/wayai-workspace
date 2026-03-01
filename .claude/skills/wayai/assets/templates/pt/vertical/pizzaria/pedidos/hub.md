@@ -3,8 +3,6 @@ name: "{NOME_EMPRESA}"
 description: "Atendimento de pedidos para pizzaria"
 ai_mode: Pilot+Copilot
 hub_type: chat
-followup_message: "Oi! Ainda está aí? Posso ajudar com mais alguma coisa?"
-inactivity_interval: 5
 connections:
   - connector_name: OpenAI
     connector_id: "0cd6a292-895b-4667-b89e-dd298628c272"

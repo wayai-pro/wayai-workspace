@@ -57,8 +57,7 @@ YAML frontmatter with hub settings and agents config, plus Markdown body.
 | `description` | string | Brief description |
 | `ai_mode` | string | `Pilot+Copilot`, `Pilot`, `Copilot`, `Turned Off` |
 | `hub_type` | string | `chat` or `task` |
-| `followup_message` | string | Message sent after inactivity |
-| `inactivity_interval` | number | Minutes before followup |
+| `kanban_statuses` | array | Workflow stages with followup config (see workspace-format.md) |
 | `agents` | array | Agent configurations (see below) |
 
 ### Agent Configuration (in hub.md)
@@ -82,8 +81,6 @@ name: "{NOME_EMPRESA}"
 description: "Atendimento de pedidos para pizzaria"
 ai_mode: Pilot+Copilot
 hub_type: chat
-followup_message: "Oi! Ainda está aí?"
-inactivity_interval: 5
 connections:
   - connector_name: WhatsApp
     connector_id: "uuid-from-database"
